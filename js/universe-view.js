@@ -88,8 +88,12 @@ const UniverseView = {
             this.controls.enableDamping = true;
             this.controls.dampingFactor = 0.05;
             this.controls.minDistance = 50;
-            this.controls.maxDistance = 5000;
-            this.controls.addEventListener('change', () => this.onZoomChange());
+            this.controls.maxDistance = Infinity; // Allow infinite zoom out
+            this.controls.zoomSpeed = 1.0; // Consistent zoom speed
+            this.controls.addEventListener('change', () => {
+                this.onZoomChange();
+                this.handleZoomSpeed();
+            });
         } else {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
@@ -98,10 +102,26 @@ const UniverseView = {
                 this.controls.enableDamping = true;
                 this.controls.dampingFactor = 0.05;
                 this.controls.minDistance = 50;
-                this.controls.maxDistance = 5000;
-                this.controls.addEventListener('change', () => this.onZoomChange());
+                this.controls.maxDistance = Infinity;
+                this.controls.zoomSpeed = 1.0;
+                this.controls.addEventListener('change', () => {
+                    this.onZoomChange();
+                    this.handleZoomSpeed();
+                });
             };
             document.head.appendChild(script);
+        }
+    },
+    
+    handleZoomSpeed() {
+        // Accelerate zoom when approaching planet (fast zoom in)
+        const distance = this.camera.position.length();
+        if (distance < 600 && distance > 150) {
+            // Fast zoom in when approaching planet
+            this.controls.zoomSpeed = 2.5;
+        } else {
+            // Normal consistent speed for zoom out
+            this.controls.zoomSpeed = 1.0;
         }
     },
     
@@ -446,17 +466,24 @@ const UniverseView = {
     updateZoomLevel() {
         const distance = this.camera.position.length();
         
+        // Always show planet
+        if (this.planet) {
+            this.planet.visible = true;
+        }
+        
         // Show/hide course icons and update planet visibility based on zoom
         this.courseRegions.forEach(region => {
             if (region.sprite) {
-                if (this.zoomLevel >= 1) {
+                if (this.zoomLevel >= 1 && distance < 2000) {
                     region.sprite.visible = true;
                     // Scale based on zoom - larger when closer
                     const scale = Math.max(30, 80 - (distance / 15));
                     region.sprite.scale.set(scale, scale, 1);
                     
                     // Make sprite face camera
-                    region.sprite.lookAt(this.camera.position);
+                    if (this.camera) {
+                        region.sprite.lookAt(this.camera.position);
+                    }
                 } else {
                     region.sprite.visible = false;
                 }
@@ -466,6 +493,12 @@ const UniverseView = {
             if (region.temple) {
                 if (this.zoomLevel >= 3 && distance < 150) {
                     region.temple.visible = true;
+                    // Make temple children visible too
+                    region.temple.traverse((child) => {
+                        if (child.isMesh) {
+                            child.visible = true;
+                        }
+                    });
                 } else {
                     region.temple.visible = false;
                 }
@@ -486,11 +519,15 @@ const UniverseView = {
         // Increase planet emissive when zoomed in for better visibility
         if (this.planetMaterial) {
             if (this.zoomLevel >= 2) {
-                this.planetMaterial.emissiveIntensity = 0.3;
+                this.planetMaterial.emissiveIntensity = 0.4;
             } else {
-                this.planetMaterial.emissiveIntensity = 0.1;
+                this.planetMaterial.emissiveIntensity = 0.2;
             }
         }
+        
+        // Hide popups when zooming
+        this.hideCourseInfo();
+        this.hideTempleInfo();
     },
     
     setupInteraction() {
@@ -508,32 +545,41 @@ const UniverseView = {
         
         this.raycaster.setFromCamera(this.mouse, this.camera);
         
+        let hoveredSomething = false;
+        
         // Check for temple intersections first (when zoomed in)
         const templeIntersects = this.raycaster.intersectObjects(
-            this.courseRegions.filter(r => r.temple).map(r => r.temple)
+            this.courseRegions.filter(r => r.temple && r.temple.visible).map(r => r.temple)
         );
         
         if (templeIntersects.length > 0) {
             const temple = templeIntersects[0].object;
             this.showTempleInfo(temple.userData, event);
-            return;
+            hoveredSomething = true;
         }
         
         // Check for sprite/emoji intersections
-        const spriteIntersects = this.raycaster.intersectObjects(
-            this.courseRegions.filter(r => r.sprite).map(r => r.sprite)
-        );
+        if (!hoveredSomething) {
+            const spriteIntersects = this.raycaster.intersectObjects(
+                this.courseRegions.filter(r => r.sprite && r.sprite.visible).map(r => r.sprite)
+            );
+            
+            if (spriteIntersects.length > 0) {
+                const hoveredSprite = spriteIntersects[0].object;
+                const baseScale = Math.max(30, 80 - (this.camera.position.length() / 15));
+                hoveredSprite.scale.set(baseScale * 1.2, baseScale * 1.2, 1);
+                this.showCourseInfo(hoveredSprite.userData.course, event);
+                hoveredSomething = true;
+            }
+        }
         
-        if (spriteIntersects.length > 0) {
-            const hoveredSprite = spriteIntersects[0].object;
-            hoveredSprite.scale.multiplyScalar(1.2);
-            this.showCourseInfo(hoveredSprite.userData.course, event);
-        } else {
+        // Hide popups if not hovering anything
+        if (!hoveredSomething) {
             this.hideCourseInfo();
             this.hideTempleInfo();
             // Reset scales
             this.courseRegions.forEach(region => {
-                if (region.sprite) {
+                if (region.sprite && region.sprite.visible) {
                     const distance = this.camera.position.length();
                     const scale = Math.max(30, 80 - (distance / 15));
                     region.sprite.scale.set(scale, scale, 1);
