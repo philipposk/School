@@ -132,27 +132,31 @@ const ThreeDWorld = {
     },
     
     createLandscape() {
-        // Create a flat brown ground terrain
-        const geometry = new THREE.PlaneGeometry(500, 500, 50, 50);
+        // Create an infinite-appearing dark brown ground
+        // Use a very large plane with fog to create infinite effect
+        const geometry = new THREE.PlaneGeometry(10000, 10000, 100, 100);
         
-        // Add some height variation for terrain texture
+        // Add subtle height variation for terrain texture
         const vertices = geometry.attributes.position.array;
         for (let i = 0; i < vertices.length; i += 3) {
-            vertices[i + 2] = Math.random() * 5 - 2; // z coordinate (height)
+            vertices[i + 2] = Math.random() * 3 - 1.5; // Subtle height variation
         }
         geometry.computeVertexNormals();
         
-        // Brown ground material
+        // Darker brown ground material
         const material = new THREE.MeshStandardMaterial({
-            color: 0x8b7355, // Brown color
-            roughness: 0.8,
-            metalness: 0.2
+            color: 0x4a3a2a, // Much darker brown
+            roughness: 0.9,
+            metalness: 0.1
         });
         
         const terrain = new THREE.Mesh(geometry, material);
         terrain.rotation.x = -Math.PI / 2;
         terrain.receiveShadow = true;
         this.scene.add(terrain);
+        
+        // Increase fog density to create infinite horizon effect
+        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0005);
         
         // Add some decorative elements
         this.addDecorativeElements();
