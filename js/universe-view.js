@@ -502,62 +502,116 @@ const UniverseView = {
         if (!this.planetTexture || !this.courseRegions.length) return;
         
         const distance = this.camera.position.length();
+        
+        // Use higher resolution when zoomed in close for better detail
+        let canvasWidth = 2048;
+        let canvasHeight = 1024;
+        let scaleFactor = 1;
+        
+        if (distance < 200) {
+            canvasWidth = 4096;
+            canvasHeight = 2048;
+            scaleFactor = 2;
+        } else if (distance < 400) {
+            canvasWidth = 3072;
+            canvasHeight = 1536;
+            scaleFactor = 1.5;
+        }
+        
         const canvas = document.createElement('canvas');
-        canvas.width = 2048;
-        canvas.height = 1024;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         const ctx = canvas.getContext('2d');
         
         // Base ocean
         ctx.fillStyle = '#2a5a7a';
-        ctx.fillRect(0, 0, 2048, 1024);
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
-        // Draw continents/landmasses
+        // Draw continents/landmasses (scaled)
         ctx.fillStyle = '#3a6a4a';
         ctx.beginPath();
-        ctx.ellipse(500, 300, 200, 150, 0, 0, Math.PI * 2);
+        ctx.ellipse(500 * scaleFactor, 300 * scaleFactor, 200 * scaleFactor, 150 * scaleFactor, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.ellipse(1500, 400, 250, 180, 0, 0, Math.PI * 2);
+        ctx.ellipse(1500 * scaleFactor, 400 * scaleFactor, 250 * scaleFactor, 180 * scaleFactor, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.ellipse(800, 700, 180, 120, 0, 0, Math.PI * 2);
+        ctx.ellipse(800 * scaleFactor, 700 * scaleFactor, 180 * scaleFactor, 120 * scaleFactor, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Determine font size based on zoom
+        // Determine font size and border width based on zoom
         let fontSize = 20;
+        let borderWidth = 4;
         let showText = false;
-        if (distance < 300) {
-            fontSize = 36;
+        if (distance < 200) {
+            fontSize = 48 * scaleFactor;
+            borderWidth = 8 * scaleFactor;
+            showText = true;
+        } else if (distance < 300) {
+            fontSize = 36 * scaleFactor;
+            borderWidth = 6 * scaleFactor;
             showText = true;
         } else if (distance < 500) {
-            fontSize = 28;
+            fontSize = 28 * scaleFactor;
+            borderWidth = 5 * scaleFactor;
             showText = true;
         } else if (distance < 800) {
-            fontSize = 22;
+            fontSize = 22 * scaleFactor;
+            borderWidth = 4 * scaleFactor;
             showText = true;
+        } else {
+            borderWidth = 3 * scaleFactor;
         }
         
         // Draw course regions
         this.courseRegions.forEach(region => {
             const { x, y, width, height, color, course } = region;
             
-            // Draw country-like shape
+            // Scale coordinates for higher resolution
+            const scaledX = x * scaleFactor;
+            const scaledY = y * scaleFactor;
+            const scaledWidth = width * scaleFactor;
+            const scaledHeight = height * scaleFactor;
+            
+            // Draw country-like shape with better visibility
             ctx.fillStyle = color;
-            ctx.globalAlpha = 0.9;
+            ctx.globalAlpha = 0.95; // More opaque for better visibility
+            
+            // Add shadow/glow effect for better contrast
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 10 * scaleFactor;
+            ctx.shadowOffsetX = 2 * scaleFactor;
+            ctx.shadowOffsetY = 2 * scaleFactor;
+            
             ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + width * 0.7, y - height * 0.2);
-            ctx.lineTo(x + width, y + height * 0.3);
-            ctx.lineTo(x + width * 0.8, y + height);
-            ctx.lineTo(x + width * 0.3, y + height * 0.9);
-            ctx.lineTo(x - width * 0.1, y + height * 0.5);
+            ctx.moveTo(scaledX, scaledY);
+            ctx.lineTo(scaledX + scaledWidth * 0.7, scaledY - scaledHeight * 0.2);
+            ctx.lineTo(scaledX + scaledWidth, scaledY + scaledHeight * 0.3);
+            ctx.lineTo(scaledX + scaledWidth * 0.8, scaledY + scaledHeight);
+            ctx.lineTo(scaledX + scaledWidth * 0.3, scaledY + scaledHeight * 0.9);
+            ctx.lineTo(scaledX - scaledWidth * 0.1, scaledY + scaledHeight * 0.5);
             ctx.closePath();
             ctx.fill();
             
-            // Add bright border for visibility
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Add bright, thick border for visibility
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = borderWidth;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
             ctx.stroke();
+            
+            // Add inner border for extra definition when zoomed in
+            if (distance < 300) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = borderWidth * 0.5;
+                ctx.stroke();
+            }
             
             // Draw course name with wrapping if zoomed in enough
             if (showText && course.title) {
@@ -566,13 +620,25 @@ const UniverseView = {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                const textX = x + width / 2;
-                const textY = y + height / 2;
-                const maxTextWidth = width * 0.9;
+                // Add text shadow for readability
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 4 * scaleFactor;
+                ctx.shadowOffsetX = 2 * scaleFactor;
+                ctx.shadowOffsetY = 2 * scaleFactor;
+                
+                const textX = scaledX + scaledWidth / 2;
+                const textY = scaledY + scaledHeight / 2;
+                const maxTextWidth = scaledWidth * 0.9;
                 const lineHeight = fontSize * 1.2;
                 
                 // Wrap text to multiple lines
                 this.wrapText(ctx, course.title, maxTextWidth, textX, textY - (lineHeight / 2), lineHeight);
+                
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
             }
             
             ctx.globalAlpha = 1.0;
