@@ -3063,6 +3063,37 @@
         window.showSignUpForm = showSignUpForm;
         window.showLoginForm = showLoginForm;
         
+        // Initialize test account (for development/testing)
+        function initTestAccount() {
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (!users['test@example.com']) {
+                // Simple hash function
+                function hashPassword(password) {
+                    let hash = 0;
+                    for (let i = 0; i < password.length; i++) {
+                        const char = password.charCodeAt(i);
+                        hash = ((hash << 5) - hash) + char;
+                        hash = hash & hash;
+                    }
+                    return hash.toString();
+                }
+                
+                users['test@example.com'] = {
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    passwordHash: hashPassword('test123')
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+        }
+        
+        // Initialize test account on page load
+        initTestAccount();
+        
+        // Make functions globally accessible
+        window.showSignUpForm = showSignUpForm;
+        window.showLoginForm = showLoginForm;
+        
         // Initialize login form
         showLoginForm();
 
