@@ -82,7 +82,7 @@ const UniverseView = {
         const width = window.innerWidth;
         const height = window.innerHeight;
         this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100000);
-        this.camera.position.set(0, 0, 2000); // Start further away to see the planet
+        this.camera.position.set(0, 0, 1500); // Start at medium distance to see the planet
         this.camera.lookAt(0, 0, 0); // Look at the planet
     },
     
