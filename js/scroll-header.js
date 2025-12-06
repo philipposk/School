@@ -305,10 +305,10 @@ const ScrollHeaderManager = {
                                             clone.style.pointerEvents = 'auto';
                                             clone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                                             
-                                            // Move to sidebar (only if sidebar doesn't already have this button)
-                                            if (!this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
-                                                clone.setAttribute('data-button-index', index);
-                                                this.sidebar.appendChild(clone);
+                                                // Move to sidebar (only if sidebar doesn't already have this button)
+                                                if (this.sidebar && !this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
+                                                    clone.setAttribute('data-button-index', index);
+                                                    this.sidebar.appendChild(clone);
                                                 
                                                 // Add hover effect
                                             clone.addEventListener('mouseenter', () => {
@@ -342,11 +342,13 @@ const ScrollHeaderManager = {
             });
             
             // Show sidebar - ensure it stays fixed at top-left
-            this.sidebar.style.position = 'fixed';
-            this.sidebar.style.left = '0.5rem';
-            this.sidebar.style.top = '1rem';
-            this.sidebar.style.opacity = '1';
-            this.sidebar.style.pointerEvents = 'auto';
+            if (this.sidebar) {
+                this.sidebar.style.position = 'fixed';
+                this.sidebar.style.left = '0.5rem';
+                this.sidebar.style.top = '1rem';
+                this.sidebar.style.opacity = '1';
+                this.sidebar.style.pointerEvents = 'auto';
+            }
             
             // Shrink header
             header.style.cssText += `
