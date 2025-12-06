@@ -1580,29 +1580,8 @@
                 <button class="header-btn" onclick="openPrediction()" title="Learning Potential">
                     🎯
                 </button>
-                <button class="header-btn" onclick="openThemeSelector()" title="Themes">
-                    🎨
-                </button>
-                <button class="header-btn" onclick="openLayoutSelector()" title="Layout">
-                    📐
-                </button>
-                <div class="language-switcher" style="position: relative;">
-                    <button class="header-btn" id="languageBtn" onclick="toggleLanguageDropdown()" title="Language">
-                        🌐
-                    </button>
-                    <div class="language-dropdown" id="languageDropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 0.5rem; background: var(--card); border-radius: 8px; box-shadow: var(--shadow-lg); min-width: 150px; z-index: 1001; border: 1px solid var(--border);">
-                        <div class="language-option" onclick="setLanguage('en')" style="padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
-                            <span>🇬🇧</span>
-                            <span>English</span>
-                        </div>
-                        <div class="language-option" onclick="setLanguage('el')" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                            <span>🇬🇷</span>
-                            <span>Ελληνικά</span>
-                        </div>
-                    </div>
-                </div>
-                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
-                    <span id="themeIcon">🌙</span>
+                <button class="header-btn" onclick="openSettings()" title="Settings">
+                    ⚙️
                 </button>
                 <div id="userProfileContainer" style="position: relative;">
                     <!-- Will be populated by JavaScript -->
@@ -1731,7 +1710,26 @@
                     { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning' },
                     { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning' },
                     { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking' }
-                ]
+                ],
+                // Translations for course content
+                translations: {
+                    el: {
+                        title: 'Κριτική Σκέψη',
+                        description: 'Κατέκτησε τη σαφή συλλογιστική και την πρακτική λογική. Μάθε να σκέφτεσαι καλύτερα και να αποφασίζεις πιο έξυπνα.',
+                        level: 'Μεσαίο',
+                        duration: '8 εβδομάδες',
+                        modules: [
+                            { title: 'Θεμέλια της Κριτικής Σκέψης', subtitle: 'Τι είναι ένα επιχείρημα; Εγκυρότητα, Ορθότητα και Δομή' },
+                            { title: 'Απαγωγή: Προτασιακή Λογική & Συλλογισμοί', subtitle: 'Εγγυημένη Αλήθεια Μέσω Δομής' },
+                            { title: 'Επαγωγή, Αποδεικτικά Στοιχεία & Ισχύς', subtitle: 'Από το Ειδικό στο Γενικό' },
+                            { title: 'Πιθανολογική Σκέψη & Bayes', subtitle: 'Πλοήγηση στην Αβεβαιότητα' },
+                            { title: 'Γνωστικές Προκαταλήψεις & Αποπροκατάληψη', subtitle: 'Υπέρβαση των Μental Συντόμων' },
+                            { title: 'Σφάλματα & Ρητορική', subtitle: 'Αναγνώριση Εσφαλμένης Συλλογιστικής' },
+                            { title: 'Κατασκευή Ισχυρών Επιχειρημάτων', subtitle: 'Δόμηση Στιβαρής Συλλογιστικής' },
+                            { title: 'Λήψη Αποφάσεων & Τελικό Έργο', subtitle: 'Εφαρμογή της Κριτικής Σκέψης' }
+                        ]
+                    }
+                }
             },
             {
                 id: 'personal-finance',
@@ -1750,7 +1748,25 @@
                     { id: 6, title: 'Retirement Planning', subtitle: '401(k), IRAs, Compound Interest, and Retirement Calculators' },
                     { id: 7, title: 'Tax Optimization', subtitle: 'Tax-Advantaged Accounts, Deductions, and Tax-Efficient Investing' },
                     { id: 8, title: 'Building Your Financial Plan', subtitle: 'Integration, Goal Prioritization, and Ongoing Management' }
-                ]
+                ],
+                translations: {
+                    el: {
+                        title: 'Προσωπικές Οικονομίες & Επενδύσεις',
+                        description: 'Πάρε τον έλεγχο του οικονομικού σου μέλλοντος. Κατέκτησε τον προγραμματισμό προϋπολογισμού, τις επενδύσεις και τον σχεδιασμό συνταξιοδότησης.',
+                        level: 'Αρχάριος',
+                        duration: '8 εβδομάδες',
+                        modules: [
+                            { title: 'Θεμέλια Προσωπικών Οικονομικών', subtitle: 'Προγραμματισμός Προϋπολογισμού, Ταμείο Επείγουσας Ανάγκης και Οικονομικοί Στόχοι' },
+                            { title: 'Κατανόηση Χρέους & Πίστωσης', subtitle: 'Πιστοποιητικά Πίστωσης, Διαχείριση Χρέους και Τόκοι' },
+                            { title: 'Τραπεζικές Υπηρεσίες & Στρατηγικές Αποταμίευσης', subtitle: 'Βελτιστοποίηση Λογαριασμών και Υψηλής Απόδοσης Αποταμίευση' },
+                            { title: 'Εισαγωγή στις Επενδύσεις', subtitle: 'Κίνδυνος, Επιστροφή, Κατηγορίες Περιουσιακών Στοιχείων και Επενδυτικοί Λογαριασμοί' },
+                            { title: 'Βασικά Μετοχών & Ομολόγων', subtitle: 'Μηχανισμοί Αγοράς, ETFs και Διαφοροποίηση' },
+                            { title: 'Σχεδιασμός Συνταξιοδότησης', subtitle: '401(k), IRAs, Σύνθετος Τόκος και Υπολογιστές Συνταξιοδότησης' },
+                            { title: 'Βελτιστοποίηση Φόρων', subtitle: 'Φορολογικά Ευνοημένοι Λογαριασμοί, Εκπτώσεις και Φορολογικά Αποτελεσματικές Επενδύσεις' },
+                            { title: 'Δόμηση του Οικονομικού Σου Σχεδίου', subtitle: 'Ενσωμάτωση, Προτεραιοποίηση Στόχων και Συνεχής Διαχείριση' }
+                        ]
+                    }
+                }
             },
             {
                 id: 'ios-app-development',
@@ -1769,13 +1785,45 @@
                     { id: 6, title: 'Networking & APIs', subtitle: 'Fetching Data from the Internet with URLSession and async/await' },
                     { id: 7, title: 'Advanced UI', subtitle: 'Animations, Gestures, and Custom Views' },
                     { id: 8, title: 'App Store Deployment', subtitle: 'Testing, Certificates, and Publishing Your App' }
-                ]
+                ],
+                translations: {
+                    el: {
+                        title: 'Ανάπτυξη iOS Εφαρμογών με SwiftUI',
+                        description: 'Δημιούργησε όμορφες εφαρμογές iPhone και iPad από την αρχή. Κατέκτησε το SwiftUI, το μέλλον της ανάπτυξης Apple.',
+                        level: 'Αρχάριος',
+                        duration: '8 εβδομάδες',
+                        modules: [
+                            { title: 'Θεμέλια SwiftUI', subtitle: 'Views, Modifiers και η Δηλωτική Παράδειγμα' },
+                            { title: 'Διάταξη & Πλοήγηση', subtitle: 'Δόμηση Εφαρμογών Πολλαπλών Οθονών με Πλοήγηση και Διατάξεις' },
+                            { title: 'Διαχείριση Κατάστασης', subtitle: 'Διαχείριση Κατάστασης Εφαρμογής με @State, @Binding και @ObservableObject' },
+                            { title: 'Λίστες & Δεδομένα', subtitle: 'Εμφάνιση Δυναμικών Δεδομένων με Λίστες, Μοντέλα και Επίμονη Αποθήκευση' },
+                            { title: 'Είσοδος Χρήστη & Φόρμες', subtitle: 'Συλλογή Εισόδου Χρήστη με TextFields, Pickers και Επικύρωση Φόρμας' },
+                            { title: 'Δικτύωση & APIs', subtitle: 'Λήψη Δεδομένων από το Internet με URLSession και async/await' },
+                            { title: 'Προχωρημένο UI', subtitle: 'Κινούμενες Εικόνες, Χειρονομίες και Προσαρμοσμένες Προβολές' },
+                            { title: 'Ανάπτυξη App Store', subtitle: 'Δοκιμή, Πιστοποιητικά και Δημοσίευση της Εφαρμογής σου' }
+                        ]
+                    }
+                }
             }
             // More courses can be added here
         ];
         
-        // Make courses globally available
+        // Make courses globally available (translated based on current language)
         window.courses = courses;
+        
+        // Function to get translated courses
+        window.getTranslatedCourses = function() {
+            if (window.i18n) {
+                return window.i18n.translateCourses(courses);
+            }
+            return courses;
+        };
+        
+        // Function to get translated course by ID
+        window.getTranslatedCourse = function(courseId) {
+            const allCourses = window.getTranslatedCourses();
+            return allCourses.find(c => c.id === courseId);
+        };
 
         // User state
         let user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -1823,20 +1871,21 @@
             const layoutHTML = UILayoutManager.renderCourses(layout);
             
             // Use custom layout if available, otherwise use default
+            const translatedCourses = window.getTranslatedCourses ? window.getTranslatedCourses() : courses;
             const coursesHTML = layoutHTML || `
                 <div class="modern-courses-grid" id="coursesSection">
-                    ${courses.map(course => `
+                    ${translatedCourses.map(course => `
                         <div class="modern-course-card" onclick="loadCourse('${course.id}')">
                             <div class="modern-course-icon">${course.icon}</div>
                             <h2 class="modern-course-title">${course.title}</h2>
                             <p class="modern-course-description">${course.description}</p>
                             <div class="modern-course-meta">
-                                <span>📚 ${course.modules} modules</span>
+                                <span>📚 ${course.modules} ${window.i18n ? window.i18n.t('modules') : 'modules'}</span>
                                 <span>⏱️ ${course.duration}</span>
                                 <span>📊 ${course.level}</span>
                             </div>
                             <div class="modern-course-arrow">
-                                Start Learning →
+                                ${window.i18n ? (window.i18n.t('startCourse') || 'Start Learning') : 'Start Learning'} →
                             </div>
                         </div>
                     `).join('')}
@@ -1853,14 +1902,14 @@
                     </div>
                     <div class="hero-3d-container" id="hero3D"></div>
                     <div class="hero-content">
-                        <h1 class="hero-title">Master New Skills</h1>
-                        <p class="hero-subtitle">Transform your knowledge with our comprehensive courses</p>
+                        <h1 class="hero-title">${window.i18n ? window.i18n.t('masterNewSkills') : 'Master New Skills'}</h1>
+                        <p class="hero-subtitle">${window.i18n ? window.i18n.t('transformKnowledge') : 'Transform your knowledge with our comprehensive courses'}</p>
                         <div class="hero-cta">
-                            <button class="hero-btn hero-btn-primary" onclick="scrollToCourses()">Explore Courses</button>
+                            <button class="hero-btn hero-btn-primary" onclick="scrollToCourses()">${window.i18n ? window.i18n.t('exploreCourses') : 'Explore Courses'}</button>
                             ${user ? `
-                                <button class="hero-btn" onclick="scrollToCourses()">Continue Learning</button>
+                                <button class="hero-btn" onclick="scrollToCourses()">${window.i18n ? (window.i18n.t('continueLearning') || 'Continue Learning') : 'Continue Learning'}</button>
                             ` : `
-                                <button class="hero-btn" onclick="openLoginModal()">Get Started</button>
+                                <button class="hero-btn" onclick="openLoginModal()">${window.i18n ? window.i18n.t('getStarted') : 'Get Started'}</button>
                             `}
                         </div>
                     </div>
@@ -3005,58 +3054,152 @@
         window.openLoginModal = openLoginModal;
         window.toggleTheme = toggleTheme;
         
-        // Enhanced features functions
-        window.openThemeSelector = function() {
+        // Unified Settings Modal
+        window.openSettings = function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const currentLanguage = localStorage.getItem('language') || 'en';
+            
             const modal = document.createElement('div');
             modal.className = 'modal show';
+            modal.id = 'settingsModal';
             modal.innerHTML = `
-                <div class="modal-content" style="max-width: 600px;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">🎨 Select Theme</h2>
-                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                    <div class="modal-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                        <h2 class="modal-title">⚙️ Settings</h2>
+                        <button onclick="closeSettings()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text);">&times;</button>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; padding: 1rem;">
-                        ${Object.entries(ThemeManager.themes).map(([key, theme]) => `
-                            <div onclick="ThemeManager.setTheme('${key}'); this.closest('.modal').remove(); showCourses();" 
-                                 style="padding: 1.5rem; border: 2px solid ${ThemeManager.currentTheme === key ? 'var(--theme-primary)' : 'var(--border)'}; 
-                                        border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;"
-                                 onmouseover="this.style.transform='scale(1.05)'" 
-                                 onmouseout="this.style.transform='scale(1)'">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">${theme.icon}</div>
-                                <div style="font-weight: 600; color: var(--text);">${theme.name}</div>
+                    
+                    <!-- Appearance Section -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🎨</span> Appearance
+                        </h3>
+                        
+                        <!-- Dark/Light Mode Toggle -->
+                        <div style="background: var(--hover-bg); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 0.25rem;">Dark Mode</div>
+                                    <div style="font-size: 0.875rem; color: var(--text-light);">Switch between light and dark theme</div>
+                                </div>
+                                <button onclick="toggleTheme(); updateSettingsModal();" 
+                                        style="background: ${currentTheme === 'dark' ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                               border: none; width: 50px; height: 26px; border-radius: 13px; 
+                                               cursor: pointer; position: relative; transition: background 0.3s;">
+                                    <span style="position: absolute; ${currentTheme === 'dark' ? 'right: 3px;' : 'left: 3px;'} top: 3px; 
+                                                width: 20px; height: 20px; background: white; border-radius: 50%; 
+                                                transition: left 0.3s, right 0.3s;"></span>
+                                </button>
                             </div>
-                        `).join('')}
+                        </div>
+                        
+                        <!-- Color Theme Selector -->
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem;">Color Theme</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem;">
+                                ${Object.entries(ThemeManager.themes).map(([key, theme]) => `
+                                    <div onclick="ThemeManager.setTheme('${key}'); updateSettingsModal();" 
+                                         style="padding: 1rem; border: 2px solid ${ThemeManager.currentTheme === key ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                                border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;
+                                                background: ${ThemeManager.currentTheme === key ? 'var(--hover-bg)' : 'transparent'};"
+                                         onmouseover="this.style.transform='scale(1.05)'" 
+                                         onmouseout="this.style.transform='scale(1)'">
+                                        <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${theme.icon}</div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text);">${theme.name}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Layout Section -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📐</span> Layout
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem;">
+                            ${Object.entries(UILayoutManager.layouts).map(([key, layout]) => `
+                                <div onclick="UILayoutManager.setLayout('${key}'); updateSettingsModal(); showCourses();" 
+                                     style="padding: 1rem; border: 2px solid ${UILayoutManager.currentLayout === key ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                            border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;
+                                            background: ${UILayoutManager.currentLayout === key ? 'var(--hover-bg)' : 'transparent'};"
+                                     onmouseover="this.style.transform='scale(1.05)'" 
+                                     onmouseout="this.style.transform='scale(1)'">
+                                    <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${layout.icon}</div>
+                                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.125rem;">${layout.name}</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-light);">${layout.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Language Section -->
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🌐</span> Language
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div onclick="setLanguage('en'); updateSettingsModal();" 
+                                 style="padding: 1rem; border: 2px solid ${currentLanguage === 'en' ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                        border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;
+                                        background: ${currentLanguage === 'en' ? 'var(--hover-bg)' : 'transparent'}; transition: all 0.2s;"
+                                 onmouseover="this.style.background='var(--hover-bg)'" 
+                                 onmouseout="this.style.background='${currentLanguage === 'en' ? 'var(--hover-bg)' : 'transparent'}'">
+                                <span style="font-size: 1.5rem;">🇬🇧</span>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text);">English</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">English</div>
+                                </div>
+                                ${currentLanguage === 'en' ? '<span style="margin-left: auto; color: var(--theme-primary);">✓</span>' : ''}
+                            </div>
+                            <div onclick="setLanguage('el'); updateSettingsModal();" 
+                                 style="padding: 1rem; border: 2px solid ${currentLanguage === 'el' ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                        border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;
+                                        background: ${currentLanguage === 'el' ? 'var(--hover-bg)' : 'transparent'}; transition: all 0.2s;"
+                                 onmouseover="this.style.background='var(--hover-bg)'" 
+                                 onmouseout="this.style.background='${currentLanguage === 'el' ? 'var(--hover-bg)' : 'transparent'}'">
+                                <span style="font-size: 1.5rem;">🇬🇷</span>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text);">Ελληνικά</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Greek</div>
+                                </div>
+                                ${currentLanguage === 'el' ? '<span style="margin-left: auto; color: var(--theme-primary);">✓</span>' : ''}
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
+            
+            // Remove existing settings modal if any
+            const existing = document.getElementById('settingsModal');
+            if (existing) existing.remove();
+            
             document.body.appendChild(modal);
         };
         
+        window.closeSettings = function() {
+            const modal = document.getElementById('settingsModal');
+            if (modal) modal.remove();
+        };
+        
+        window.updateSettingsModal = function() {
+            // Update the modal to reflect current settings
+            setTimeout(() => {
+                const modal = document.getElementById('settingsModal');
+                if (modal) {
+                    closeSettings();
+                    openSettings();
+                }
+            }, 100);
+        };
+        
+        // Keep individual functions for backward compatibility
+        window.openThemeSelector = function() {
+            openSettings();
+        };
+        
         window.openLayoutSelector = function() {
-            const modal = document.createElement('div');
-            modal.className = 'modal show';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 600px;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">📐 Select Layout</h2>
-                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; padding: 1rem;">
-                        ${Object.entries(UILayoutManager.layouts).map(([key, layout]) => `
-                            <div onclick="UILayoutManager.setLayout('${key}'); this.closest('.modal').remove(); showCourses();" 
-                                 style="padding: 1.5rem; border: 2px solid ${UILayoutManager.currentLayout === key ? 'var(--theme-primary)' : 'var(--border)'}; 
-                                        border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;"
-                                 onmouseover="this.style.transform='scale(1.05)'" 
-                                 onmouseout="this.style.transform='scale(1)'">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">${layout.icon}</div>
-                                <div style="font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">${layout.name}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-light);">${layout.description}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+            openSettings();
         };
         
         window.showQuizzes = function() {
