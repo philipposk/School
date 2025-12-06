@@ -3237,17 +3237,43 @@
                 
                 // Only close if not typing in an input field
                 if (!isInputFocused) {
+                    // Check for specific modals first
+                    const aiSearchModal = document.getElementById('aiSearchModal');
+                    if (aiSearchModal && aiSearchModal.classList.contains('show')) {
+                        if (typeof closeAISearch === 'function') {
+                            closeAISearch();
+                            return;
+                        }
+                    }
+                    
+                    const predictionModal = document.getElementById('predictionModal');
+                    if (predictionModal && predictionModal.classList.contains('show')) {
+                        if (typeof closePrediction === 'function') {
+                            closePrediction();
+                            return;
+                        }
+                    }
+                    
+                    const settingsModal = document.getElementById('settingsModal');
+                    if (settingsModal && settingsModal.classList.contains('show')) {
+                        if (typeof closeSettings === 'function') {
+                            closeSettings();
+                            return;
+                        }
+                    }
+                    
+                    // Fallback: close any other modals
                     const modals = document.querySelectorAll('.modal.show');
                     if (modals.length > 0) {
                         // Close the topmost modal (last one in DOM order)
                         const topModal = modals[modals.length - 1];
                         closeModal(topModal);
-                        
-                        // Also close any dropdowns
-                        const dropdown = document.getElementById('profileDropdown');
-                        if (dropdown) {
-                            dropdown.classList.remove('show');
-                        }
+                    }
+                    
+                    // Also close any dropdowns
+                    const dropdown = document.getElementById('profileDropdown');
+                    if (dropdown) {
+                        dropdown.classList.remove('show');
                     }
                 }
             }
