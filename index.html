@@ -3208,6 +3208,11 @@
                     closePrediction();
                     return;
                 }
+            } else if (modalId === 'aiSearchModal') {
+                if (typeof closeAISearch === 'function') {
+                    closeAISearch();
+                    return;
+                }
             }
             
             // Default: just remove show class
