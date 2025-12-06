@@ -889,3 +889,35 @@
     }
 }
 
+/* ASCII Art / Code Block Visibility */
+.module-content pre {
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1.6;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Dark mode: brighter colors for ASCII art visibility */
+[data-theme="dark"] .module-content pre {
+    background: #0f172a !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .module-content pre code {
+    color: #e2e8f0 !important;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Light mode: darker background for contrast */
+[data-theme="light"] .module-content pre {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.module-content pre code {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 500;
+}
+
