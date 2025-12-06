@@ -135,6 +135,21 @@ const ScrollHeaderManager = {
         const scrollY = window.scrollY;
         const shouldBeScrolled = scrollY > 100; // Threshold for animation
         
+        // Only proceed if state changed
+        if (shouldBeScrolled === this.isScrolled) return;
+        
+        this.isScrolled = shouldBeScrolled;
+        
+        // Ensure buttons are found
+        if (this.headerButtons.length === 0) {
+            this.headerButtons = Array.from(document.querySelectorAll('.header-btn'));
+        }
+        
+        if (this.headerButtons.length === 0) {
+            console.warn('ScrollHeaderManager: No header buttons found');
+            return;
+        }
+        
         // Calculate scroll speed for animation timing
         const now = Date.now();
         const timeSinceLastScroll = now - (this.lastScrollTime || now);
@@ -149,24 +164,15 @@ const ScrollHeaderManager = {
         // Fast scroll (>10px/ms) = 0.5x duration (faster), slow scroll (<1px/ms) = 2x duration (slower)
         this.animationSpeed = Math.max(0.5, Math.min(2.0, 1 / (scrollSpeed * 0.1 + 0.5)));
         
-        if (shouldBeScrolled !== this.isScrolled) {
-            this.isScrolled = shouldBeScrolled;
-            
-            // Ensure buttons are found before animating
-            if (this.headerButtons.length === 0) {
-                this.headerButtons = Array.from(document.querySelectorAll('.header-btn'));
-            }
-            
-            if (this.headerButtons.length > 0) {
-                this.animateHeader(shouldBeScrolled);
-                
-                // Play sound effect (gracefully handle missing files)
-                if (this.soundEnabled && this.sounds.pop) {
-                    this.sounds.pop.play().catch(() => {
-                        // Silently fail if sound file doesn't exist
-                    });
-                }
-            }
+        console.log('ScrollHeaderManager: handleScroll called, shouldBeScrolled:', shouldBeScrolled, 'buttons:', this.headerButtons.length);
+        
+        this.animateHeader(shouldBeScrolled);
+        
+        // Play sound effect (gracefully handle missing files)
+        if (this.soundEnabled && this.sounds.pop) {
+            this.sounds.pop.play().catch(() => {
+                // Silently fail if sound file doesn't exist
+            });
         }
     },
     
