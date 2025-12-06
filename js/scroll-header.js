@@ -260,11 +260,12 @@ const ScrollHeaderManager = {
                 
                 // Animate flight path with multiple bounces
                 setTimeout(() => {
+                    console.log(`ScrollHeaderManager: Starting phase 1 for button ${index}`);
                     // Phase 1: Fly along top - first bounce
-                    clone.style.transition = `all ${phase1Duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-                    clone.style.left = `${midX1}px`;
-                    clone.style.top = `${midY}px`;
-                    clone.style.transform = 'rotateZ(0deg) scale(1)';
+                    clone.style.setProperty('transition', `all ${phase1Duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`, 'important');
+                    clone.style.setProperty('left', `${midX1}px`, 'important');
+                    clone.style.setProperty('top', `${midY}px`, 'important');
+                    clone.style.setProperty('transform', 'rotateZ(0deg) scale(1)', 'important');
                     
                     // Phase 2: Bounce up
                     setTimeout(() => {
