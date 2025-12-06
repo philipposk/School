@@ -9,19 +9,22 @@ const ScrollHeaderManager = {
     
     init() {
         // Create sounds directory reference (sounds will be in /sounds/ folder)
-        this.sounds = {
-            pop: new Audio('sounds/pop.mp3'),
-            scroll: new Audio('sounds/scroll.mp3'),
-            fly: new Audio('sounds/fly.mp3'),
-            walk: new Audio('sounds/walk.mp3'),
-            click: new Audio('sounds/click.mp3')
-        };
+        // Gracefully handle missing sound files
+        this.sounds = {};
+        const soundFiles = ['pop', 'scroll', 'fly', 'walk', 'click'];
         
-        // Set volume for sounds (subtle, not annoying)
-        Object.values(this.sounds).forEach(sound => {
-            if (sound) {
-                sound.volume = 0.2; // Low volume
-                sound.preload = 'auto';
+        soundFiles.forEach(name => {
+            try {
+                const audio = new Audio(`sounds/${name}.mp3`);
+                audio.volume = 0.2; // Low volume - subtle, not annoying
+                audio.preload = 'auto';
+                // Test if file exists by trying to load
+                audio.addEventListener('error', () => {
+                    console.log(`Sound file sounds/${name}.mp3 not found - skipping`);
+                });
+                this.sounds[name] = audio;
+            } catch (e) {
+                console.log(`Could not create sound for ${name}:`, e);
             }
         });
         
@@ -72,9 +75,11 @@ const ScrollHeaderManager = {
             this.isScrolled = shouldBeScrolled;
             this.animateHeader(shouldBeScrolled);
             
-            // Play sound effect
+            // Play sound effect (gracefully handle missing files)
             if (this.soundEnabled && this.sounds.pop) {
-                this.sounds.pop.play().catch(e => console.log('Sound play failed:', e));
+                this.sounds.pop.play().catch(() => {
+                    // Silently fail if sound file doesn't exist
+                });
             }
         }
     },
