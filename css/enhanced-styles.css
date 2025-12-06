@@ -308,6 +308,20 @@
     backdrop-filter: blur(10px);
 }
 
+[data-theme-style="liquid-glass"] .modern-course-card,
+[data-theme-style="liquid-glass"] .beauty-card,
+[data-theme-style="liquid-glass"] .feed-item,
+[data-theme-style="liquid-glass"] .card {
+    backdrop-filter: blur(10px);
+    background: rgba(0, 212, 255, 0.1) !important;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+[data-theme-style="liquid-glass"] header {
+    backdrop-filter: blur(10px);
+    background: rgba(0, 212, 255, 0.2) !important;
+}
+
 [data-theme-style="instagram"] header {
     background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
 }
@@ -317,13 +331,34 @@
 }
 
 [data-theme-style="cyber"] {
-    background: #0a0a0a;
+    background: #0a0a0a !important;
     color: #00ff88;
 }
 
 [data-theme-style="cyber"] header {
-    background: #0a0a0a;
+    background: #0a0a0a !important;
     border-bottom: 2px solid #00ff88;
+}
+
+[data-theme-style="cyber"] .modern-course-card,
+[data-theme-style="cyber"] .beauty-card,
+[data-theme-style="cyber"] .feed-item,
+[data-theme-style="cyber"] .card {
+    background: #0a0a0a !important;
+    border: 1px solid #00ff88;
+    color: #00ff88;
+}
+
+[data-theme-style="cyber"] .modern-course-title,
+[data-theme-style="cyber"] h1,
+[data-theme-style="cyber"] h2,
+[data-theme-style="cyber"] h3 {
+    color: #00ff88 !important;
+}
+
+[data-theme-style="cyber"] .modern-course-description,
+[data-theme-style="cyber"] p {
+    color: #00cc6a !important;
 }
 
 /* Layout Styles */

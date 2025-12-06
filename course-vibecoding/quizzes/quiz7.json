@@ -1,0 +1,108 @@
+{
+  "title": "Module 7: Integration & Deployment",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "Environment variables should be:",
+      "options": [
+        "Committed to Git",
+        "Kept secret and secure",
+        "Shared publicly",
+        "Hardcoded in code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Environment variables should be kept secret and secure, never committed to Git or hardcoded."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "Backend proxy is used to:",
+      "options": [
+        "Slow down requests",
+        "Keep API keys secret",
+        "Add complexity",
+        "Skip security"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Backend proxy keeps API keys secret by handling API calls server-side instead of exposing keys in client code."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "Vercel is best for:",
+      "options": [
+        "Backend only",
+        "Next.js applications",
+        "Databases",
+        "APIs only"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Vercel is optimized for Next.js applications with automatic deployments and excellent integration."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "Production database should:",
+      "options": [
+        "Use local database",
+        "Use cloud service",
+        "Not exist",
+        "Be public"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Production databases should use cloud services like Supabase, MongoDB Atlas, or Railway PostgreSQL."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "CI/CD helps with:",
+      "options": [
+        "Manual deployment",
+        "Automated deployment",
+        "Skipping tests",
+        "Nothing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "CI/CD (Continuous Integration/Continuous Deployment) automates testing and deployment processes."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "Post-deployment you should:",
+      "options": [
+        "Forget about it",
+        "Monitor and verify",
+        "Delete code",
+        "Skip testing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "After deployment, monitor the application, verify functionality, and check for errors."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "Why use environment variables instead of hardcoding secrets?",
+      "sampleAnswer": "Environment variables keep secrets secure, allow different configs for dev/prod, prevent accidental exposure in code, and make it easy to change without code modifications."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "What's the difference between frontend and backend deployment?",
+      "sampleAnswer": "Frontend deployment hosts static files and client-side code (Vercel, Netlify). Backend deployment hosts server code and APIs (Railway, Render). They often use different platforms and have different requirements."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "Why use a backend proxy for external API calls?",
+      "sampleAnswer": "Backend proxy keeps API keys secret (not exposed in client), provides better security, enables rate limiting, centralizes error handling, and allows request transformation."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "What should you check after deploying to production?",
+      "sampleAnswer": "Check: functionality (all features work), performance (load times acceptable), security (HTTPS, no exposed secrets), monitoring (error tracking, analytics), and verify environment variables are set correctly."
+    }
+  ]
+}
+

@@ -2,7 +2,28 @@
 // Supports English and Greek
 
 const i18n = {
-    currentLanguage: localStorage.getItem('language') || 'en',
+    // Detect browser/system language, default to 'en' if not supported
+    detectLanguage: function() {
+        // Check localStorage first (user preference)
+        const savedLang = localStorage.getItem('language');
+        if (savedLang && (savedLang === 'en' || savedLang === 'el')) {
+            return savedLang;
+        }
+        
+        // Detect from browser/system settings
+        const browserLang = navigator.language || navigator.userLanguage || 'en';
+        const langCode = browserLang.split('-')[0].toLowerCase(); // Get 'el' from 'el-GR'
+        
+        // Map browser language to supported languages
+        if (langCode === 'el' || browserLang.toLowerCase().includes('greek')) {
+            return 'el';
+        }
+        
+        // Default to English
+        return 'en';
+    },
+    
+    currentLanguage: null, // Will be set in init()
     
     translations: {
         en: {
@@ -123,6 +144,13 @@ const i18n = {
             loading: "Loading...",
             error: "Error",
             success: "Success",
+            
+            // Hero section
+            masterNewSkills: "Master New Skills",
+            transformKnowledge: "Transform your knowledge with our comprehensive courses",
+            exploreCourses: "Explore Courses",
+            getStarted: "Get Started",
+            continueLearning: "Continue Learning",
             
             // Settings
             settings: "Settings",
@@ -271,6 +299,14 @@ const i18n = {
             error: "Σφάλμα",
             success: "Επιτυχία",
             
+            // Hero section
+            masterNewSkills: "Κατέκτησε Νέες Δεξιότητες",
+            transformKnowledge: "Μεταμόρφωσε τη γνώση σου με τα ολοκληρωμένα μαθήματά μας",
+            exploreCourses: "Εξερεύνησε Μαθήματα",
+            getStarted: "Ξεκίνα",
+            continueLearning: "Συνέχισε τη Μάθηση",
+            startCourse: "Έναρξη Μαθήματος",
+            
             // Settings
             settings: "Ρυθμίσεις",
             theme: "Θέμα",
@@ -330,7 +366,49 @@ const i18n = {
     
     // Initialize
     init() {
+        // Set current language (detect if not saved)
+        if (!this.currentLanguage) {
+            this.currentLanguage = this.detectLanguage();
+        } else {
+            // If language is saved, use it (but still detect on first visit)
+            const savedLang = localStorage.getItem('language');
+            if (savedLang && (savedLang === 'en' || savedLang === 'el')) {
+                this.currentLanguage = savedLang;
+            } else {
+                this.currentLanguage = this.detectLanguage();
+            }
+        }
+        localStorage.setItem('language', this.currentLanguage);
         this.updatePageLanguage();
+    },
+    
+    // Get translated course data
+    translateCourse(course) {
+        const lang = this.currentLanguage;
+        
+        // If course has translations, use them
+        if (course.translations && course.translations[lang]) {
+            return {
+                ...course,
+                title: course.translations[lang].title || course.title,
+                description: course.translations[lang].description || course.description,
+                level: course.translations[lang].level || course.level,
+                duration: course.translations[lang].duration || course.duration,
+                modules_data: course.modules_data.map((module, index) => ({
+                    ...module,
+                    title: course.translations[lang].modules?.[index]?.title || module.title,
+                    subtitle: course.translations[lang].modules?.[index]?.subtitle || module.subtitle
+                }))
+            };
+        }
+        
+        // Fallback to original course data
+        return course;
+    },
+    
+    // Translate all courses
+    translateCourses(courses) {
+        return courses.map(course => this.translateCourse(course));
     }
 };
 

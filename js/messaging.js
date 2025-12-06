@@ -174,9 +174,6 @@ Available courses: ${JSON.stringify(courseContext)}
 
 Be conversational, encouraging, and helpful. Keep responses concise (2-3 sentences max). If asked about specific topics, reference relevant course modules.`;
 
-            // Get conversation history (will be empty for new conversations)
-            const conversationHistory = [];
-            
             // Get conversation history if available
             const conversationHistory = conversationId ? this.getConversationHistory(conversationId) : [];
             

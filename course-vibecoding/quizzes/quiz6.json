@@ -1,0 +1,108 @@
+{
+  "title": "Module 6: Testing & Quality Assurance",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "Testing AI-generated code is:",
+      "options": [
+        "Unnecessary",
+        "Essential",
+        "Optional",
+        "Waste of time"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Testing AI-generated code is essential because AI can make mistakes and miss edge cases."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "Unit tests focus on:",
+      "options": [
+        "Complete workflows",
+        "Individual components",
+        "UI appearance",
+        "Performance"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Unit tests focus on testing individual components or functions in isolation."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "Test-driven development means:",
+      "options": [
+        "Write code first",
+        "Write tests first",
+        "Skip tests",
+        "Test manually"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Test-driven development (TDD) means writing tests before writing the code that makes them pass."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "Good test coverage target is:",
+      "options": [
+        "50%",
+        "70%+",
+        "30%",
+        "100% always"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Aim for 70%+ overall coverage, with 90%+ for critical paths."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "Tests should focus on:",
+      "options": [
+        "Implementation details",
+        "User-facing behavior",
+        "Third-party code",
+        "Internal variables"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Tests should focus on user-facing behavior, not implementation details."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "Continuous testing helps:",
+      "options": [
+        "Slow development",
+        "Catch issues early",
+        "Skip manual testing",
+        "Nothing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Continuous testing helps catch issues early and prevent broken code from being merged."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "Why is it important to test AI-generated code?",
+      "sampleAnswer": "AI can make mistakes, might miss edge cases, may have integration issues, and testing provides confidence that code works correctly before deployment."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "What's the difference between unit, integration, and E2E tests?",
+      "sampleAnswer": "Unit tests: individual components/functions, fast and isolated. Integration tests: how components work together, medium speed. E2E tests: complete user workflows, slower, full system."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "How do you debug a failing test?",
+      "sampleAnswer": "Read the error message, understand what failed, check test expectations, verify the code behavior, fix the code or test as needed, then re-run tests."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "Explain the benefits of test-driven development with AI.",
+      "sampleAnswer": "TDD with AI provides: clear requirements upfront, better test coverage, more focused code generation, and ensures code meets test specifications from the start."
+    }
+  ]
+}
+
