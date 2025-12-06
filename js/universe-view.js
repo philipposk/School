@@ -642,33 +642,51 @@ const UniverseView = {
                 const lineHeight = fontSize * 1.2;
                 const maxLines = Math.floor(maxHeight / lineHeight);
                 
-                // Truncate text intelligently to fit within bounds
+                // First, try to wrap the full text
                 let displayText = course.title;
-                let textWidth = ctx.measureText(displayText).width;
+                let textLines = this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, 2) - 1) * lineHeight / 2), lineHeight);
                 
-                // If text is too wide, truncate it
-                if (textWidth > maxTextWidth) {
-                    // Try to fit on one line first
-                    let truncated = displayText;
-                    while (ctx.measureText(truncated + '...').width > maxTextWidth && truncated.length > 0) {
-                        truncated = truncated.slice(0, -1);
+                // Check if wrapped text fits (count lines by measuring)
+                const words = displayText.split(' ');
+                let estimatedLines = 1;
+                let currentLine = '';
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
+                    if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
+                        estimatedLines++;
+                        currentLine = words[i];
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                
+                // If wrapped text has too many lines, truncate intelligently
+                if (estimatedLines > maxLines) {
+                    // Try to fit on maxLines by taking first N words that fit
+                    let truncated = '';
+                    let lineCount = 0;
+                    for (let i = 0; i < words.length && lineCount < maxLines; i++) {
+                        const testText = truncated ? truncated + ' ' + words[i] : words[i];
+                        const testWidth = ctx.measureText(testText).width;
+                        if (testWidth > maxTextWidth && truncated) {
+                            lineCount++;
+                            if (lineCount < maxLines) {
+                                truncated = words[i];
+                            } else {
+                                break;
+                            }
+                        } else {
+                            truncated = testText;
+                        }
                     }
                     displayText = truncated + (truncated.length < course.title.length ? '...' : '');
+                    
+                    // Re-wrap the truncated text
+                    this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, 2) - 1) * lineHeight / 2), lineHeight);
+                } else {
+                    // Full text fits, just wrap it (already done above)
+                    // No need to do anything, wrapText was already called
                 }
-                
-                // If still too wide or too many lines, use abbreviated version
-                if (ctx.measureText(displayText).width > maxTextWidth || displayText.split(' ').length > maxLines * 2) {
-                    // Take first 2-3 words or first 20 characters
-                    const words = course.title.split(' ');
-                    if (words.length > 2) {
-                        displayText = words.slice(0, 2).join(' ') + '...';
-                    } else {
-                        displayText = course.title.substring(0, 20) + (course.title.length > 20 ? '...' : '');
-                    }
-                }
-                
-                // Wrap text to fit within region bounds
-                const textLines = this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, 2) - 1) * lineHeight / 2), lineHeight);
                 
                 // Reset shadow
                 ctx.shadowColor = 'transparent';
