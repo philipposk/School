@@ -51,7 +51,7 @@ const ThreeDWorld = {
     setupScene() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x0a0a0a);
-        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.002);
+        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0015); // Reduced fog for better visibility
     },
     
     setupCamera() {
@@ -99,12 +99,12 @@ const ThreeDWorld = {
     },
     
     setupLights() {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        // Ambient light - brighter for better card visibility
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         this.scene.add(ambientLight);
         
-        // Directional light (sun)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        // Directional light (sun) - brighter
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
         directionalLight.position.set(50, 100, 50);
         directionalLight.castShadow = true;
         directionalLight.shadow.mapSize.width = 2048;
@@ -117,10 +117,10 @@ const ThreeDWorld = {
         directionalLight.shadow.camera.bottom = -100;
         this.scene.add(directionalLight);
         
-        // Point lights for atmosphere
-        const colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0xf9ca24];
+        // Point lights for atmosphere - brighter and more colorful
+        const colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0xf9ca24, 0x667eea, 0x764ba2];
         colors.forEach((color, i) => {
-            const light = new THREE.PointLight(color, 0.5, 100);
+            const light = new THREE.PointLight(color, 1.0, 150);
             const angle = (i / colors.length) * Math.PI * 2;
             light.position.set(
                 Math.cos(angle) * 80,
@@ -191,56 +191,88 @@ const ThreeDWorld = {
     },
     
     createCourseCard(course, index, total) {
-        // Create 3D card geometry
-        const cardWidth = 15;
-        const cardHeight = 10;
-        const cardDepth = 0.5;
+        // Create 3D card geometry - slightly larger for better visibility
+        const cardWidth = 18;
+        const cardHeight = 12;
+        const cardDepth = 0.8;
         
         const geometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
         
-        // Create canvas texture for the card
+        // Create canvas texture for the card with brighter colors
         const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
+        canvas.width = 1024; // Higher resolution
+        canvas.height = 1024;
         const ctx = canvas.getContext('2d');
         
-        // Draw card design
-        const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-        gradient.addColorStop(0, '#667eea');
-        gradient.addColorStop(1, '#764ba2');
+        // Draw card design with brighter, more vibrant gradient
+        const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+        // Use brighter, more saturated colors
+        gradient.addColorStop(0, '#8b9aff'); // Brighter purple-blue
+        gradient.addColorStop(0.5, '#9d6eff'); // Bright purple
+        gradient.addColorStop(1, '#b886ff'); // Bright violet
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 512, 512);
+        ctx.fillRect(0, 0, 1024, 1024);
         
-        // Add icon
-        ctx.font = 'bold 120px Arial';
+        // Add border/outline for better visibility
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 8;
+        ctx.strokeRect(8, 8, 1008, 1008);
+        
+        // Add inner glow effect
+        const innerGradient = ctx.createRadialGradient(512, 512, 0, 512, 512, 512);
+        innerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        innerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = innerGradient;
+        ctx.fillRect(0, 0, 1024, 1024);
+        
+        // Add icon - larger and brighter
+        ctx.font = 'bold 180px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'white';
-        ctx.fillText(course.icon, 256, 150);
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 4;
+        ctx.strokeText(course.icon, 512, 220);
+        ctx.fillText(course.icon, 512, 220);
         
-        // Add title
-        ctx.font = 'bold 32px Arial';
-        ctx.fillStyle = 'white';
-        const titleLines = this.wrapText(ctx, course.title, 400);
+        // Add title - larger and with shadow
+        ctx.font = 'bold 48px Arial';
+        ctx.fillStyle = '#ffffff';
+        const titleLines = this.wrapText(ctx, course.title, 800);
         titleLines.forEach((line, i) => {
-            ctx.fillText(line, 256, 250 + i * 40);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.lineWidth = 6;
+            ctx.strokeText(line, 512, 380 + i * 60);
+            ctx.fillText(line, 512, 380 + i * 60);
         });
         
         // Create texture
         const texture = new THREE.CanvasTexture(canvas);
         texture.needsUpdate = true;
         
+        // Create material with emissive glow
         const material = new THREE.MeshStandardMaterial({
             map: texture,
-            emissive: 0x000000,
-            emissiveMap: texture,
-            roughness: 0.3,
-            metalness: 0.7
+            emissive: 0x4444ff, // Blue glow
+            emissiveIntensity: 0.3,
+            roughness: 0.2,
+            metalness: 0.3
         });
         
         const mesh = new THREE.Mesh(geometry, material);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
+        
+        // Add glow effect using a larger, semi-transparent mesh
+        const glowGeometry = new THREE.BoxGeometry(cardWidth * 1.15, cardHeight * 1.15, cardDepth * 0.5);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x667eea,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.BackSide
+        });
+        const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+        mesh.add(glowMesh);
         
         // Position cards in a circle/spiral pattern
         const angle = (index / total) * Math.PI * 2;
@@ -310,15 +342,18 @@ const ThreeDWorld = {
             if (!obj.mesh.userData.hovered) return;
             obj.mesh.userData.hovered = false;
             obj.mesh.scale.copy(obj.mesh.userData.originalScale);
-            obj.mesh.material.emissive.setHex(0x000000);
+            obj.mesh.material.emissive.setHex(0x4444ff);
+            obj.mesh.material.emissiveIntensity = 0.3;
         });
         
         // Highlight hovered card
         if (intersects.length > 0) {
             const hoveredMesh = intersects[0].object;
             hoveredMesh.userData.hovered = true;
-            hoveredMesh.scale.multiplyScalar(1.2);
-            hoveredMesh.material.emissive.setHex(0x444444);
+            hoveredMesh.scale.multiplyScalar(1.3);
+            // Bright glow on hover
+            hoveredMesh.material.emissive.setHex(0x88aaff);
+            hoveredMesh.material.emissiveIntensity = 0.8;
             
             // Show info popup
             this.showCourseInfo(intersects[0].object.userData.course, event);
