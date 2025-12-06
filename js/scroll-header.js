@@ -27,6 +27,12 @@ const ScrollHeaderManager = {
     },
     
     createSidebar() {
+        // Remove existing sidebar if any
+        const existing = document.getElementById('header-sidebar');
+        if (existing) {
+            existing.remove();
+        }
+        
         const sidebar = document.createElement('div');
         sidebar.id = 'header-sidebar';
         sidebar.style.cssText = `
@@ -41,13 +47,16 @@ const ScrollHeaderManager = {
             opacity: 0 !important;
             pointer-events: none !important;
             visibility: hidden !important;
-            transition: opacity 0.3s ease !important;
-            background: rgba(0, 0, 0, 0.3) !important;
+            transition: opacity 0.3s ease, visibility 0.3s ease !important;
+            background: rgba(0, 0, 0, 0.5) !important;
             backdrop-filter: blur(10px) !important;
             border-radius: 12px !important;
+            min-width: 60px !important;
+            min-height: 60px !important;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
+        console.log('ScrollHeaderManager: Sidebar created and appended to body');
     },
     
     handleScroll() {
