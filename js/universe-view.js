@@ -1279,6 +1279,9 @@ const UniverseView = {
             this.controls.update();
         }
         
+        // Track camera movement for auto-return
+        this.trackCameraMovement();
+        
         // Update zoom level check
         const currentDistance = this.camera.position.length();
         if (Math.abs(currentDistance - (this.lastDistance || 0)) > 10) {
