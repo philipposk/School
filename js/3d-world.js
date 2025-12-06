@@ -58,8 +58,9 @@ const ThreeDWorld = {
         const width = window.innerWidth;
         const height = window.innerHeight;
         this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000);
-        this.camera.position.set(0, 50, 100);
-        this.camera.lookAt(0, 0, 0);
+        // Start camera positioned to see underground course
+        this.camera.position.set(0, 30, 80);
+        this.camera.lookAt(0, -10, 0); // Look towards underground area
     },
     
     setupRenderer(container) {
@@ -152,6 +153,18 @@ const ThreeDWorld = {
         terrain.rotation.x = -Math.PI / 2;
         terrain.receiveShadow = true;
         this.scene.add(terrain);
+        
+        // Create an opening/hole in the ground for the underground course
+        const holeGeometry = new THREE.CylinderGeometry(25, 25, 2, 32);
+        const holeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+        const hole = new THREE.Mesh(holeGeometry, holeMaterial);
+        hole.position.y = -1;
+        hole.rotation.x = Math.PI / 2;
+        this.scene.add(hole);
         
         // Add some decorative elements
         this.addDecorativeElements();
@@ -277,16 +290,25 @@ const ThreeDWorld = {
         // Position cards in a circle/spiral pattern
         const angle = (index / total) * Math.PI * 2;
         const radius = 40 + (index % 3) * 15;
-        const height = 5 + Math.sin(index) * 10;
         
-        mesh.position.set(
-            Math.cos(angle) * radius,
-            height,
-            Math.sin(angle) * radius
-        );
-        
-        // Rotate to face center
-        mesh.lookAt(0, height, 0);
+        // Special positioning for "Understanding Human Minds" - place it underground
+        let height;
+        if (course.id === 'human-minds') {
+            height = -15; // Underground position
+            // Position it at the center but underground
+            mesh.position.set(0, height, 0);
+            // Make it face up slightly
+            mesh.rotation.x = -Math.PI / 6;
+        } else {
+            height = 5 + Math.sin(index) * 10;
+            mesh.position.set(
+                Math.cos(angle) * radius,
+                height,
+                Math.sin(angle) * radius
+            );
+            // Rotate to face center
+            mesh.lookAt(0, height, 0);
+        }
         
         // Add hover glow effect
         mesh.userData = {
