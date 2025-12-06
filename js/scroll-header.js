@@ -76,10 +76,18 @@ const ScrollHeaderManager = {
             this.animateHeader(shouldBeScrolled);
         } else if (shouldBeScrolled && this.sidebar) {
             // Keep sidebar visible if scrolled (even if state hasn't changed)
-            this.sidebar.style.setProperty('opacity', '1', 'important');
-            this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
-            this.sidebar.style.setProperty('visibility', 'visible', 'important');
-            this.sidebar.style.setProperty('display', 'flex', 'important');
+            // Recreate buttons if sidebar is empty
+            if (this.sidebar.children.length === 0 && this.headerButtons.length > 0) {
+                console.log('ScrollHeaderManager: Sidebar empty, recreating buttons');
+                this.animateHeader(true);
+            } else {
+                // Just ensure it's visible
+                this.sidebar.style.setProperty('opacity', '1', 'important');
+                this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
+                this.sidebar.style.setProperty('visibility', 'visible', 'important');
+                this.sidebar.style.setProperty('display', 'flex', 'important');
+                this.sidebar.style.setProperty('z-index', '99999', 'important');
+            }
         }
     },
     
