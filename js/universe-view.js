@@ -680,24 +680,17 @@ const UniverseView = {
             const safeScaledX = Math.max(scaledWidth * 0.2, Math.min(scaledX, canvasWidth - scaledWidth * 0.8));
             const safeScaledY = Math.max(scaledHeight * 0.2, Math.min(scaledY, canvasHeight - scaledHeight * 0.8));
             
-            // Draw country-like shape with better visibility
+            // Draw smooth, rounded country-like shape (not weird polygons)
             ctx.fillStyle = color;
-            ctx.globalAlpha = 0.95; // More opaque for better visibility
+            ctx.globalAlpha = 0.95;
             
-            // Add shadow/glow effect for better contrast
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 10 * scaleFactor;
-            ctx.shadowOffsetX = 2 * scaleFactor;
-            ctx.shadowOffsetY = 2 * scaleFactor;
+            // Use rounded rectangle with smooth curves instead of weird polygons
+            const centerX = safeScaledX + scaledWidth / 2;
+            const centerY = safeScaledY + scaledHeight / 2;
+            const radius = Math.min(scaledWidth, scaledHeight) * 0.3;
             
             ctx.beginPath();
-            ctx.moveTo(safeScaledX, safeScaledY);
-            ctx.lineTo(safeScaledX + scaledWidth * 0.7, safeScaledY - scaledHeight * 0.2);
-            ctx.lineTo(safeScaledX + scaledWidth, safeScaledY + scaledHeight * 0.3);
-            ctx.lineTo(safeScaledX + scaledWidth * 0.8, safeScaledY + scaledHeight);
-            ctx.lineTo(safeScaledX + scaledWidth * 0.3, safeScaledY + scaledHeight * 0.9);
-            ctx.lineTo(safeScaledX - scaledWidth * 0.1, safeScaledY + scaledHeight * 0.5);
-            ctx.closePath();
+            ctx.roundRect(safeScaledX, safeScaledY, scaledWidth, scaledHeight, radius);
             ctx.fill();
             
             // Reset shadow
@@ -1489,17 +1482,16 @@ const UniverseView = {
             this.lastDistance = currentDistance;
         }
         
-        // Rotate planet slowly - realistic speed (one full rotation every ~2 minutes)
-        // At high altitude, planets appear to rotate very slowly
+        // Rotate planet very slowly - much slower for better viewing
         if (this.planet) {
             const distance = this.camera.position.length();
-            // Slower rotation when viewed from far away (more realistic)
+            // Much slower rotation - one full rotation every 5-10 minutes
             if (distance > 1000) {
-                this.planet.rotation.y += 0.0002; // Very slow from far away
+                this.planet.rotation.y += 0.00005; // Very slow from far away
             } else if (distance > 500) {
-                this.planet.rotation.y += 0.0005; // Slow from mid distance
+                this.planet.rotation.y += 0.0001; // Slow from mid distance
             } else {
-                this.planet.rotation.y += 0.001; // Slightly faster when close
+                this.planet.rotation.y += 0.0002; // Still slow when close
             }
         }
         
