@@ -487,39 +487,69 @@ window.sendChatMessage = async function(conversationId) {
     }
 };
 
-window.openMessaging = function() {
-    const modal = document.getElementById('messagingModal');
-    if (!modal) {
-        const modalHTML = `
-            <div id="messagingModal" class="modal">
-                <div class="modal-content" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
-                    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                        <div>
-                            <h2 class="modal-title">Messages</h2>
-                            <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.25rem;">
-                                Chat with friends, AI tutor, or course instructors
-                            </p>
+window.openMessaging = function(friendEmail = null) {
+    try {
+        if (!user || !user.email) {
+            alert('Please sign in to view messages');
+            return;
+        }
+        
+        let modal = document.getElementById('messagingModal');
+        if (!modal) {
+            const modalHTML = `
+                <div id="messagingModal" class="modal">
+                    <div class="modal-content" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+                        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                            <div>
+                                <h2 class="modal-title">Messages</h2>
+                                <p style="color: var(--text-light); font-size: 0.875rem; margin-top: 0.25rem;">
+                                    Chat with friends, AI tutor, or course instructors
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="startNewChat('ai_tutor')" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    🤖 AI Tutor
+                                </button>
+                                <button onclick="startNewChat('instructor')" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    👨‍🏫 Instructor
+                                </button>
+                                <button onclick="closeMessaging()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="startNewChat('ai_tutor')" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
-                                🤖 AI Tutor
-                            </button>
-                            <button onclick="startNewChat('instructor')" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
-                                👨‍🏫 Instructor
-                            </button>
-                            <button onclick="closeMessaging()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                        <div id="messagingContent" style="flex: 1; overflow-y: auto; padding: 1rem;">
+                            ${MessagingManager.renderChatList()}
                         </div>
-                    </div>
-                    <div id="messagingContent" style="flex: 1; overflow-y: auto; padding: 1rem;">
-                        ${MessagingManager.renderChatList()}
                     </div>
                 </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            modal = document.getElementById('messagingModal');
+        } else {
+            // Update chat list
+            const content = document.getElementById('messagingContent');
+            if (content) {
+                content.innerHTML = MessagingManager.renderChatList();
+            }
+        }
+        
+        if (modal) {
+            modal.classList.add('show');
+            
+            // If friendEmail provided, open chat directly
+            if (friendEmail) {
+                setTimeout(() => {
+                    const conv = MessagingManager.getOrCreateConversation(friendEmail, MessagingManager.ConversationType.FRIEND);
+                    if (conv && typeof openChat === 'function') {
+                        closeMessaging();
+                        openChat(conv.id);
+                    }
+                }, 100);
+            }
+        }
+    } catch (error) {
+        console.error('Error opening messaging:', error);
+        alert('Unable to open messages. Please refresh the page.');
     }
-    
-    document.getElementById('messagingModal').classList.add('show');
 };
 
 window.closeMessaging = function() {

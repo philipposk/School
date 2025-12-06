@@ -2584,11 +2584,14 @@
                 return;
             }
             
-            if (!state.currentCourseId) {
-                alert('Please select a course first');
-                return;
+            // Use the messaging system modal instead of sidebar view
+            if (typeof window.openMessaging === 'function') {
+                window.openMessaging();
+            } else {
+                alert('Messaging system not available. Please refresh the page.');
             }
             
+            // Keep sidebar view state for UI consistency
             state.sidebarView = 'messages';
             renderCourseView();
             

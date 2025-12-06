@@ -585,13 +585,24 @@ window.performAISearch = async function() {
 };
 
 window.openPrediction = function() {
-    const modal = document.getElementById('predictionModal');
-    if (!modal) {
-        document.body.insertAdjacentHTML('beforeend', LearningPotentialPredictor.renderPredictionModal());
-    } else {
-        document.getElementById('predictionModal').innerHTML = LearningPotentialPredictor.renderPredictionModal();
+    try {
+        let modal = document.getElementById('predictionModal');
+        if (!modal) {
+            document.body.insertAdjacentHTML('beforeend', LearningPotentialPredictor.renderPredictionModal());
+            modal = document.getElementById('predictionModal');
+        } else {
+            // Update modal content
+            const newContent = LearningPotentialPredictor.renderPredictionModal();
+            modal.outerHTML = newContent;
+            modal = document.getElementById('predictionModal');
+        }
+        if (modal) {
+            modal.classList.add('show');
+        }
+    } catch (error) {
+        console.error('Error opening prediction modal:', error);
+        alert('Unable to open Learning Potential. Please try again.');
     }
-    document.getElementById('predictionModal').classList.add('show');
 };
 
 window.closePrediction = function() {
