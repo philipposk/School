@@ -115,6 +115,13 @@ const UniverseView = {
     
     handleZoomSpeed() {
         // Accelerate zoom when approaching planet (fast zoom in)
+        // But only if not hovering over something (to prevent unwanted zoom)
+        if (this.isHovering) {
+            // Keep normal speed when hovering to prevent accidental zoom
+            this.controls.zoomSpeed = 1.0;
+            return;
+        }
+        
         const distance = this.camera.position.length();
         if (distance < 600 && distance > 150) {
             // Fast zoom in when approaching planet
@@ -533,15 +540,35 @@ const UniverseView = {
     setupInteraction() {
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
+        this.isHovering = false; // Track hover state
         
         this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
         this.renderer.domElement.addEventListener('click', (e) => this.onMouseClick(e));
+        this.renderer.domElement.addEventListener('mouseleave', () => {
+            this.isHovering = false;
+            this.hideCourseInfo();
+            this.hideTempleInfo();
+        });
     },
     
     onMouseMove(event) {
         const rect = this.renderer.domElement.getBoundingClientRect();
         this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        // Only check for hover if not scrolling/zooming
+        // Check if mouse is moving (not just stationary)
+        const now = Date.now();
+        if (!this.lastMouseMoveTime) {
+            this.lastMouseMoveTime = now;
+        }
+        const timeSinceLastMove = now - this.lastMouseMoveTime;
+        this.lastMouseMoveTime = now;
+        
+        // Skip hover detection if mouse just moved (might be scrolling)
+        if (timeSinceLastMove < 50) {
+            return;
+        }
         
         this.raycaster.setFromCamera(this.mouse, this.camera);
         
@@ -555,6 +582,7 @@ const UniverseView = {
         if (templeIntersects.length > 0) {
             const temple = templeIntersects[0].object;
             this.showTempleInfo(temple.userData, event);
+            this.isHovering = true;
             hoveredSomething = true;
         }
         
@@ -569,12 +597,14 @@ const UniverseView = {
                 const baseScale = Math.max(30, 80 - (this.camera.position.length() / 15));
                 hoveredSprite.scale.set(baseScale * 1.2, baseScale * 1.2, 1);
                 this.showCourseInfo(hoveredSprite.userData.course, event);
+                this.isHovering = true;
                 hoveredSomething = true;
             }
         }
         
         // Hide popups if not hovering anything
         if (!hoveredSomething) {
+            this.isHovering = false;
             this.hideCourseInfo();
             this.hideTempleInfo();
             // Reset scales
