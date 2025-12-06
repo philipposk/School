@@ -621,12 +621,22 @@ const UniverseView = {
         // Update zoom level based on distance
         if (distance > 1000) {
             this.zoomLevel = 0; // Galaxy view
+            // Disable walking if zoomed out too far
+            if (this.isLanded && distance > 500) {
+                this.isLanded = false;
+                this.removeWalkingControls();
+            }
         } else if (distance > 300) {
             this.zoomLevel = 1; // Planet view
+            // Disable walking if zoomed out
+            if (this.isLanded && distance > 500) {
+                this.isLanded = false;
+                this.removeWalkingControls();
+            }
         } else if (distance > 150) {
             this.zoomLevel = 2; // Course regions visible
         } else {
-            this.zoomLevel = 3; // Module detail view
+            this.zoomLevel = 3; // Module detail view - walking enabled
         }
         
         // Update visibility of elements based on zoom level
@@ -1189,10 +1199,233 @@ const UniverseView = {
                     // Create regions within the course
                     this.createSubRegions(courseRegion);
                 }
+                
+                // Enable walking/flying navigation
+                this.setupWalkingControls();
             }
         };
         
         animate();
+    },
+    
+    // Setup walking/flying navigation controls when landed
+    setupWalkingControls() {
+        if (this.walkingControls) {
+            return; // Already set up
+        }
+        
+        // Store original controls state
+        this.originalControlsEnabled = {
+            enableRotate: this.controls.enableRotate,
+            enableZoom: this.controls.enableZoom,
+            enablePan: this.controls.enablePan
+        };
+        
+        // Enable pan for walking around
+        this.controls.enableRotate = true;
+        this.controls.enableZoom = true;
+        this.controls.enablePan = true;
+        
+        // Keyboard movement state
+        this.keys = {
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            space: false, // Fly up
+            shift: false // Fly down / speed boost
+        };
+        
+        // Movement speed
+        this.walkSpeed = 2.0;
+        this.flySpeed = 5.0;
+        
+        // Bind event handlers to preserve context
+        this.boundOnWalkingKeyDown = (e) => this.onWalkingKeyDown(e);
+        this.boundOnWalkingKeyUp = (e) => this.onWalkingKeyUp(e);
+        
+        // Add keyboard event listeners
+        document.addEventListener('keydown', this.boundOnWalkingKeyDown);
+        document.addEventListener('keyup', this.boundOnWalkingKeyUp);
+        
+        this.walkingControls = {
+            active: true,
+            lastUpdate: Date.now()
+        };
+        
+        // Add UI hint
+        this.showWalkingHint();
+    },
+    
+    // Remove walking controls when zooming out
+    removeWalkingControls() {
+        if (!this.walkingControls) return;
+        
+        // Restore original controls state
+        if (this.originalControlsEnabled) {
+            this.controls.enableRotate = this.originalControlsEnabled.enableRotate;
+            this.controls.enableZoom = this.originalControlsEnabled.enableZoom;
+            this.controls.enablePan = this.originalControlsEnabled.enablePan;
+        }
+        
+        // Remove keyboard listeners
+        if (this.boundOnWalkingKeyDown) {
+            document.removeEventListener('keydown', this.boundOnWalkingKeyDown);
+        }
+        if (this.boundOnWalkingKeyUp) {
+            document.removeEventListener('keyup', this.boundOnWalkingKeyUp);
+        }
+        
+        this.walkingControls = null;
+        this.keys = {};
+        
+        // Hide walking hint
+        this.hideWalkingHint();
+    },
+    
+    onWalkingKeyDown(event) {
+        if (!this.isLanded || !this.walkingControls) return;
+        
+        const key = event.key.toLowerCase();
+        if (key === 'w' || key === 'arrowup') {
+            this.keys.w = true;
+            event.preventDefault();
+        } else if (key === 's' || key === 'arrowdown') {
+            this.keys.s = true;
+            event.preventDefault();
+        } else if (key === 'a' || key === 'arrowleft') {
+            this.keys.a = true;
+            event.preventDefault();
+        } else if (key === 'd' || key === 'arrowright') {
+            this.keys.d = true;
+            event.preventDefault();
+        } else if (key === ' ') {
+            this.keys.space = true;
+            event.preventDefault();
+        } else if (key === 'shift') {
+            this.keys.shift = true;
+            event.preventDefault();
+        }
+    },
+    
+    onWalkingKeyUp(event) {
+        if (!this.isLanded || !this.walkingControls) return;
+        
+        const key = event.key.toLowerCase();
+        if (key === 'w' || key === 'arrowup') {
+            this.keys.w = false;
+        } else if (key === 's' || key === 'arrowdown') {
+            this.keys.s = false;
+        } else if (key === 'a' || key === 'arrowleft') {
+            this.keys.a = false;
+        } else if (key === 'd' || key === 'arrowright') {
+            this.keys.d = false;
+        } else if (key === ' ') {
+            this.keys.space = false;
+        } else if (key === 'shift') {
+            this.keys.shift = false;
+        }
+    },
+    
+    // Update walking/flying movement each frame
+    updateWalkingMovement() {
+        if (!this.isLanded || !this.walkingControls || !this.keys) return;
+        
+        const deltaTime = (Date.now() - (this.walkingControls.lastUpdate || Date.now())) / 1000;
+        this.walkingControls.lastUpdate = Date.now();
+        
+        if (deltaTime > 0.1) return; // Skip if too much time passed
+        
+        // Calculate movement direction based on camera orientation
+        const direction = new THREE.Vector3();
+        const camera = this.camera;
+        
+        // Get forward direction (camera's local Z axis, negated)
+        camera.getWorldDirection(direction);
+        direction.negate();
+        
+        // Get right direction (camera's local X axis)
+        const right = new THREE.Vector3();
+        right.crossVectors(direction, camera.up).normalize();
+        
+        // Get up direction
+        const up = new THREE.Vector3(0, 1, 0);
+        
+        // Calculate movement vector
+        const moveVector = new THREE.Vector3(0, 0, 0);
+        const speed = this.keys.shift ? this.walkSpeed * 2 : this.walkSpeed;
+        
+        if (this.keys.w) {
+            moveVector.add(direction.multiplyScalar(speed * deltaTime));
+        }
+        if (this.keys.s) {
+            moveVector.add(direction.multiplyScalar(-speed * deltaTime));
+        }
+        if (this.keys.a) {
+            moveVector.add(right.multiplyScalar(-speed * deltaTime));
+        }
+        if (this.keys.d) {
+            moveVector.add(right.multiplyScalar(speed * deltaTime));
+        }
+        if (this.keys.space) {
+            moveVector.add(up.multiplyScalar(this.flySpeed * deltaTime));
+        }
+        if (this.keys.shift && !this.keys.space) {
+            // Shift without space = move down (when flying)
+            moveVector.add(up.multiplyScalar(-this.flySpeed * deltaTime));
+        }
+        
+        // Apply movement
+        if (moveVector.length() > 0) {
+            camera.position.add(moveVector);
+            
+            // Update controls target to maintain look direction
+            if (this.controls) {
+                const newTarget = camera.position.clone().add(direction.multiplyScalar(10));
+                this.controls.target.lerp(newTarget, 0.1);
+            }
+        }
+    },
+    
+    showWalkingHint() {
+        let hint = document.getElementById('walking-hint');
+        if (!hint) {
+            hint = document.createElement('div');
+            hint.id = 'walking-hint';
+            hint.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                z-index: 10001;
+                font-size: 0.9rem;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                pointer-events: none;
+            `;
+            document.body.appendChild(hint);
+        }
+        
+        hint.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 0.5rem;">🚶 Walking Mode Active</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">
+                <div>WASD / Arrow Keys: Move</div>
+                <div>Space: Fly Up | Shift: Fly Down / Speed Boost</div>
+                <div>Mouse: Look Around | Scroll: Zoom</div>
+            </div>
+        `;
+        hint.style.display = 'block';
+    },
+    
+    hideWalkingHint() {
+        const hint = document.getElementById('walking-hint');
+        if (hint) {
+            hint.style.display = 'none';
+        }
     },
     
     // Create sub-regions within a course (like Ipeiros, Veroia, Kalamata)
@@ -1624,6 +1857,11 @@ const UniverseView = {
         // Update traveling stars effect
         if (typeof this.updateTravelingStars === 'function') {
             this.updateTravelingStars();
+        }
+        
+        // Update walking/flying movement if landed
+        if (this.isLanded && this.walkingControls) {
+            this.updateWalkingMovement();
         }
         
         // Update zoom level check
