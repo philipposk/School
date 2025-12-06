@@ -117,6 +117,7 @@ const UniverseView = {
                 this.controls.dampingFactor = 0.05;
                 this.controls.minDistance = 50;
                 this.controls.maxDistance = Infinity;
+                this.controls.target.set(0, 0, 0); // Look at planet
                 this.controls.zoomSpeed = 1.0;
                 this.controls.addEventListener('change', () => {
                     this.onZoomChange();
