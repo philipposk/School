@@ -48,11 +48,13 @@ const ScrollHeaderManager = {
             pointer-events: none !important;
             visibility: hidden !important;
             transition: opacity 0.3s ease, visibility 0.3s ease !important;
-            background: rgba(0, 0, 0, 0.5) !important;
+            background: rgba(0, 0, 0, 0.7) !important;
             backdrop-filter: blur(10px) !important;
             border-radius: 12px !important;
             min-width: 60px !important;
             min-height: 60px !important;
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
