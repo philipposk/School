@@ -1356,23 +1356,23 @@ const UniverseView = {
         const speed = this.keys.shift ? this.walkSpeed * 2 : this.walkSpeed;
         
         if (this.keys.w) {
-            moveVector.add(direction.multiplyScalar(speed * deltaTime));
+            moveVector.add(direction.clone().multiplyScalar(speed * deltaTime));
         }
         if (this.keys.s) {
-            moveVector.add(direction.multiplyScalar(-speed * deltaTime));
+            moveVector.add(direction.clone().multiplyScalar(-speed * deltaTime));
         }
         if (this.keys.a) {
-            moveVector.add(right.multiplyScalar(-speed * deltaTime));
+            moveVector.add(right.clone().multiplyScalar(-speed * deltaTime));
         }
         if (this.keys.d) {
-            moveVector.add(right.multiplyScalar(speed * deltaTime));
+            moveVector.add(right.clone().multiplyScalar(speed * deltaTime));
         }
         if (this.keys.space) {
-            moveVector.add(up.multiplyScalar(this.flySpeed * deltaTime));
+            moveVector.add(up.clone().multiplyScalar(this.flySpeed * deltaTime));
         }
         if (this.keys.shift && !this.keys.space) {
             // Shift without space = move down (when flying)
-            moveVector.add(up.multiplyScalar(-this.flySpeed * deltaTime));
+            moveVector.add(up.clone().multiplyScalar(-this.flySpeed * deltaTime));
         }
         
         // Apply movement
@@ -1381,7 +1381,7 @@ const UniverseView = {
             
             // Update controls target to maintain look direction
             if (this.controls) {
-                const newTarget = camera.position.clone().add(direction.multiplyScalar(10));
+                const newTarget = camera.position.clone().add(direction.clone().multiplyScalar(10));
                 this.controls.target.lerp(newTarget, 0.1);
             }
         }
