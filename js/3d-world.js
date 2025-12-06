@@ -132,14 +132,36 @@ const ThreeDWorld = {
     },
     
     createLandscape() {
-        // Create a terrain-like landscape
-        const geometry = new THREE.PlaneGeometry(500, 500, 50, 50);
+        // Create a curved globe-like terrain
+        const radius = 200; // Radius of the globe
+        const segments = 64; // More segments for smoother curve
         
-        // Add some height variation
+        // Create sphere geometry for the globe
+        const geometry = new THREE.SphereGeometry(radius, segments, segments);
+        
+        // Modify vertices to create terrain variation while keeping globe shape
         const vertices = geometry.attributes.position.array;
+        const vertex = new THREE.Vector3();
+        
         for (let i = 0; i < vertices.length; i += 3) {
-            vertices[i + 2] = Math.random() * 5 - 2; // z coordinate (height)
+            vertex.set(vertices[i], vertices[i + 1], vertices[i + 2]);
+            
+            // Get distance from center to determine terrain height variation
+            const distance = vertex.length();
+            const normalizedDistance = distance / radius;
+            
+            // Add terrain variation (only on upper hemisphere)
+            if (vertex.y > -radius * 0.3) { // Only modify upper part
+                const noise = Math.random() * 8 - 4; // Small height variation
+                const scale = 1 + (noise / radius);
+                vertex.multiplyScalar(scale);
+            }
+            
+            vertices[i] = vertex.x;
+            vertices[i + 1] = vertex.y;
+            vertices[i + 2] = vertex.z;
         }
+        
         geometry.computeVertexNormals();
         
         const material = new THREE.MeshStandardMaterial({
@@ -149,8 +171,9 @@ const ThreeDWorld = {
         });
         
         const terrain = new THREE.Mesh(geometry, material);
-        terrain.rotation.x = -Math.PI / 2;
         terrain.receiveShadow = true;
+        // Position globe so ground is at y=0
+        terrain.position.y = -radius;
         this.scene.add(terrain);
         
         // Add some decorative elements
