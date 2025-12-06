@@ -218,13 +218,18 @@ const UniverseView = {
         
         const material = new THREE.MeshStandardMaterial({
             map: this.planetTexture,
-            roughness: 0.8,
-            metalness: 0.1
+            roughness: 0.7,
+            metalness: 0.2,
+            emissive: 0x000000,
+            emissiveIntensity: 0.1
         });
         
         this.planet = new THREE.Mesh(geometry, material);
         this.planet.position.set(0, 0, 0);
         this.scene.add(this.planet);
+        
+        // Store reference for later updates
+        this.planetMaterial = material;
         
         // Add atmosphere glow
         const atmosphereGeometry = new THREE.SphereGeometry(radius * 1.05, 32, 32);
@@ -251,43 +256,69 @@ const UniverseView = {
             { active: '#805ad5', coming: '#b794f4', undefined: '#718096' }, // Violet
         ];
         
-        // Update planet texture with course regions
+        // Update planet texture with course regions - better distribution
         const canvas = document.createElement('canvas');
         canvas.width = 2048;
         canvas.height = 1024;
         const ctx = canvas.getContext('2d');
         
-        // Base ocean
-        ctx.fillStyle = '#1a4a6a';
+        // Base ocean - brighter so it's visible
+        ctx.fillStyle = '#2a5a7a';
         ctx.fillRect(0, 0, 2048, 1024);
+        
+        // Draw continents/landmasses first
+        ctx.fillStyle = '#3a6a4a';
+        ctx.beginPath();
+        ctx.ellipse(500, 300, 200, 150, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(1500, 400, 250, 180, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(800, 700, 180, 120, 0, 0, Math.PI * 2);
+        ctx.fill();
         
         courses.forEach((course, index) => {
             const colorSet = courseColors[index % courseColors.length];
-            const isActive = true; // You can determine this based on course status
+            const isActive = true;
             const color = isActive ? colorSet.active : colorSet.coming;
             
-            // Draw course region as a country-like shape
-            const x = (index % 6) * 300 + 200;
-            const y = Math.floor(index / 6) * 200 + 200;
-            const width = 250;
-            const height = 150;
+            // Distribute courses across the planet surface (spherical coordinates)
+            const lat = (index / courses.length) * Math.PI - Math.PI / 2; // -90 to 90 degrees
+            const lon = (index * 137.508) % (Math.PI * 2); // Golden angle distribution
             
-            // Draw irregular country shape
+            // Convert to texture coordinates
+            const x = (lon / (Math.PI * 2)) * 2048;
+            const y = ((lat + Math.PI / 2) / Math.PI) * 1024;
+            
+            const width = 180;
+            const height = 120;
+            
+            // Draw country-like shape with better visibility
             ctx.fillStyle = color;
+            ctx.globalAlpha = 0.9;
             ctx.beginPath();
             ctx.moveTo(x, y);
-            ctx.lineTo(x + width * 0.8, y);
+            ctx.lineTo(x + width * 0.7, y - height * 0.2);
             ctx.lineTo(x + width, y + height * 0.3);
-            ctx.lineTo(x + width * 0.9, y + height);
-            ctx.lineTo(x + width * 0.2, y + height * 0.8);
-            ctx.lineTo(x, y + height * 0.5);
+            ctx.lineTo(x + width * 0.8, y + height);
+            ctx.lineTo(x + width * 0.3, y + height * 0.9);
+            ctx.lineTo(x - width * 0.1, y + height * 0.5);
             ctx.closePath();
             ctx.fill();
             
-            // Add border
+            // Add bright border for visibility
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.stroke();
+            
+            // Add course name when zoomed in (will be handled by zoom level)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(course.title.substring(0, 15), x + width / 2, y + height / 2);
+            
+            ctx.globalAlpha = 1.0;
             
             // Store course region data
             this.courseRegions.push({
@@ -297,33 +328,47 @@ const UniverseView = {
                 width: width,
                 height: height,
                 color: color,
-                isActive: isActive
+                isActive: isActive,
+                lat: lat,
+                lon: lon
             });
             
             // Create 3D emoji/icon above the region
-            this.createCourseIcon(course, index, courses.length);
+            this.createCourseIcon(course, index, courses.length, lat, lon);
         });
         
         // Update planet texture
         this.planetTexture.image = canvas;
         this.planetTexture.needsUpdate = true;
+        
+        // Force material update
+        if (this.planetMaterial) {
+            this.planetMaterial.map = this.planetTexture;
+            this.planetMaterial.needsUpdate = true;
+        }
     },
     
-    createCourseIcon(course, index, total) {
-        // Create 3D text sprite for course emoji/icon
+    createCourseIcon(course, index, total, lat, lon) {
+        // Create 3D text sprite for course emoji/icon - larger and more visible
         const canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 256;
+        canvas.width = 512;
+        canvas.height = 512;
         const ctx = canvas.getContext('2d');
         
-        ctx.font = 'bold 180px Arial';
+        // Background circle for better visibility
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.beginPath();
+        ctx.arc(256, 256, 220, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.font = 'bold 240px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffffff';
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 8;
-        ctx.strokeText(course.icon, 128, 128);
-        ctx.fillText(course.icon, 128, 128);
+        ctx.lineWidth = 12;
+        ctx.strokeText(course.icon, 256, 256);
+        ctx.fillText(course.icon, 256, 256);
         
         const texture = new THREE.CanvasTexture(canvas);
         texture.needsUpdate = true;
@@ -335,23 +380,31 @@ const UniverseView = {
         });
         
         const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.scale.set(30, 30, 1);
+        sprite.scale.set(40, 40, 1);
         
-        // Position above the course region on the planet
-        const angle = (index / total) * Math.PI * 2;
-        const radius = 120; // Slightly above planet surface
-        sprite.position.set(
-            Math.cos(angle) * radius,
-            Math.sin(index) * 40 + 20,
-            Math.sin(angle) * radius
-        );
+        // Position above the course region on the planet using spherical coordinates
+        const radius = 110; // Slightly above planet surface
+        const x = Math.cos(lat) * Math.cos(lon) * radius;
+        const y = Math.sin(lat) * radius;
+        const z = Math.cos(lat) * Math.sin(lon) * radius;
         
-        sprite.userData = { course: course, index: index };
+        sprite.position.set(x, y, z);
+        
+        // Make sprite always face camera
+        sprite.lookAt(this.camera.position);
+        
+        sprite.userData = { course: course, index: index, lat: lat, lon: lon };
         this.scene.add(sprite);
-        this.courseRegions.push({ sprite: sprite, course: course });
+        
+        // Store sprite reference
+        const regionIndex = this.courseRegions.findIndex(r => r.course.id === course.id);
+        if (regionIndex >= 0) {
+            this.courseRegions[regionIndex].sprite = sprite;
+        }
         
         // Add floating animation
-        sprite.userData.baseY = sprite.position.y;
+        sprite.userData.baseY = y;
+        sprite.userData.basePosition = sprite.position.clone();
     },
     
     onZoomChange() {
@@ -373,19 +426,33 @@ const UniverseView = {
     },
     
     updateZoomLevel() {
-        // Show/hide course icons based on zoom
+        const distance = this.camera.position.length();
+        
+        // Show/hide course icons and update planet visibility based on zoom
         this.courseRegions.forEach(region => {
             if (region.sprite) {
                 if (this.zoomLevel >= 1) {
                     region.sprite.visible = true;
-                    // Scale based on zoom
-                    const scale = Math.max(20, 50 - (this.camera.position.length() / 20));
+                    // Scale based on zoom - larger when closer
+                    const scale = Math.max(30, 80 - (distance / 15));
                     region.sprite.scale.set(scale, scale, 1);
+                    
+                    // Make sprite face camera
+                    region.sprite.lookAt(this.camera.position);
                 } else {
                     region.sprite.visible = false;
                 }
             }
         });
+        
+        // Increase planet emissive when zoomed in for better visibility
+        if (this.planetMaterial) {
+            if (this.zoomLevel >= 2) {
+                this.planetMaterial.emissiveIntensity = 0.3;
+            } else {
+                this.planetMaterial.emissiveIntensity = 0.1;
+            }
+        }
     },
     
     setupInteraction() {
