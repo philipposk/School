@@ -58,8 +58,9 @@ const ScrollHeaderManager = {
             border: 2px solid rgba(255, 255, 255, 0.3) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
             margin: 0 !important;
-            transform: none !important;
+            transform: translate3d(0, 0, 0) !important;
             will-change: opacity, visibility !important;
+            contain: layout style paint !important;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
