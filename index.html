@@ -3113,26 +3113,63 @@
                     return;
                 }
                 
-                // Create new user account
-                users[email] = {
-                    name: name,
-                    email: emailValidation.email,
-                    passwordHash: hashPassword(password)
-                };
-                localStorage.setItem('users', JSON.stringify(users));
+                // Try Supabase first if configured
+                const supabaseUrl = localStorage.getItem('supabase_url');
+                const supabaseKey = localStorage.getItem('supabase_anon_key');
                 
-                // Auto sign in
-                user = { name: name, email: emailValidation.email };
-                localStorage.setItem('user', JSON.stringify(user));
-                
-                if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
-                    UserProfileManager.initDefaultFriends();
-                }
-                
-                document.getElementById('loginModal').classList.remove('show');
-                updateUserDisplay();
-                if (state.currentCourseId) {
-                    renderCourseView();
+                if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
+                    // Use Supabase authentication
+                    SupabaseManager.init().then(async () => {
+                        try {
+                            const { data, error } = await SupabaseManager.signUp(emailValidation.email, password, name);
+                            if (error) throw error;
+                            
+                            // Get profile
+                            const profile = await SupabaseManager.getProfile(data.user.id);
+                            user = { ...data.user, ...profile };
+                            
+                            // Send welcome email if backend is configured
+                            const backendUrl = localStorage.getItem('backend_url');
+                            if (backendUrl) {
+                                fetch(`${backendUrl}/api/notifications/welcome`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: user.email, name: user.name })
+                                }).catch(err => console.log('Welcome email failed:', err));
+                            }
+                            
+                            document.getElementById('loginModal').classList.remove('show');
+                            updateUserDisplay();
+                            if (state.currentCourseId) {
+                                renderCourseView();
+                            }
+                        } catch (error) {
+                            console.error('Supabase signup error:', error);
+                            alert(error.message || 'Sign up failed. Please try again.');
+                        }
+                    });
+                } else {
+                    // Fallback: localStorage authentication
+                    users[email] = {
+                        name: name,
+                        email: emailValidation.email,
+                        passwordHash: hashPassword(password)
+                    };
+                    localStorage.setItem('users', JSON.stringify(users));
+                    
+                    // Auto sign in
+                    user = { name: name, email: emailValidation.email };
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                        UserProfileManager.initDefaultFriends();
+                    }
+                    
+                    document.getElementById('loginModal').classList.remove('show');
+                    updateUserDisplay();
+                    if (state.currentCourseId) {
+                        renderCourseView();
+                    }
                 }
             };
         }
@@ -3156,12 +3193,40 @@
                 </p>
             `;
             
-            form.onsubmit = (e) => {
+            form.onsubmit = async (e) => {
                 e.preventDefault();
                 const emailOrUsername = document.getElementById('loginEmail').value.trim().toLowerCase();
                 const password = document.getElementById('loginPassword').value;
                 
-                // Check if it's an email or username
+                // Try Supabase first if configured
+                const supabaseUrl = localStorage.getItem('supabase_url');
+                const supabaseKey = localStorage.getItem('supabase_anon_key');
+                
+                if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
+                    // Use Supabase authentication
+                    try {
+                        await SupabaseManager.init();
+                        const { data, error } = await SupabaseManager.signIn(emailOrUsername, password);
+                        if (error) throw error;
+                        
+                        // Get profile
+                        const profile = await SupabaseManager.getProfile(data.user.id);
+                        user = { ...data.user, ...profile };
+                        
+                        document.getElementById('loginModal').classList.remove('show');
+                        updateUserDisplay();
+                        if (state.currentCourseId) {
+                            renderCourseView();
+                        }
+                        return;
+                    } catch (error) {
+                        console.error('Supabase login error:', error);
+                        alert(error.message || 'Login failed. Please check your credentials.');
+                        return;
+                    }
+                }
+                
+                // Fallback: localStorage authentication
                 const isEmail = emailOrUsername.includes('@');
                 const users = JSON.parse(localStorage.getItem('users') || '{}');
                 
@@ -3496,6 +3561,76 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Backend Configuration Section -->
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔧</span> Backend Configuration
+                        </h3>
+                        <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 1rem; padding: 0.75rem; background: var(--hover-bg); border-radius: 8px;">
+                            ${localStorage.getItem('backend_url') 
+                                ? '<span style="color: var(--success);">✓ Backend configured</span>' 
+                                : '<span style="color: var(--warning);">⚠ No backend configured - using fallback mode</span>'}
+                            ${localStorage.getItem('supabase_url') && localStorage.getItem('supabase_anon_key')
+                                ? '<br><span style="color: var(--success);">✓ Supabase configured</span>' 
+                                : '<br><span style="color: var(--warning);">⚠ Supabase not configured - using localStorage</span>'}
+                        </div>
+                        
+                        <!-- Backend URL -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Backend Server URL (for shared AI API keys)
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="backendUrlInput" 
+                                       placeholder="https://your-backend.railway.app" 
+                                       value="${localStorage.getItem('backend_url') || ''}"
+                                       style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 0.85rem;"
+                                       oninput="document.getElementById('backendUrlStatus').textContent = ''">
+                                <button onclick="saveBackendUrl()" 
+                                        style="padding: 0.75rem 1.5rem; background: var(--theme-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    Save
+                                </button>
+                            </div>
+                            <div id="backendUrlStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-light);">
+                                Deploy backend to Railway/Render and paste URL here. See <a href="https://github.com/philipposk/School/blob/main/IMPLEMENTATION_GUIDE.md" target="_blank" style="color: var(--theme-primary);">IMPLEMENTATION_GUIDE.md</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Supabase Configuration -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Supabase URL
+                            </label>
+                            <input type="text" id="supabaseUrlInput" 
+                                   placeholder="https://xxxxx.supabase.co" 
+                                   value="${localStorage.getItem('supabase_url') || ''}"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 0.85rem; margin-bottom: 0.5rem;"
+                                   oninput="document.getElementById('supabaseStatus').textContent = ''">
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Supabase Anon Key
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" id="supabaseKeyInput" 
+                                       placeholder="eyJhbGc..." 
+                                       value="${localStorage.getItem('supabase_anon_key') ? '••••••••••••' : ''}"
+                                       style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: monospace; font-size: 0.85rem;"
+                                       oninput="document.getElementById('supabaseStatus').textContent = ''">
+                                <button onclick="saveSupabaseConfig()" 
+                                        style="padding: 0.75rem 1.5rem; background: var(--theme-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    Save
+                                </button>
+                            </div>
+                            <div id="supabaseStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-light);">
+                                Get credentials from Supabase Dashboard → Settings → API. See <a href="https://github.com/philipposk/School/blob/main/supabase-setup.md" target="_blank" style="color: var(--theme-primary);">supabase-setup.md</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             
@@ -3567,6 +3702,99 @@
                 status.textContent = 'Error: AI config not loaded';
                 status.style.color = 'var(--error)';
             }
+        };
+        
+        window.saveBackendUrl = function() {
+            const input = document.getElementById('backendUrlInput');
+            const status = document.getElementById('backendUrlStatus');
+            const url = input.value.trim();
+            
+            if (!url) {
+                status.textContent = 'Please enter a backend URL';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch (e) {
+                status.textContent = 'Invalid URL format';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            localStorage.setItem('backend_url', url);
+            if (typeof AIConfig !== 'undefined') {
+                AIConfig.setBackendUrl(url);
+            }
+            
+            status.textContent = '✓ Backend URL saved successfully!';
+            status.style.color = 'var(--success)';
+            
+            // Test connection
+            fetch(`${url}/health`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        status.textContent = '✓ Backend URL saved and connected!';
+                        status.style.color = 'var(--success)';
+                    }
+                })
+                .catch(err => {
+                    status.textContent = '⚠ Saved but connection test failed. Check URL.';
+                    status.style.color = 'var(--warning)';
+                });
+            
+            setTimeout(() => {
+                const modal = document.getElementById('settingsModal');
+                if (modal) {
+                    openSettings();
+                }
+            }, 1500);
+        };
+        
+        window.saveSupabaseConfig = function() {
+            const urlInput = document.getElementById('supabaseUrlInput');
+            const keyInput = document.getElementById('supabaseKeyInput');
+            const status = document.getElementById('supabaseStatus');
+            
+            const url = urlInput.value.trim();
+            const key = keyInput.value.trim();
+            
+            if (!url || !key) {
+                status.textContent = 'Please enter both URL and key';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch (e) {
+                status.textContent = 'Invalid URL format';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_anon_key', key);
+            
+            // Update Supabase client if loaded
+            if (typeof SupabaseManager !== 'undefined') {
+                SupabaseManager.init();
+            }
+            
+            status.textContent = '✓ Supabase configuration saved!';
+            status.style.color = 'var(--success)';
+            keyInput.value = '••••••••••••';
+            
+            setTimeout(() => {
+                const modal = document.getElementById('settingsModal');
+                if (modal) {
+                    openSettings();
+                }
+            }, 1500);
         };
         
         window.setLanguage = function(lang) {

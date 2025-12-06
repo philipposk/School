@@ -1,9 +1,11 @@
 // AI API Configuration
-// Store API keys securely (user can update via settings)
+// Uses backend proxy if available, falls back to direct API calls with user keys
 
 const AIConfig = {
-    // API Keys (user can set these via settings)
-    // Set your API keys through the settings panel or localStorage
+    // Backend URL (set via settings or localStorage)
+    backendUrl: localStorage.getItem('backend_url') || '',
+    
+    // API Keys (fallback - user can set these via settings if no backend)
     groqApiKey: localStorage.getItem('groq_api_key') || '',
     openaiApiKey: localStorage.getItem('openai_api_key') || '',
     
@@ -15,7 +17,18 @@ const AIConfig = {
     groqModel: 'llama-3.1-70b-versatile', // Fast and free
     openaiModel: 'gpt-4o-mini', // Cost-effective
     
-    // Save API keys
+    // Check if backend is configured
+    hasBackend() {
+        return !!this.backendUrl && this.backendUrl.trim() !== '';
+    },
+    
+    // Set backend URL
+    setBackendUrl(url) {
+        this.backendUrl = url;
+        localStorage.setItem('backend_url', url);
+    },
+    
+    // Save API keys (fallback mode)
     setGroqKey(key) {
         this.groqApiKey = key;
         localStorage.setItem('groq_api_key', key);
@@ -26,10 +39,35 @@ const AIConfig = {
         localStorage.setItem('openai_api_key', key);
     },
     
-    // Call Groq API (faster, good for chat/search)
+    // Call Groq API (uses backend proxy if available, otherwise direct)
     async callGroqAPI(messages, options = {}) {
+        // Try backend proxy first
+        if (this.hasBackend()) {
+            try {
+                const response = await fetch(`${this.backendUrl}/api/ai/groq`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ messages, options })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+                    throw new Error(error.error?.message || `API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.warn('Backend proxy failed, falling back to direct API:', error);
+                // Fall through to direct API call
+            }
+        }
+        
+        // Fallback: Direct API call (requires user's API key)
         if (!this.groqApiKey) {
-            throw new Error('Groq API key not configured');
+            throw new Error('Groq API key not configured. Please set up backend proxy or add your API key in Settings.');
         }
         
         const response = await fetch(this.groqEndpoint, {
@@ -56,10 +94,35 @@ const AIConfig = {
         return data.choices[0].message.content;
     },
     
-    // Call OpenAI API (better for complex tasks like grading)
+    // Call OpenAI API (uses backend proxy if available, otherwise direct)
     async callOpenAIAPI(messages, options = {}) {
+        // Try backend proxy first
+        if (this.hasBackend()) {
+            try {
+                const response = await fetch(`${this.backendUrl}/api/ai/openai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ messages, options })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+                    throw new Error(error.error?.message || `API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.warn('Backend proxy failed, falling back to direct API:', error);
+                // Fall through to direct API call
+            }
+        }
+        
+        // Fallback: Direct API call (requires user's API key)
         if (!this.openaiApiKey) {
-            throw new Error('OpenAI API key not configured');
+            throw new Error('OpenAI API key not configured. Please set up backend proxy or add your API key in Settings.');
         }
         
         const response = await fetch(this.openaiEndpoint, {
