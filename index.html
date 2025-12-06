@@ -1568,7 +1568,7 @@
     <header>
         <div class="header-content">
             <div class="logo" onclick="showCourses()" id="logoText">
-                ${window.i18n ? window.i18n.t('logo') : '🎓 Learning Platform'}
+                🎓 Learning Platform
             </div>
             <div class="header-right">
                 <button class="header-btn" onclick="openAISearch()" title="AI Search">
@@ -2403,7 +2403,7 @@
         function showSignInButton() {
             const container = document.getElementById('userProfileContainer');
             container.innerHTML = `
-                <button class="btn btn-secondary" onclick="openLoginModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem;">
+                <button class="btn btn-secondary" onclick="openLoginModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; white-space: nowrap;">
                     Sign In
                 </button>
             `;
