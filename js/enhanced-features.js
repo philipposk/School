@@ -719,6 +719,11 @@ window.performAISearch = async function() {
 
 window.openPrediction = function() {
     try {
+        // Ensure courses are shown first
+        if (typeof showCourses === 'function') {
+            showCourses();
+        }
+        
         let modal = document.getElementById('predictionModal');
         if (!modal) {
             document.body.insertAdjacentHTML('beforeend', LearningPotentialPredictor.renderPredictionModal());
@@ -733,13 +738,19 @@ window.openPrediction = function() {
             modal.classList.add('show');
         }
         
-        // Scroll to courses section smoothly
+        // Scroll to courses section smoothly - wait a bit longer for DOM to update
         setTimeout(() => {
             const coursesSection = document.getElementById('coursesSection');
             if (coursesSection) {
                 coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                // Fallback: scroll to app container
+                const app = document.getElementById('app');
+                if (app) {
+                    app.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
-        }, 100);
+        }, 300);
     } catch (error) {
         console.error('Error opening prediction modal:', error);
         alert('Unable to open Learning Potential. Please try again.');
