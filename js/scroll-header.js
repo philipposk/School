@@ -122,9 +122,20 @@ const ScrollHeaderManager = {
             this.headerButtons.forEach((btn, index) => {
                 const clone = btn.cloneNode(true);
                 clone.classList.add('header-sidebar-btn');
+                // Remove any existing transforms or positioning
+                clone.style.removeProperty('transform');
+                clone.style.removeProperty('position');
+                clone.style.removeProperty('top');
+                clone.style.removeProperty('left');
+                clone.style.removeProperty('right');
+                clone.style.removeProperty('bottom');
+                
                 clone.style.cssText = `
+                    position: relative !important;
                     width: 48px !important;
                     height: 48px !important;
+                    min-width: 48px !important;
+                    min-height: 48px !important;
                     border-radius: 50% !important;
                     display: flex !important;
                     align-items: center !important;
@@ -136,9 +147,16 @@ const ScrollHeaderManager = {
                     pointer-events: auto !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transition: all 0.3s ease !important;
+                    transition: transform 0.3s ease, background 0.3s ease !important;
                     font-size: 1.2rem !important;
-                    z-index: 100000 !important;
+                    box-sizing: border-box !important;
+                    flex-shrink: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    top: auto !important;
+                    left: auto !important;
+                    right: auto !important;
+                    bottom: auto !important;
                 `;
                 clone.onclick = btn.onclick;
                 clone.setAttribute('title', btn.getAttribute('title') || btn.textContent.trim());
