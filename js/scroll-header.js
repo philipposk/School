@@ -316,7 +316,10 @@ const ScrollHeaderManager = {
                 `;
             });
             
-            // Show sidebar
+            // Show sidebar - ensure it stays fixed at top-left
+            this.sidebar.style.position = 'fixed';
+            this.sidebar.style.left = '0.5rem';
+            this.sidebar.style.top = '1rem';
             this.sidebar.style.opacity = '1';
             this.sidebar.style.pointerEvents = 'auto';
             
