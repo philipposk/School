@@ -46,25 +46,83 @@ const ScrollHeaderManager = {
     },
     
     createSidebar() {
-        // Create sidebar container on left side
+        // Create sidebar container on top-left side
         const sidebar = document.createElement('div');
         sidebar.id = 'header-sidebar';
         sidebar.style.cssText = `
             position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 0.5rem;
+            top: 1rem;
             z-index: 1000;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            padding: 1rem 0.5rem;
+            padding: 0.5rem;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
+        
+        // Create sound toggle button
+        this.createSoundToggle();
+    },
+    
+    createSoundToggle() {
+        const soundBtn = document.createElement('button');
+        soundBtn.id = 'sound-toggle';
+        soundBtn.innerHTML = this.soundEnabled ? '🔊' : '🔇';
+        soundBtn.title = this.soundEnabled ? 'Mute sounds' : 'Unmute sounds';
+        soundBtn.style.cssText = `
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        `;
+        
+        soundBtn.addEventListener('click', () => {
+            this.soundEnabled = !this.soundEnabled;
+            soundBtn.innerHTML = this.soundEnabled ? '🔊' : '🔇';
+            soundBtn.title = this.soundEnabled ? 'Mute sounds' : 'Unmute sounds';
+            
+            // Stop all playing sounds if muting
+            if (!this.soundEnabled) {
+                Object.values(this.sounds).forEach(sound => {
+                    if (sound && !sound.paused) {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }
+                });
+            }
+        });
+        
+        soundBtn.addEventListener('mouseenter', () => {
+            soundBtn.style.transform = 'scale(1.1)';
+            soundBtn.style.background = 'rgba(102, 126, 234, 1)';
+        });
+        
+        soundBtn.addEventListener('mouseleave', () => {
+            soundBtn.style.transform = 'scale(1)';
+            soundBtn.style.background = 'rgba(102, 126, 234, 0.8)';
+        });
+        
+        document.body.appendChild(soundBtn);
+        this.soundToggle = soundBtn;
     },
     
     handleScroll() {
@@ -130,72 +188,103 @@ const ScrollHeaderManager = {
                 
                 document.body.appendChild(clone);
                 
-                // Calculate flight path: fly along top, sharp turn, land
-                const midX = window.innerWidth * 0.1; // Turn point
+                // Calculate flight path: fly along top with multiple bounces
+                const midX1 = window.innerWidth * 0.2; // First bounce point
+                const midX2 = window.innerWidth * 0.1; // Second bounce point
                 const midY = 50; // Fly along top
                 
-                // Animate flight path with sharp turn
+                // Calculate timing based on scroll speed
+                const baseDelay = 50 * this.animationSpeed;
+                const phase1Duration = 300 * this.animationSpeed;
+                const phase2Duration = 250 * this.animationSpeed;
+                const phase3Duration = 200 * this.animationSpeed;
+                const phase4Duration = 150 * this.animationSpeed;
+                const phase5Duration = 100 * this.animationSpeed;
+                
+                // Animate flight path with multiple bounces
                 setTimeout(() => {
-                    // Phase 1: Fly along top
-                    clone.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    clone.style.left = `${midX}px`;
+                    // Phase 1: Fly along top - first bounce
+                    clone.style.transition = `all ${phase1Duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+                    clone.style.left = `${midX1}px`;
                     clone.style.top = `${midY}px`;
                     clone.style.transform = 'rotateZ(0deg) scale(1)';
                     
-                    // Phase 2: Sharp turn and dive
+                    // Phase 2: Bounce up
                     setTimeout(() => {
-                        clone.style.transition = 'all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19)';
-                        clone.style.left = `${targetX}px`;
-                        clone.style.top = `${targetY - 20}px`;
-                        clone.style.transform = 'rotateZ(-45deg) scale(1.2)';
+                        clone.style.transition = `all ${phase2Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                        clone.style.top = `${midY - 15}px`;
+                        clone.style.transform = 'rotateZ(5deg) scale(1.1)';
                         
-                        // Phase 3: Land with splash/bang
+                        // Phase 3: Bounce down and continue
                         setTimeout(() => {
-                            clone.style.transition = 'all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                            clone.style.left = `${targetX}px`;
-                            clone.style.top = `${targetY}px`;
-                            clone.style.transform = 'rotateZ(0deg) scale(1)';
-                            clone.style.borderRadius = '50%';
-                            clone.style.width = '48px';
-                            clone.style.height = '48px';
+                            clone.style.transition = `all ${phase3Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`;
+                            clone.style.left = `${midX2}px`;
+                            clone.style.top = `${midY}px`;
+                            clone.style.transform = 'rotateZ(-5deg) scale(1)';
                             
-                            // Create splash/bang effect
-                            this.createSplashEffect(targetX, targetY, index);
-                            
-                            // Play landing sound
-                            if (this.soundEnabled && this.sounds.pop) {
-                                setTimeout(() => {
-                                    this.sounds.pop.play().catch(() => {});
-                                }, 100);
-                            }
-                            
-                            // Finalize button
+                            // Phase 4: Sharp turn and dive with bounce
                             setTimeout(() => {
-                                clone.style.position = 'relative';
-                                clone.style.left = '';
-                                clone.style.top = '';
-                                clone.style.pointerEvents = 'auto';
-                                clone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                                clone.style.transition = `all ${phase4Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`;
+                                clone.style.left = `${targetX + 10}px`;
+                                clone.style.top = `${targetY - 30}px`;
+                                clone.style.transform = 'rotateZ(-45deg) scale(1.3)';
                                 
-                                // Move to sidebar
-                                this.sidebar.appendChild(clone);
-                                
-                                // Add hover effect
-                                clone.addEventListener('mouseenter', () => {
-                                    clone.style.transform = 'translateX(10px) scale(1.1) translateZ(20px)';
-                                    clone.style.background = 'rgba(255, 255, 255, 0.25)';
-                                });
-                                clone.addEventListener('mouseleave', () => {
-                                    clone.style.transform = 'translateX(0) scale(1) translateZ(0)';
-                                    clone.style.background = 'rgba(255, 255, 255, 0.15)';
-                                });
-                                
-                                // Copy onclick handler
-                                clone.onclick = btn.onclick;
-                            }, 200);
-                        }, 300);
-                    }, 400);
-                }, index * 100);
+                                // Phase 5: Bounce up before landing
+                                setTimeout(() => {
+                                    clone.style.transition = `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                                    clone.style.top = `${targetY - 10}px`;
+                                    clone.style.transform = 'rotateZ(-20deg) scale(1.1)';
+                                    
+                                    // Phase 6: Final landing with splash/bang
+                                    setTimeout(() => {
+                                        clone.style.transition = `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                                        clone.style.left = `${targetX}px`;
+                                        clone.style.top = `${targetY}px`;
+                                        clone.style.transform = 'rotateZ(0deg) scale(1)';
+                                        clone.style.borderRadius = '50%';
+                                        clone.style.width = '48px';
+                                        clone.style.height = '48px';
+                                        
+                                        // Create splash/bang effect
+                                        this.createSplashEffect(targetX, targetY, index);
+                                        
+                                        // Play landing sound
+                                        if (this.soundEnabled && this.sounds.pop) {
+                                            setTimeout(() => {
+                                                this.sounds.pop.play().catch(() => {});
+                                            }, 50);
+                                        }
+                                        
+                                        // Finalize button
+                                        setTimeout(() => {
+                                            clone.style.position = 'relative';
+                                            clone.style.left = '';
+                                            clone.style.top = '';
+                                            clone.style.pointerEvents = 'auto';
+                                            clone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                                            
+                                            // Move to sidebar
+                                            this.sidebar.appendChild(clone);
+                                            
+                                            // Add hover effect
+                                            clone.addEventListener('mouseenter', () => {
+                                                clone.style.transform = 'translateX(10px) scale(1.1) translateZ(20px)';
+                                                clone.style.background = 'rgba(255, 255, 255, 0.25)';
+                                            });
+                                            clone.addEventListener('mouseleave', () => {
+                                                clone.style.transform = 'translateX(0) scale(1) translateZ(0)';
+                                                clone.style.background = 'rgba(255, 255, 255, 0.15)';
+                                            });
+                                            
+                                            // Copy onclick handler
+                                            clone.onclick = btn.onclick;
+                                        }, 100);
+                                    }, phase5Duration);
+                                }, phase4Duration);
+                            }, phase3Duration);
+                        }, phase2Duration);
+                    }, phase1Duration);
+                }, index * baseDelay);
             });
             
             // Hide original header buttons with 3D animation
