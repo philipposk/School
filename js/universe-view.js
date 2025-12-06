@@ -987,9 +987,18 @@ const UniverseView = {
             this.controls.update();
         }
         
-        // Rotate planet slowly
+        // Rotate planet slowly - realistic speed (one full rotation every ~2 minutes)
+        // At high altitude, planets appear to rotate very slowly
         if (this.planet) {
-            this.planet.rotation.y += 0.002;
+            const distance = this.camera.position.length();
+            // Slower rotation when viewed from far away (more realistic)
+            if (distance > 1000) {
+                this.planet.rotation.y += 0.0002; // Very slow from far away
+            } else if (distance > 500) {
+                this.planet.rotation.y += 0.0005; // Slow from mid distance
+            } else {
+                this.planet.rotation.y += 0.001; // Slightly faster when close
+            }
         }
         
         // Animate course icons (floating)
