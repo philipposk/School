@@ -3570,6 +3570,14 @@
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const currentLanguage = localStorage.getItem('language') || 'en';
             
+            // Scroll to courses section smoothly
+            setTimeout(() => {
+                const coursesSection = document.getElementById('coursesSection');
+                if (coursesSection) {
+                    coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+            
             const modal = document.createElement('div');
             modal.className = 'modal show';
             modal.id = 'settingsModal';

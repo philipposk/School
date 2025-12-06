@@ -654,6 +654,14 @@ window.openAISearch = function() {
     }
     document.getElementById('aiSearchModal').classList.add('show');
     document.getElementById('aiSearchInput').focus();
+    
+    // Scroll to courses section smoothly
+    setTimeout(() => {
+        const coursesSection = document.getElementById('coursesSection');
+        if (coursesSection) {
+            coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 100);
 };
 
 window.closeAISearch = function() {
@@ -724,6 +732,14 @@ window.openPrediction = function() {
         if (modal) {
             modal.classList.add('show');
         }
+        
+        // Scroll to courses section smoothly
+        setTimeout(() => {
+            const coursesSection = document.getElementById('coursesSection');
+            if (coursesSection) {
+                coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
     } catch (error) {
         console.error('Error opening prediction modal:', error);
         alert('Unable to open Learning Potential. Please try again.');
