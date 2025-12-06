@@ -17,6 +17,11 @@ const UniverseView = {
     autoReturnTimer: null,
     isReturningToMainPlanet: false,
     mainPlanetLabelVisible: false,
+    travelingStars: null, // Particle system for traveling stars
+    travelingStarsGeometry: null,
+    travelingStarsMaterial: null,
+    isTravelingAway: false,
+    travelSpeed: 0,
     
     init() {
         if (typeof THREE === 'undefined') {
@@ -1281,6 +1286,9 @@ const UniverseView = {
         
         // Track camera movement for auto-return
         this.trackCameraMovement();
+        
+        // Update traveling stars effect
+        this.updateTravelingStars();
         
         // Update zoom level check
         const currentDistance = this.camera.position.length();
