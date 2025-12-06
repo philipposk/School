@@ -422,11 +422,36 @@ const ScrollHeaderManager = {
                 transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             `;
         } else {
+            // Restore original header buttons immediately
+            this.headerButtons.forEach((btn) => {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.style.transform = '';
+                btn.style.transition = '';
+            });
+            
             // Clean up any existing flying buttons first
             document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
             
-            // Animate buttons back to header (reverse animation)
-            const sidebarButtons = Array.from(this.sidebar.querySelectorAll('.header-sidebar-btn'));
+            // Hide sidebar
+            if (this.sidebar) {
+                this.sidebar.style.opacity = '0';
+                this.sidebar.style.pointerEvents = 'none';
+                // Clear sidebar after fade out
+                setTimeout(() => {
+                    if (this.sidebar) {
+                        this.sidebar.innerHTML = '';
+                    }
+                }, 300);
+            }
+            
+            // Restore header
+            header.style.cssText = header.style.cssText.replace(/transform[^;]*;?/g, '').replace(/opacity[^;]*;?/g, '');
+            header.style.opacity = '1';
+            header.style.transform = '';
+            
+            // Animate buttons back to header (reverse animation) - optional
+            const sidebarButtons = Array.from(this.sidebar ? this.sidebar.querySelectorAll('.header-sidebar-btn') : []);
             
             sidebarButtons.forEach((sidebarBtn, index) => {
                 const btn = this.headerButtons[index];
