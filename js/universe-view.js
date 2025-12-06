@@ -1328,6 +1328,138 @@ const UniverseView = {
         this.container.appendChild(ui);
     },
     
+    // Track camera movement to detect when user stops moving towards other planets
+    trackCameraMovement() {
+        if (!this.camera || this.isReturningToMainPlanet) return;
+        
+        const currentPos = this.camera.position.clone();
+        const currentTime = Date.now();
+        
+        // Check if camera is moving
+        if (this.lastCameraPosition) {
+            const movement = currentPos.distanceTo(this.lastCameraPosition);
+            const timeSinceLastMove = currentTime - (this.lastCameraMovementTime || currentTime);
+            
+            // If camera moved significantly, reset timer
+            if (movement > 1) {
+                this.lastCameraMovementTime = currentTime;
+                this.lastCameraPosition = currentPos;
+                
+                // Check if moving towards other planets
+                const distanceToMainPlanet = currentPos.length();
+                const isLookingAtOtherPlanet = this.isLookingAtOtherPlanet();
+                
+                // If far from main planet and looking at other planet, start auto-return timer
+                if (distanceToMainPlanet > 1000 && isLookingAtOtherPlanet) {
+                    this.startAutoReturnTimer();
+                } else {
+                    this.clearAutoReturnTimer();
+                }
+            } else {
+                // Camera not moving - check if should auto-return
+                if (timeSinceLastMove > 3000) { // 3 seconds of no movement
+                    const distanceToMainPlanet = currentPos.length();
+                    const isLookingAtOtherPlanet = this.isLookingAtOtherPlanet();
+                    
+                    if (distanceToMainPlanet > 1000 && isLookingAtOtherPlanet) {
+                        this.returnToMainPlanet();
+                    }
+                }
+            }
+        } else {
+            this.lastCameraPosition = currentPos;
+            this.lastCameraMovementTime = currentTime;
+        }
+    },
+    
+    // Check if camera is looking at/moving towards other planets
+    isLookingAtOtherPlanet() {
+        if (!this.camera || this.otherPlanets.length === 0) return false;
+        
+        const cameraPos = this.camera.position;
+        const distanceToMainPlanet = cameraPos.length();
+        
+        // If very close to main planet, not looking at other planets
+        if (distanceToMainPlanet < 1000) return false;
+        
+        // Check if any other planet is closer than main planet
+        for (let planet of this.otherPlanets) {
+            const planetPos = planet.position;
+            const distanceToPlanet = cameraPos.distanceTo(planetPos);
+            
+            // If other planet is significantly closer, user is looking at it
+            if (distanceToPlanet < distanceToMainPlanet * 0.8) {
+                return true;
+            }
+        }
+        
+        return false;
+    },
+    
+    // Start auto-return timer
+    startAutoReturnTimer() {
+        if (this.autoReturnTimer) return; // Already started
+        
+        this.autoReturnTimer = setTimeout(() => {
+            this.returnToMainPlanet();
+        }, 3000); // 3 seconds
+    },
+    
+    // Clear auto-return timer
+    clearAutoReturnTimer() {
+        if (this.autoReturnTimer) {
+            clearTimeout(this.autoReturnTimer);
+            this.autoReturnTimer = null;
+        }
+    },
+    
+    // Smoothly return to panoramic view of main planet
+    returnToMainPlanet() {
+        if (this.isReturningToMainPlanet) return;
+        
+        this.isReturningToMainPlanet = true;
+        this.clearAutoReturnTimer();
+        
+        // Target position: panoramic view from far away
+        const targetDistance = 2000; // Far enough to see the whole planet
+        const targetPosition = new THREE.Vector3(0, 0, targetDistance);
+        
+        const startPosition = this.camera.position.clone();
+        const startTime = Date.now();
+        const duration = 3000; // 3 second animation
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Smooth easing
+            const ease = 1 - Math.pow(1 - progress, 3);
+            
+            // Interpolate position
+            this.camera.position.lerpVectors(startPosition, targetPosition, ease);
+            
+            // Look at main planet
+            this.camera.lookAt(0, 0, 0);
+            
+            // Update controls target
+            if (this.controls) {
+                this.controls.target.set(0, 0, 0);
+                this.controls.update();
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Animation complete
+                this.isReturningToMainPlanet = false;
+                this.lastCameraPosition = this.camera.position.clone();
+                this.lastCameraMovementTime = Date.now();
+            }
+        };
+        
+        animate();
+    },
+    
     animate() {
         requestAnimationFrame(() => this.animate());
         
