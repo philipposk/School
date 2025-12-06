@@ -556,9 +556,17 @@
             padding: 1.5rem;
             box-shadow: var(--shadow);
             height: fit-content;
+            max-height: calc(100vh - 120px);
             position: sticky;
             top: 100px;
             border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            flex-shrink: 0;
         }
 
         .course-title-sidebar {
@@ -572,6 +580,29 @@
 
         .module-list {
             list-style: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            padding-right: 0.5rem;
+            margin-right: -0.5rem;
+        }
+
+        /* Custom scrollbar for module list */
+        .module-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .module-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .module-list::-webkit-scrollbar-thumb {
+            background: var(--text-light);
+            border-radius: 3px;
+        }
+
+        .module-list::-webkit-scrollbar-thumb:hover {
+            background: var(--text);
         }
 
         .module-item {
@@ -2214,18 +2245,21 @@
             app.innerHTML = `
                 <div class="container">
                     <aside class="sidebar">
-                        <div class="course-title-sidebar">${currentCourse.title}</div>
-                        <div class="sidebar-nav-item ${state.sidebarView === 'messages' ? 'active' : ''}" onclick="viewSidebarMessages()" style="margin-bottom: 1rem;">
-                            <span class="sidebar-nav-item-icon">💬</span>
-                            <span>Messages</span>
+                        <div class="sidebar-header">
+                            <div class="course-title-sidebar">${currentCourse.title}</div>
+                            <div class="sidebar-nav-item ${state.sidebarView === 'messages' ? 'active' : ''}" onclick="viewSidebarMessages()" style="margin-bottom: 1rem;">
+                                <span class="sidebar-nav-item-icon">💬</span>
+                                <span>Messages</span>
+                            </div>
+                            <div class="sidebar-nav-item ${state.sidebarView === 'assignments' ? 'active' : ''}" onclick="viewSidebarAssignments()" style="margin-bottom: 1rem;">
+                                <span class="sidebar-nav-item-icon">📝</span>
+                                <span>Assignments</span>
+                            </div>
+                            <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem;">
+                                <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Modules</div>
+                            </div>
                         </div>
-                        <div class="sidebar-nav-item ${state.sidebarView === 'assignments' ? 'active' : ''}" onclick="viewSidebarAssignments()" style="margin-bottom: 1rem;">
-                            <span class="sidebar-nav-item-icon">📝</span>
-                            <span>Assignments</span>
-                        </div>
-                        <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem;">
-                            <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Modules</div>
-                            <ul class="module-list" id="moduleList">
+                        <ul class="module-list" id="moduleList">
                                 ${currentCourse.modules_data.map((module, index) => {
                                     const isActive = module.id === state.currentModule && !state.sidebarView;
                                     const moduleKey = `${state.currentCourseId}-${module.id}`;
@@ -2243,8 +2277,7 @@
                                         </li>
                                     `;
                                 }).join('')}
-                            </ul>
-                        </div>
+                        </ul>
                     </aside>
 
                     <main class="content-area">

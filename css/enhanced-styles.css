@@ -172,9 +172,13 @@
     border-radius: 12px;
     padding: 1.5rem;
     height: fit-content;
+    max-height: calc(100vh - 120px);
     position: sticky;
     top: 100px;
     border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .sidebar-nav h3 {
