@@ -1,0 +1,78 @@
+{
+  "module": "Module 7: Advanced UI",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What does withAnimation do?",
+      "options": ["Creates animation", "Animates state changes", "Draws shapes", "Handles gestures"],
+      "correct_answer": 1,
+      "explanation": "withAnimation wraps state changes in an animation block, animating the transition."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What is a spring animation?",
+      "options": ["Linear animation", "Bouncy animation", "Fade animation", "Slide animation"],
+      "correct_answer": 1,
+      "explanation": "Spring animations have a natural, bouncy feel that mimics physical springs."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What gesture detects dragging?",
+      "options": ["TapGesture", "DragGesture", "LongPressGesture", "PinchGesture"],
+      "correct_answer": 1,
+      "explanation": "DragGesture detects when the user drags their finger across the screen."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What is a transition?",
+      "options": ["Animation type", "How views appear/disappear", "Gesture type", "View modifier"],
+      "correct_answer": 1,
+      "explanation": "Transitions define how views appear and disappear, like fade, slide, or scale."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "How do you create a reusable view?",
+      "options": ["Create a struct conforming to View", "Use a function", "Use a class", "Use a protocol"],
+      "correct_answer": 0,
+      "explanation": "Create a struct that conforms to the View protocol to make reusable view components."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What does ViewModifier do?",
+      "options": ["Creates views", "Modifies view appearance", "Handles gestures", "Animates views"],
+      "correct_answer": 1,
+      "explanation": "ViewModifier protocol allows you to create custom modifiers that change view appearance."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What's the difference between implicit and explicit animations?",
+      "acceptable_answers": [
+        "Implicit uses .animation(), explicit uses withAnimation",
+        "Implicit automatic, explicit manual control",
+        "Different ways to trigger animations"
+      ],
+      "explanation": "Implicit animations use the .animation() modifier, while explicit animations use withAnimation blocks for more control."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "When would you use a custom modifier vs a custom view?",
+      "acceptable_answers": [
+        "Modifier for styling, view for components",
+        "Modifier changes appearance, view creates new component",
+        "Different purposes for reusability"
+      ],
+      "explanation": "Use custom modifiers for reusable styling, and custom views for reusable components with their own structure."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

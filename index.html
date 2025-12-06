@@ -1,0 +1,3063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A professional online learning platform offering master's-level courses in critical thinking, logic, finance, and software development.">
+    <title>School - Enhanced Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="css/messaging-assignments.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" onerror="console.warn('Three.js failed to load, 3D effects disabled')"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d3748;
+            --secondary: #667eea;
+            --accent: #764ba2;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --error: #f56565;
+        }
+
+        /* Light Mode */
+        :root, [data-theme="light"] {
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --hover-bg: #f7fafc;
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] {
+            --bg: #1a202c;
+            --card: #2d3748;
+            --text: #e2e8f0;
+            --text-light: #a0aec0;
+            --border: #4a5568;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --hover-bg: #374151;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .user-email {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--card);
+            color: var(--text);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            display: none;
+            z-index: 1001;
+            border: 1px solid var(--border);
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Split-screen modal for assignment submission */
+        .modal-content.split-view {
+            max-width: 95%;
+            width: 95%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .modal-content.split-view .modal-left-panel,
+        .modal-content.split-view .modal-right-panel {
+            overflow-y: auto;
+            max-height: 90vh;
+            padding: 1.5rem;
+        }
+
+        .modal-content.split-view .modal-left-panel {
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+        }
+
+        .modal-content.split-view .modal-right-panel {
+            background: var(--card);
+        }
+
+        @media (max-width: 768px) {
+            .modal-content.split-view {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .modal-content.split-view .modal-left-panel {
+                display: none;
+            }
+            
+            .modal-content.split-view .modal-right-panel {
+                max-height: 100vh;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Easter egg animations */
+        @keyframes modal3DOpen {
+            0% {
+                transform: perspective(1000px) rotateX(90deg) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: perspective(1000px) rotateX(45deg) scale(0.8);
+                opacity: 0.7;
+            }
+            100% {
+                transform: perspective(1000px) rotateX(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes modal3DClose {
+            0% {
+                transform: perspective(1000px) rotateX(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: perspective(1000px) rotateX(-90deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        @keyframes characterBounce {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1.1);
+            }
+        }
+
+        @keyframes characterShake {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(-10deg);
+            }
+            75% {
+                transform: rotate(10deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .easter-egg-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .easter-egg-gif-container {
+            margin-bottom: 2rem;
+            max-width: 400px;
+            max-height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .easter-egg-gif-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .easter-egg-3d-modal {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            animation: modal3DOpen 0.8s ease-out forwards;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .easter-egg-3d-modal.closing {
+            animation: modal3DClose 0.5s ease-in forwards;
+        }
+
+        .easter-egg-character {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .easter-egg-character-emoji {
+            font-size: 4rem;
+            display: inline-block;
+            animation: characterBounce 1s ease-in-out infinite, characterShake 0.5s ease-in-out 0.3s;
+        }
+
+        .easter-egg-message {
+            margin-top: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            animation: fadeIn 0.5s ease-out 0.5s both;
+        }
+
+        .easter-egg-subtitle {
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            color: var(--text-light);
+            animation: fadeIn 0.5s ease-out 0.7s both;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--hover-bg);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Course Listing Page */
+        .courses-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .course-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .course-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .course-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* Course View */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 1px solid var(--border);
+        }
+
+        .course-title-sidebar {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .module-item:hover {
+            background: var(--hover-bg);
+            transform: translateX(5px);
+        }
+
+        .module-item.active {
+            background: var(--hover-bg);
+            border-left-color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .sidebar-nav-item:hover {
+            background: var(--hover-bg);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav-item.active {
+            background: var(--hover-bg);
+            border-left-color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item-icon {
+            font-size: 1.2rem;
+        }
+
+        .module-number {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .module-name {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .module-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-in-progress {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        [data-theme="dark"] .status-completed {
+            background: #22543d;
+            color: #c6f6d5;
+        }
+
+        [data-theme="dark"] .status-in-progress {
+            background: #7c2d12;
+            color: #feebc8;
+        }
+
+        .content-area {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            min-height: 600px;
+            border: 1px solid var(--border);
+        }
+
+        .module-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .module-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .module-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .module-content {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+        }
+
+        .module-content h1 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        .module-content h2 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .module-content h3 {
+            font-size: 1.25rem;
+            margin: 1.25rem 0 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .module-content h4 {
+            font-size: 1.125rem;
+            margin: 1rem 0 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .module-content p {
+            margin: 1rem 0;
+        }
+
+        .module-content ul, .module-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .module-content li {
+            margin: 0.5rem 0;
+        }
+
+        .module-content code {
+            background: var(--hover-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--error);
+        }
+
+        .module-content pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .module-content pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .module-content blockquote {
+            border-left: 4px solid var(--secondary);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .module-content strong {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--hover-bg);
+            color: var(--secondary);
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .resource-link:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .quiz-container {
+            background: var(--hover-bg);
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .quiz-question {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: var(--text);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            padding: 1rem;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--secondary);
+            background: var(--hover-bg);
+        }
+
+        .quiz-option.selected {
+            background: var(--hover-bg);
+            border-color: var(--secondary);
+        }
+
+        .quiz-option.correct {
+            background: #c6f6d5;
+            border-color: var(--success);
+        }
+
+        .quiz-option.incorrect {
+            background: #fed7d7;
+            border-color: var(--error);
+        }
+
+        .quiz-explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--card);
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+            display: none;
+            color: var(--text);
+        }
+
+        .quiz-explanation.show {
+            display: block;
+        }
+
+        .short-answer-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--card);
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .score-pass {
+            color: var(--success);
+        }
+
+        .score-fail {
+            color: var(--error);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container, .courses-container {
+                padding: 1rem;
+            }
+
+            .content-area {
+                padding: 1.5rem;
+            }
+
+            .module-title {
+                font-size: 1.5rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 3D Hero Section */
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        [data-theme="dark"] .hero-section {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-3d-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.125rem, 3vw, 1.5rem);
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .hero-btn {
+            padding: 1.25rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .hero-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-btn-primary {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+        }
+
+        .hero-btn-primary:hover {
+            background: white;
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatShape 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 10s;
+        }
+
+        @keyframes floatShape {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        /* Modern Course Cards */
+        .modern-courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 4rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .modern-course-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .modern-course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .modern-course-card:hover::before {
+            opacity: 1;
+        }
+
+        .modern-course-card:nth-child(1) { animation-delay: 0.1s; }
+        .modern-course-card:nth-child(2) { animation-delay: 0.2s; }
+        .modern-course-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .modern-course-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .modern-course-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            animation: bounceGentle 3s infinite;
+        }
+
+        @keyframes bounceGentle {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        .modern-course-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .modern-course-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .modern-course-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .modern-course-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary);
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .modern-course-card:hover .modern-course-arrow {
+            transform: translateX(5px);
+        }
+
+        /* AI Chatbot Bubble */
+        .chatbot-bubble {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s infinite;
+        }
+
+        .chatbot-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .chatbot-bubble.active {
+            transform: scale(0.9);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), 0 0 0 10px rgba(102, 126, 234, 0.1);
+            }
+        }
+
+        .chatbot-icon {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .chatbot-window {
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 400px;
+            max-width: calc(100vw - 4rem);
+            height: 600px;
+            max-height: calc(100vh - 120px);
+            background: var(--card);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            animation: slideUpFade 0.3s ease-out;
+        }
+
+        .chatbot-window.show {
+            display: flex;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chatbot-header-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chatbot-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chatbot-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chatbot-message {
+            display: flex;
+            gap: 0.75rem;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .chatbot-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .chatbot-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chatbot-message .chatbot-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .chatbot-message.user .chatbot-avatar {
+            background: var(--hover-bg);
+            color: var(--text);
+        }
+
+        .chatbot-text {
+            background: var(--hover-bg);
+            padding: 0.875rem 1.125rem;
+            border-radius: 18px;
+            max-width: 75%;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .chatbot-message.user .chatbot-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .chatbot-input-container {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 0.875rem 1.125rem;
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chatbot-input:focus {
+            border-color: var(--secondary);
+        }
+
+        .chatbot-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-send:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .modern-courses-grid {
+                grid-template-columns: 1fr;
+                padding: 2rem 1rem;
+            }
+
+            .chatbot-window {
+                width: calc(100vw - 2rem);
+                height: calc(100vh - 100px);
+                bottom: 80px;
+                right: 1rem;
+            }
+
+            .chatbot-bubble {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Welcome to Learning Platform</h2>
+                <p style="color: var(--text-light); margin-top: 0.5rem;">Sign in to track your progress</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="loginName" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Start Learning</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Your Profile</h2>
+            </div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="profileName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="profileEmail" required>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo" onclick="showCourses()" id="logoText">
+                ${window.i18n ? window.i18n.t('logo') : '🎓 Learning Platform'}
+            </div>
+            <div class="header-right">
+                <button class="header-btn" onclick="openAISearch()" title="AI Search">
+                    🔍
+                </button>
+                <button class="header-btn" onclick="openPrediction()" title="Learning Potential">
+                    🎯
+                </button>
+                <button class="header-btn" onclick="openThemeSelector()" title="Themes">
+                    🎨
+                </button>
+                <button class="header-btn" onclick="openLayoutSelector()" title="Layout">
+                    📐
+                </button>
+                <div class="language-switcher" style="position: relative;">
+                    <button class="header-btn" id="languageBtn" onclick="toggleLanguageDropdown()" title="Language">
+                        🌐
+                    </button>
+                    <div class="language-dropdown" id="languageDropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 0.5rem; background: var(--card); border-radius: 8px; box-shadow: var(--shadow-lg); min-width: 150px; z-index: 1001; border: 1px solid var(--border);">
+                        <div class="language-option" onclick="setLanguage('en')" style="padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🇬🇧</span>
+                            <span>English</span>
+                        </div>
+                        <div class="language-option" onclick="setLanguage('el')" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🇬🇷</span>
+                            <span>Ελληνικά</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <div id="userProfileContainer" style="position: relative;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AI Chatbot Bubble -->
+    <div class="chatbot-bubble" id="chatbotBubble" onclick="toggleChatbot()">
+        <div class="chatbot-icon">🤖</div>
+    </div>
+
+    <!-- AI Chatbot Window -->
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <div class="chatbot-header-title">
+                <span>🤖</span>
+                <span>AI Assistant</span>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="chatbot-message">
+                <div class="chatbot-avatar">🤖</div>
+                <div class="chatbot-text">
+                    Hi! I'm your AI learning assistant. How can I help you today? Ask me about courses, modules, or anything related to your learning journey!
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input-container">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Ask me anything..." onkeypress="handleChatbotKeyPress(event)">
+            <button class="chatbot-send" onclick="sendChatbotMessage()">→</button>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- Content will be loaded here -->
+    </div>
+    
+    <!-- Footer -->
+    <footer style="background: var(--card); border-top: 1px solid var(--border); padding: 2rem; margin-top: 4rem; text-align: center;">
+        <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+            <a href="legal/privacy-policy.html" target="_blank" style="color: var(--text-light); text-decoration: none;">Privacy Policy</a>
+            <span style="color: var(--text-light);">|</span>
+            <a href="legal/terms-of-service.html" target="_blank" style="color: var(--text-light); text-decoration: none;">Terms of Service</a>
+            <span style="color: var(--text-light);">|</span>
+            <a href="#" onclick="openGDPRSettings(); return false;" style="color: var(--text-light); text-decoration: none;">GDPR & Data</a>
+        </div>
+        <p style="color: var(--text-light); margin-top: 1rem; font-size: 0.875rem;">
+            © 2024 School. All rights reserved.
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/ai-config.js"></script>
+    <script src="js/enhanced-features.js"></script>
+    <script src="js/certificates.js"></script>
+    <script src="js/user-profiles.js"></script>
+    <script src="js/messaging.js"></script>
+    <script src="js/assignments.js"></script>
+    <script src="js/gdpr-compliance.js"></script>
+    <script>
+        // Configure marked
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (err) {}
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            breaks: true,
+            gfm: true
+        });
+
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            document.getElementById('themeIcon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Watch for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                updateThemeIcon(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // Courses Data
+        const courses = [
+            {
+                id: 'critical-thinking',
+                title: 'Critical Thinking',
+                description: 'Master clear reasoning and practical logic. Learn to think better and decide smarter.',
+                icon: '🧠',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Intermediate',
+                modules_data: [
+                    { id: 1, title: 'Foundations of Critical Thinking', subtitle: 'What Is an Argument? Validity, Soundness, and Structure' },
+                    { id: 2, title: 'Deduction: Propositional Logic & Syllogisms', subtitle: 'Guaranteed Truth Through Structure' },
+                    { id: 3, title: 'Induction, Evidence & Strength', subtitle: 'From Specific to General' },
+                    { id: 4, title: 'Probabilistic Thinking & Bayes', subtitle: 'Navigating Uncertainty' },
+                    { id: 5, title: 'Cognitive Biases & Debiasing', subtitle: 'Overcoming Mental Shortcuts' },
+                    { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning' },
+                    { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning' },
+                    { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking' }
+                ]
+            },
+            {
+                id: 'personal-finance',
+                title: 'Personal Finance & Investing',
+                description: 'Take control of your financial future. Master budgeting, investing, and retirement planning.',
+                icon: '💰',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Beginner',
+                modules_data: [
+                    { id: 1, title: 'Foundations of Personal Finance', subtitle: 'Budgeting, Emergency Funds, and Financial Goals' },
+                    { id: 2, title: 'Understanding Debt & Credit', subtitle: 'Credit Scores, Debt Management, and Interest Rates' },
+                    { id: 3, title: 'Banking & Savings Strategies', subtitle: 'Account Optimization and High-Yield Savings' },
+                    { id: 4, title: 'Introduction to Investing', subtitle: 'Risk, Return, Asset Classes, and Investment Accounts' },
+                    { id: 5, title: 'Stocks & Bonds Fundamentals', subtitle: 'Market Mechanics, ETFs, and Diversification' },
+                    { id: 6, title: 'Retirement Planning', subtitle: '401(k), IRAs, Compound Interest, and Retirement Calculators' },
+                    { id: 7, title: 'Tax Optimization', subtitle: 'Tax-Advantaged Accounts, Deductions, and Tax-Efficient Investing' },
+                    { id: 8, title: 'Building Your Financial Plan', subtitle: 'Integration, Goal Prioritization, and Ongoing Management' }
+                ]
+            },
+            {
+                id: 'ios-app-development',
+                title: 'iOS App Development with SwiftUI',
+                description: 'Build beautiful iPhone and iPad apps from scratch. Master SwiftUI, the future of Apple development.',
+                icon: '📱',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Beginner',
+                modules_data: [
+                    { id: 1, title: 'SwiftUI Foundations', subtitle: 'Views, Modifiers, and the Declarative Paradigm' },
+                    { id: 2, title: 'Layout & Navigation', subtitle: 'Building Multi-Screen Apps with Navigation and Layouts' },
+                    { id: 3, title: 'State Management', subtitle: 'Managing App State with @State, @Binding, and @ObservableObject' },
+                    { id: 4, title: 'Lists & Data', subtitle: 'Displaying Dynamic Data with Lists, Models, and Persistence' },
+                    { id: 5, title: 'User Input & Forms', subtitle: 'Collecting User Input with TextFields, Pickers, and Form Validation' },
+                    { id: 6, title: 'Networking & APIs', subtitle: 'Fetching Data from the Internet with URLSession and async/await' },
+                    { id: 7, title: 'Advanced UI', subtitle: 'Animations, Gestures, and Custom Views' },
+                    { id: 8, title: 'App Store Deployment', subtitle: 'Testing, Certificates, and Publishing Your App' }
+                ]
+            }
+            // More courses can be added here
+        ];
+        
+        // Make courses globally available
+        window.courses = courses;
+
+        // User state
+        let user = JSON.parse(localStorage.getItem('user') || 'null');
+        let currentCourse = null;
+        let currentQuiz = null;
+        let quizAnswers = {};
+
+        // Course state
+        const state = {
+            currentCourseId: null,
+            currentModule: 1,
+            completedModules: JSON.parse(localStorage.getItem('completedModules') || '[]'),
+            quizScores: JSON.parse(localStorage.getItem('quizScores') || '{}'),
+            totalModules: 0,
+            sidebarView: null // 'messages', 'assignments', or null for modules
+        };
+
+        // Initialize
+        function init() {
+            initTheme();
+            if (user) {
+                // Initialize default friends if not already done
+                if (typeof UserProfileManager !== 'undefined' && UserProfileManager.initDefaultFriends) {
+                    UserProfileManager.initDefaultFriends();
+                }
+                updateUserDisplay();
+            } else {
+                showSignInButton();
+            }
+            showCourses();
+        }
+
+        // Show courses listing with 3D hero
+        function showCourses() {
+            state.currentCourseId = null;
+            const app = document.getElementById('app');
+            const layout = UILayoutManager.currentLayout;
+            const layoutHTML = UILayoutManager.renderCourses(layout);
+            
+            // Always show 3D hero first, then courses
+            app.innerHTML = `
+                <div class="hero-section">
+                    <div class="floating-shapes">
+                        <div class="shape"></div>
+                        <div class="shape"></div>
+                        <div class="shape"></div>
+                    </div>
+                    <div class="hero-3d-container" id="hero3D"></div>
+                    <div class="hero-content">
+                        <h1 class="hero-title">Master New Skills</h1>
+                        <p class="hero-subtitle">Transform your knowledge with our comprehensive courses</p>
+                        <div class="hero-cta">
+                            <button class="hero-btn hero-btn-primary" onclick="scrollToCourses()">Explore Courses</button>
+                            <button class="hero-btn" onclick="openLoginModal()">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modern-courses-grid" id="coursesSection">
+                    ${courses.map(course => `
+                        <div class="modern-course-card" onclick="loadCourse('${course.id}')">
+                            <div class="modern-course-icon">${course.icon}</div>
+                            <h2 class="modern-course-title">${course.title}</h2>
+                            <p class="modern-course-description">${course.description}</p>
+                            <div class="modern-course-meta">
+                                <span>📚 ${course.modules} modules</span>
+                                <span>⏱️ ${course.duration}</span>
+                                <span>📊 ${course.level}</span>
+                            </div>
+                            <div class="modern-course-arrow">
+                                Start Learning →
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Initialize 3D scene
+            init3DScene();
+        }
+
+        // Initialize 3D scene for hero
+        function init3DScene() {
+            const container = document.getElementById('hero3D');
+            if (!container || typeof THREE === 'undefined') {
+                // Fallback if Three.js didn't load
+                if (container) {
+                    container.style.background = 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)';
+                }
+                return;
+            }
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Create floating geometric shapes
+            const geometries = [
+                new THREE.IcosahedronGeometry(1, 0),
+                new THREE.OctahedronGeometry(1, 0),
+                new THREE.TetrahedronGeometry(1, 0)
+            ];
+
+            const shapes = [];
+            geometries.forEach((geo, i) => {
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    metalness: 0.7,
+                    roughness: 0.3,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const mesh = new THREE.Mesh(geo, material);
+                mesh.position.set(
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10
+                );
+                mesh.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                scene.add(mesh);
+                shapes.push(mesh);
+            });
+
+            // Add ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            // Add directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            camera.position.z = 5;
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                shapes.forEach((shape, i) => {
+                    shape.rotation.x += 0.005 * (i + 1);
+                    shape.rotation.y += 0.008 * (i + 1);
+                    shape.position.y += Math.sin(Date.now() * 0.001 + i) * 0.01;
+                });
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        function scrollToCourses() {
+            const coursesSection = document.getElementById('coursesSection');
+            if (coursesSection) {
+                coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Load course
+        function loadCourse(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            if (!course) return;
+
+            currentCourse = course;
+            state.currentCourseId = courseId;
+            state.currentModule = 1;
+            state.totalModules = course.modules_data.length;
+
+            renderCourseView();
+            loadModule(1);
+        }
+
+        // Render course view
+        function renderCourseView() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <aside class="sidebar">
+                        <div class="course-title-sidebar">${currentCourse.title}</div>
+                        <div class="sidebar-nav-item ${state.sidebarView === 'messages' ? 'active' : ''}" onclick="viewSidebarMessages()" style="margin-bottom: 1rem;">
+                            <span class="sidebar-nav-item-icon">💬</span>
+                            <span>Messages</span>
+                        </div>
+                        <div class="sidebar-nav-item ${state.sidebarView === 'assignments' ? 'active' : ''}" onclick="viewSidebarAssignments()" style="margin-bottom: 1rem;">
+                            <span class="sidebar-nav-item-icon">📝</span>
+                            <span>Assignments</span>
+                        </div>
+                        <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem;">
+                            <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Modules</div>
+                            <ul class="module-list" id="moduleList">
+                                ${currentCourse.modules_data.map((module, index) => {
+                                    const isActive = module.id === state.currentModule && !state.sidebarView;
+                                    const moduleKey = `${state.currentCourseId}-${module.id}`;
+                                    const isCompleted = state.completedModules.includes(moduleKey);
+                                    const hasQuiz = state.quizScores[moduleKey];
+                                    
+                                    return `
+                                        <li class="module-item ${isActive ? 'active' : ''}" onclick="loadModule(${module.id})">
+                                            <div class="module-number">Module ${module.id}</div>
+                                            <div class="module-name">${module.title}</div>
+                                            <div class="module-status">
+                                                ${isCompleted ? '<span class="status-badge status-completed">✓ Completed</span>' : ''}
+                                                ${hasQuiz ? `<span class="status-badge status-in-progress">Quiz: ${hasQuiz.score}/${hasQuiz.total}</span>` : ''}
+                                            </div>
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
+                        </div>
+                    </aside>
+
+                    <main class="content-area">
+                        <div id="content">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Loading module...</p>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            `;
+        }
+
+        // Load module content
+        async function loadModule(moduleId) {
+            state.currentModule = moduleId;
+            state.sidebarView = null; // Clear sidebar view when loading module
+            renderCourseView();
+            
+            const contentArea = document.getElementById('content');
+            contentArea.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading module...</p></div>';
+
+            try {
+                const module = currentCourse.modules_data[moduleId - 1];
+                // Determine course directory based on courseId
+                let courseDir = 'course';
+                if (state.currentCourseId === 'personal-finance') {
+                    courseDir = 'course-finance';
+                } else if (state.currentCourseId === 'ios-app-development') {
+                    courseDir = 'course-ios';
+                }
+                const response = await fetch(`${courseDir}/modules/module${String(moduleId).padStart(2, '0')}.md`);
+                
+                if (!response.ok) {
+                    throw new Error('Module not found');
+                }
+
+                const markdown = await response.text();
+                let html = marked.parse(markdown);
+
+                // Process markdown to hide answers and make resources clickable
+                html = processModuleContent(html, moduleId);
+
+                contentArea.innerHTML = `
+                    <div class="module-header">
+                        <h1 class="module-title">${module.title}</h1>
+                        <p class="module-subtitle">${module.subtitle}</p>
+                        <div class="module-actions">
+                            <button class="btn btn-primary" onclick="startQuiz(${moduleId})">Take Quiz</button>
+                            <button class="btn btn-secondary" onclick="downloadModule(${moduleId})">Download PDF</button>
+                        </div>
+                    </div>
+                    <div class="module-content">${html}</div>
+                    <div class="nav-buttons">
+                        ${moduleId > 1 ? `<button class="btn btn-secondary" onclick="loadModule(${moduleId - 1})">← Previous Module</button>` : '<div></div>'}
+                        ${moduleId < state.totalModules ? `<button class="btn btn-primary" onclick="loadModule(${moduleId + 1})">Next Module →</button>` : '<button class="btn btn-success" onclick="completeCourse()">Complete Course ✓</button>'}
+                    </div>
+                `;
+
+                // Highlight code blocks
+                document.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                });
+
+                updateProgress();
+            } catch (error) {
+                contentArea.innerHTML = `
+                    <div class="module-header">
+                        <h1 class="module-title">Error Loading Module</h1>
+                    </div>
+                    <p>Could not load module content. Please check that the file exists.</p>
+                    <p style="color: var(--text-light); margin-top: 1rem;">Error: ${error.message}</p>
+                `;
+            }
+        }
+
+        // Process module content
+        function processModuleContent(html, moduleId) {
+            html = html.replace(/✓/g, '');
+            html = html.replace(/\(Answer:.*?\)/gi, '');
+            html = html.replace(/("Basics of Arguments"|"Introduction to Propositional Logic"|PDF|worksheet|template|cheat sheet)/gi, 
+                '<a href="#" class="resource-link" onclick="downloadResource(\'$1\')">📄 $1</a>');
+            return html;
+        }
+
+        // Quiz functionality
+        async function startQuiz(moduleId) {
+            try {
+                // Determine course directory based on courseId
+                let courseDir = 'course';
+                if (state.currentCourseId === 'personal-finance') {
+                    courseDir = 'course-finance';
+                } else if (state.currentCourseId === 'ios-app-development') {
+                    courseDir = 'course-ios';
+                }
+                const response = await fetch(`${courseDir}/quizzes/quiz${moduleId}.json`);
+                if (!response.ok) {
+                    alert('Quiz not available for this module yet.');
+                    return;
+                }
+                
+                currentQuiz = await response.json();
+                quizAnswers = {};
+                
+                const moduleKey = `${state.currentCourseId}-${moduleId}`;
+                
+                const quizHTML = `
+                    <div class="quiz-container">
+                        <div class="quiz-header">
+                            <h2 class="quiz-title">${currentQuiz.module} - Quiz</h2>
+                            <span style="color: var(--text-light);">${currentQuiz.questions.length} questions</span>
+                        </div>
+                        ${currentQuiz.questions.map((q, idx) => {
+                            if (q.type === 'multiple_choice') {
+                                return `
+                                    <div class="quiz-question">
+                                        <div class="question-text">${idx + 1}. ${q.question}</div>
+                                        <div class="quiz-options">
+                                            ${q.options.map((opt, optIdx) => `
+                                                <div class="quiz-option" onclick="selectAnswer(${idx}, ${optIdx})" id="q${idx}_opt${optIdx}">
+                                                    ${String.fromCharCode(65 + optIdx)}) ${opt}
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        <div class="quiz-explanation" id="explanation_${idx}">
+                                            <strong>Explanation:</strong> ${q.explanation}
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                return `
+                                    <div class="quiz-question">
+                                        <div class="question-text">${idx + 1}. ${q.question}</div>
+                                        <input type="text" class="short-answer-input" id="answer_${idx}" placeholder="Type your answer here">
+                                        <div class="quiz-explanation" id="explanation_${idx}">
+                                            <strong>Explanation:</strong> ${q.explanation}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }).join('')}
+                        <div class="quiz-actions">
+                            <button class="btn btn-primary" onclick="submitQuiz(${moduleId})">Submit Quiz</button>
+                            <button class="btn btn-secondary" onclick="loadModule(${moduleId})">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('content').innerHTML = quizHTML;
+            } catch (error) {
+                alert('Error loading quiz: ' + error.message);
+            }
+        }
+
+        function selectAnswer(questionIdx, optionIdx) {
+            const question = currentQuiz.questions[questionIdx];
+            if (question.type !== 'multiple_choice') return;
+            
+            document.querySelectorAll(`#q${questionIdx}_opt${optionIdx}`).forEach(el => {
+                el.parentElement.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            });
+            
+            const selectedOption = document.getElementById(`q${questionIdx}_opt${optionIdx}`);
+            selectedOption.classList.add('selected');
+            quizAnswers[questionIdx] = optionIdx;
+        }
+
+        async function submitQuiz(moduleId) {
+            if (!currentQuiz) return;
+            
+            let score = 0;
+            const total = currentQuiz.questions.length;
+            const moduleKey = `${state.currentCourseId}-${moduleId}`;
+            
+            currentQuiz.questions.forEach((q, idx) => {
+                const explanation = document.getElementById(`explanation_${idx}`);
+                explanation.classList.add('show');
+                
+                if (q.type === 'multiple_choice') {
+                    const selected = quizAnswers[idx];
+                    const correct = q.correct_answer;
+                    const optionEl = document.getElementById(`q${idx}_opt${selected}`);
+                    
+                    if (selected === correct) {
+                        score++;
+                        if (optionEl) {
+                            optionEl.classList.add('correct');
+                        }
+                    } else {
+                        if (optionEl) {
+                            optionEl.classList.add('incorrect');
+                        }
+                        const correctEl = document.getElementById(`q${idx}_opt${correct}`);
+                        if (correctEl) {
+                            correctEl.classList.add('correct');
+                        }
+                    }
+                } else {
+                    const answer = document.getElementById(`answer_${idx}`).value.toLowerCase().trim();
+                    const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
+                    if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
+                        score++;
+                    }
+                }
+            });
+            
+            state.quizScores[moduleKey] = { score, total };
+            localStorage.setItem('quizScores', JSON.stringify(state.quizScores));
+            
+            const passed = score >= currentQuiz.passing_score;
+            const scoreHTML = `
+                <div class="quiz-score ${passed ? 'score-pass' : 'score-fail'}">
+                    ${passed ? '✓ ' : '✗ '}You scored ${score}/${total} 
+                    ${passed ? '- Passed!' : `- Need ${currentQuiz.passing_score} to pass`}
+                </div>
+            `;
+            
+            document.querySelector('.quiz-container').insertAdjacentHTML('beforeend', scoreHTML);
+            renderCourseView();
+            loadModule(moduleId);
+        }
+
+        function downloadResource(resourceName) {
+            alert(`Downloading ${resourceName}...\n(Resource files will be available in the resources folder)`);
+        }
+
+        async function downloadModule(moduleId) {
+            const module = currentCourse.modules_data[moduleId - 1];
+            
+            try {
+                // Determine course directory based on courseId
+                let courseDir = 'course';
+                if (state.currentCourseId === 'personal-finance') {
+                    courseDir = 'course-finance';
+                } else if (state.currentCourseId === 'ios-app-development') {
+                    courseDir = 'course-ios';
+                }
+                // Try to fetch the module markdown file
+                const response = await fetch(`${courseDir}/modules/module${String(moduleId).padStart(2, '0')}.md`);
+                if (!response.ok) {
+                    throw new Error('Module file not found');
+                }
+                
+                const markdown = await response.text();
+                
+                // Create a printable HTML document
+                const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${module.title} - ${currentCourse.title}</title>
+    <style>
+        @media print {
+            @page {
+                margin: 2cm;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+            }
+            h1 { color: #2d3748; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem; }
+            h2 { color: #667eea; margin-top: 1.5rem; }
+            h3 { color: #764ba2; margin-top: 1rem; }
+            code {
+                background: #f7fafc;
+                padding: 0.2rem 0.4rem;
+                border-radius: 3px;
+                font-family: 'Courier New', monospace;
+            }
+            pre {
+                background: #f7fafc;
+                padding: 1rem;
+                border-radius: 5px;
+                overflow-x: auto;
+            }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 { color: #2d3748; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem; }
+        h2 { color: #667eea; margin-top: 1.5rem; }
+        h3 { color: #764ba2; margin-top: 1rem; }
+        code {
+            background: #f7fafc;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>${module.title}</h1>
+    <p><strong>Course:</strong> ${currentCourse.title}</p>
+    <p><strong>Module ${moduleId}</strong></p>
+    <hr>
+    ${marked.parse(markdown)}
+</body>
+</html>
+                `;
+                
+                // Create a blob and download it
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${module.title.replace(/[^a-z0-9]/gi, '_')}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // Also open print dialog for PDF option
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                setTimeout(() => {
+                    printWindow.print();
+                    // Close after a delay
+                    setTimeout(() => printWindow.close(), 1000);
+                }, 250);
+                
+            } catch (error) {
+                console.error('Error downloading module:', error);
+                // Fallback: Open print dialog for current page
+                alert(`Opening print dialog for ${module.title}...\n\nIn the print dialog, select "Save as PDF" to download as PDF.`);
+                window.print();
+            }
+        }
+
+        function completeCourse() {
+            const moduleKey = `${state.currentCourseId}-${state.currentModule}`;
+            if (!state.completedModules.includes(moduleKey)) {
+                state.completedModules.push(moduleKey);
+                localStorage.setItem('completedModules', JSON.stringify(state.completedModules));
+            }
+            
+            // Check if course is fully completed and generate certificate
+            if (CertificateManager.checkCourseCompletion(state.currentCourseId)) {
+                const existingCert = CertificateManager.getCertificatesForUser().find(
+                    cert => cert.courseId === state.currentCourseId
+                );
+                
+                if (!existingCert) {
+                    const certificate = CertificateManager.generateCertificate(
+                        state.currentCourseId,
+                        currentCourse.title
+                    );
+                    alert(`🎉 Congratulations! You have completed "${currentCourse.title}"!\n\nYour certificate has been generated and is available in your profile.`);
+                } else {
+                    alert('🎉 Congratulations! You have completed this course!\n\nYour certificate is available in your profile.');
+                }
+            } else {
+                alert('🎉 Great progress! Complete all modules and pass all quizzes to earn your certificate.');
+            }
+        }
+
+        function updateProgress() {
+            // Progress tracking can be added here
+        }
+
+        // User Management
+        function updateUserDisplay() {
+            const container = document.getElementById('userProfileContainer');
+            if (user) {
+                container.innerHTML = `
+                    <div class="user-profile" onclick="toggleProfileDropdown()">
+                        <div class="user-avatar" id="userAvatar">${user.name.charAt(0).toUpperCase()}</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">${user.name}</div>
+                            <div class="user-email" id="userEmail">${user.email}</div>
+                        </div>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-dropdown-item" onclick="viewMyProfile()">My Profile</div>
+                            <div class="profile-dropdown-item" onclick="openProfileEditModal()">Edit Profile</div>
+                            <div class="profile-dropdown-item" onclick="viewCertificates()">My Certificates</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openMessaging === 'function') window.openMessaging(); else console.error('openMessaging not available'); }, 50);">Messages</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openAssignments === 'function') window.openAssignments(); else console.error('openAssignments not available'); }, 50);">Assignments</div>
+                            <div class="profile-dropdown-item" onclick="openFriendsModal()">Friends</div>
+                            <div class="profile-dropdown-item" onclick="openGDPRSettings()">GDPR & Data</div>
+                            <div class="profile-dropdown-item" onclick="logout()">Sign Out</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                showSignInButton();
+            }
+        }
+
+        function showSignInButton() {
+            const container = document.getElementById('userProfileContainer');
+            container.innerHTML = `
+                <button class="btn btn-secondary" onclick="openLoginModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem;">
+                    Sign In
+                </button>
+            `;
+        }
+
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.add('show');
+            document.getElementById('profileName').value = user.name;
+            document.getElementById('profileEmail').value = user.email;
+            document.getElementById('profileDropdown').classList.remove('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        function logout() {
+            user = null;
+            localStorage.removeItem('user');
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            showSignInButton();
+            if (state.currentCourseId) {
+                renderCourseView();
+            }
+        }
+
+        function viewCertificates() {
+            const modal = document.getElementById('certificatesModal');
+            if (!modal) {
+                const modalHTML = `
+                    <div id="certificatesModal" class="modal">
+                        <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+                            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h2 class="modal-title">My Certificates</h2>
+                                    <p style="color: var(--text-light); margin-top: 0.5rem;">Your earned certificates and achievements</p>
+                                </div>
+                                <button onclick="closeCertificatesModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                            </div>
+                            <div id="certificatesContent"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+            
+            document.getElementById('certificatesContent').innerHTML = CertificateManager.renderCertificatesModal();
+            document.getElementById('certificatesModal').classList.add('show');
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+        
+        function closeCertificatesModal() {
+            document.getElementById('certificatesModal').classList.remove('show');
+        }
+        
+        function openProfileEditModal() {
+            const modal = document.getElementById('profileEditModal');
+            if (!modal) {
+                const modalHTML = `
+                    <div id="profileEditModal" class="modal">
+                        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h2 class="modal-title">Edit Profile</h2>
+                                <button onclick="closeProfileEditModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                            </div>
+                            <div id="profileEditContent"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+            
+            document.getElementById('profileEditContent').innerHTML = UserProfileManager.renderEditProfileModal();
+            document.getElementById('profileEditModal').classList.add('show');
+            
+            // Add character counter for bio
+            setTimeout(() => {
+                const bioInput = document.getElementById('profileBioInput');
+                const bioCounter = document.getElementById('bioCharCount');
+                if (bioInput && bioCounter) {
+                    bioInput.addEventListener('input', function() {
+                        bioCounter.textContent = this.value.length;
+                        if (this.value.length > 450) {
+                            bioCounter.style.color = 'var(--warning)';
+                        } else {
+                            bioCounter.style.color = 'var(--text-light)';
+                        }
+                    });
+                }
+            }, 100);
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+        
+        function closeProfileEditModal() {
+            document.getElementById('profileEditModal').classList.remove('show');
+        }
+        
+        function viewMyProfile() {
+            viewUserProfile(user.email);
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+        
+        function openFriendsModal() {
+            const modal = document.getElementById('friendsModal');
+            if (!modal) {
+                const modalHTML = `
+                    <div id="friendsModal" class="modal">
+                        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h2 class="modal-title">Friends</h2>
+                                <button onclick="closeFriendsModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                            </div>
+                            <div id="friendsContent"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+            
+            // Render friends modal using UserProfileManager
+            const friendsContent = document.getElementById('friendsContent');
+            if (friendsContent && typeof UserProfileManager !== 'undefined' && UserProfileManager.renderFriendsModal) {
+                friendsContent.innerHTML = UserProfileManager.renderFriendsModal();
+            } else if (typeof renderFriendsModal === 'function') {
+                renderFriendsModal();
+            } else {
+                friendsContent.innerHTML = '<p>Loading friends...</p>';
+            }
+            document.getElementById('friendsModal').classList.add('show');
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+        
+        function closeFriendsModal() {
+            document.getElementById('friendsModal').classList.remove('show');
+        }
+        
+        // Sidebar navigation functions
+        function viewSidebarMessages() {
+            if (!user) {
+                alert('Please sign in to view messages');
+                return;
+            }
+            
+            if (!state.currentCourseId) {
+                alert('Please select a course first');
+                return;
+            }
+            
+            state.sidebarView = 'messages';
+            renderCourseView();
+            
+            // Get all conversations - check if messaging system exists
+            let allConversations = [];
+            const currentUserEmail = user.email;
+            
+            // Try to get messages from messaging system
+            if (typeof window.MessagingSystem !== 'undefined' && window.MessagingSystem.getConversations) {
+                allConversations = window.MessagingSystem.getConversations(currentUserEmail);
+            } else {
+                // Fallback: check localStorage directly
+                const messages = JSON.parse(localStorage.getItem('messages') || '{}');
+                Object.keys(messages).forEach(conversationId => {
+                    const [user1, user2] = conversationId.split('_');
+                    if (user1 === currentUserEmail || user2 === currentUserEmail) {
+                        const otherUserEmail = user1 === currentUserEmail ? user2 : user1;
+                        const otherUser = UserProfileManager ? UserProfileManager.getProfile(otherUserEmail) : { name: otherUserEmail.split('@')[0], email: otherUserEmail };
+                        const conversationMessages = messages[conversationId] || [];
+                        const lastMessage = conversationMessages[conversationMessages.length - 1];
+                        
+                        allConversations.push({
+                            friendEmail: otherUserEmail,
+                            friendName: otherUser.name || otherUserEmail.split('@')[0],
+                            lastMessage: lastMessage ? lastMessage.text : 'No messages yet',
+                            lastMessageTime: lastMessage ? lastMessage.timestamp : null,
+                            unreadCount: 0
+                        });
+                    }
+                });
+            }
+            
+            // Sort by last message time
+            allConversations.sort((a, b) => {
+                if (!a.lastMessageTime) return 1;
+                if (!b.lastMessageTime) return -1;
+                return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+            });
+            
+            const contentArea = document.getElementById('content');
+            contentArea.innerHTML = `
+                <div class="module-header">
+                    <h1 class="module-title">💬 Messages</h1>
+                    <p class="module-subtitle">Your conversations</p>
+                </div>
+                <div class="module-content">
+                    ${allConversations.length > 0 ? `
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            ${allConversations.map(conv => `
+                                <div class="friend-card" style="cursor: pointer; padding: 1rem; border: 1px solid var(--border); border-radius: 8px;" onclick="if(typeof window.openMessaging === 'function') { window.openMessaging('${conv.friendEmail}'); } else { alert('Messaging system not available'); }">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div class="friend-avatar">${conv.friendName.charAt(0).toUpperCase()}</div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; margin-bottom: 0.25rem;">${conv.friendName}</div>
+                                            <div style="font-size: 0.875rem; color: var(--text-light);">${conv.lastMessage.substring(0, 50)}${conv.lastMessage.length > 50 ? '...' : ''}</div>
+                                        </div>
+                                        ${conv.lastMessageTime ? `<div style="font-size: 0.75rem; color: var(--text-light);">${new Date(conv.lastMessageTime).toLocaleDateString()}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">No messages yet</p>
+                            <p>Start a conversation by messaging a friend from your Friends list!</p>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function viewSidebarAssignments() {
+            if (!user) {
+                alert('Please sign in to view assignments');
+                return;
+            }
+            
+            if (!state.currentCourseId) {
+                alert('Please select a course first');
+                return;
+            }
+            
+            state.sidebarView = 'assignments';
+            renderCourseView();
+            
+            // Get assignments from modules
+            const assignments = [];
+            currentCourse.modules_data.forEach((module, index) => {
+                const moduleKey = `${state.currentCourseId}-${module.id}`;
+                const isCompleted = state.completedModules.includes(moduleKey);
+                
+                assignments.push({
+                    moduleId: module.id,
+                    moduleTitle: module.title,
+                    title: `Module ${module.id} Assignment`,
+                    description: `Complete the assignment for ${module.title}`,
+                    dueDate: null,
+                    status: isCompleted ? 'completed' : 'pending',
+                    moduleKey: moduleKey
+                });
+            });
+            
+            const contentArea = document.getElementById('content');
+            contentArea.innerHTML = `
+                <div class="module-header">
+                    <h1 class="module-title">📝 Assignments</h1>
+                    <p class="module-subtitle">Your course assignments</p>
+                </div>
+                <div class="module-content">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        ${assignments.map(assignment => `
+                            <div class="friend-card" style="padding: 1.5rem; border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">${assignment.title}</h3>
+                                        <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">${assignment.description}</p>
+                                    </div>
+                                    <span class="status-badge ${assignment.status === 'completed' ? 'status-completed' : 'status-in-progress'}" style="white-space: nowrap;">
+                                        ${assignment.status === 'completed' ? '✓ Completed' : 'Pending'}
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                                    <button class="btn btn-primary" onclick="loadModule(${assignment.moduleId})" style="flex: 1;">
+                                        ${assignment.status === 'completed' ? 'Review Module' : 'Start Assignment'}
+                                    </button>
+                                    ${assignment.status === 'completed' ? `
+                                        <button class="btn btn-secondary" onclick="viewCertificate('${assignment.moduleKey}')" style="flex: 1;">
+                                            View Certificate
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function viewCertificate(certId) {
+            const certificate = CertificateManager.getCertificateById(certId);
+            if (!certificate) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 class="modal-title">Certificate</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    ${CertificateManager.renderCertificateHTML(certificate)}
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        window.viewCertificates = viewCertificates;
+        window.closeCertificatesModal = closeCertificatesModal;
+        window.openProfileEditModal = openProfileEditModal;
+        window.closeProfileEditModal = closeProfileEditModal;
+        window.viewMyProfile = viewMyProfile;
+        window.openFriendsModal = openFriendsModal;
+        window.closeFriendsModal = closeFriendsModal;
+        window.viewCertificate = viewCertificate;
+        window.viewSidebarMessages = viewSidebarMessages;
+        window.viewSidebarAssignments = viewSidebarAssignments;
+        window.openGDPRSettings = openGDPRSettings;
+        window.closeGDPRSettings = closeGDPRSettings;
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('loginName').value;
+            const emailInput = document.getElementById('loginEmail').value;
+            
+            // Validate inputs
+            const nameValidation = SecurityUtils.validateName(nameInput);
+            if (!nameValidation.valid) {
+                SecurityUtils.showError(nameValidation.error);
+                return;
+            }
+            
+            const emailValidation = SecurityUtils.validateEmail(emailInput);
+            if (!emailValidation.valid) {
+                SecurityUtils.showError(emailValidation.error);
+                return;
+            }
+            
+            user = { 
+                name: nameValidation.name, 
+                email: emailValidation.email 
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+            
+            // Initialize default friends (AI Tutor, Course Instructor)
+            if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                UserProfileManager.initDefaultFriends();
+            }
+            
+            document.getElementById('loginModal').classList.remove('show');
+            updateUserDisplay();
+            if (state.currentCourseId) {
+                renderCourseView();
+            }
+        });
+
+        // Profile Form
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            user.name = document.getElementById('profileName').value;
+            user.email = document.getElementById('profileEmail').value;
+            localStorage.setItem('user', JSON.stringify(user));
+            updateUserDisplay();
+            closeProfileModal();
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown && !e.target.closest('.user-profile')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Close modals with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                // Don't close if user is typing in an input, textarea, or contenteditable element
+                const activeElement = document.activeElement;
+                const isInputFocused = activeElement && (
+                    activeElement.tagName === 'INPUT' ||
+                    activeElement.tagName === 'TEXTAREA' ||
+                    activeElement.isContentEditable
+                );
+                
+                // Only close if not typing in an input field
+                if (!isInputFocused) {
+                    // Get all visible modals
+                    const modals = document.querySelectorAll('.modal.show');
+                    
+                    if (modals.length > 0) {
+                        // Close the topmost modal (last one in DOM order)
+                        const topModal = modals[modals.length - 1];
+                        topModal.classList.remove('show');
+                        
+                        // Also close any dropdowns
+                        const dropdown = document.getElementById('profileDropdown');
+                        if (dropdown) {
+                            dropdown.classList.remove('show');
+                        }
+                        
+                        // Prevent default behavior
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+
+        // Make functions global
+        window.showCourses = showCourses;
+        window.loadCourse = loadCourse;
+        window.loadModule = loadModule;
+        window.startQuiz = startQuiz;
+        window.selectAnswer = selectAnswer;
+        window.submitQuiz = submitQuiz;
+        window.downloadResource = downloadResource;
+        window.downloadModule = downloadModule;
+        window.completeCourse = completeCourse;
+        window.toggleProfileDropdown = toggleProfileDropdown;
+        window.openProfileModal = openProfileModal;
+        window.closeProfileModal = closeProfileModal;
+        window.logout = logout;
+        window.viewCertificates = viewCertificates;
+        window.openLoginModal = openLoginModal;
+        window.toggleTheme = toggleTheme;
+        
+        // Enhanced features functions
+        window.openThemeSelector = function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">🎨 Select Theme</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; padding: 1rem;">
+                        ${Object.entries(ThemeManager.themes).map(([key, theme]) => `
+                            <div onclick="ThemeManager.setTheme('${key}'); this.closest('.modal').remove(); showCourses();" 
+                                 style="padding: 1.5rem; border: 2px solid ${ThemeManager.currentTheme === key ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                        border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;"
+                                 onmouseover="this.style.transform='scale(1.05)'" 
+                                 onmouseout="this.style.transform='scale(1)'">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">${theme.icon}</div>
+                                <div style="font-weight: 600; color: var(--text);">${theme.name}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+        
+        window.openLayoutSelector = function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">📐 Select Layout</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; padding: 1rem;">
+                        ${Object.entries(UILayoutManager.layouts).map(([key, layout]) => `
+                            <div onclick="UILayoutManager.setLayout('${key}'); this.closest('.modal').remove(); showCourses();" 
+                                 style="padding: 1.5rem; border: 2px solid ${UILayoutManager.currentLayout === key ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                        border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;"
+                                 onmouseover="this.style.transform='scale(1.05)'" 
+                                 onmouseout="this.style.transform='scale(1)'">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">${layout.icon}</div>
+                                <div style="font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">${layout.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-light);">${layout.description}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+        
+        window.showQuizzes = function() {
+            alert('Quiz feature - showing all quizzes');
+        };
+        
+        window.showProgress = function() {
+            openPrediction();
+        };
+
+        // Chatbot functionality
+        function toggleChatbot() {
+            const window = document.getElementById('chatbotWindow');
+            const bubble = document.getElementById('chatbotBubble');
+            
+            if (window.classList.contains('show')) {
+                window.classList.remove('show');
+                bubble.classList.remove('active');
+            } else {
+                window.classList.add('show');
+                bubble.classList.add('active');
+                document.getElementById('chatbotInput').focus();
+            }
+        }
+
+        function handleChatbotKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatbotMessage();
+            }
+        }
+
+        function sendChatbotMessage() {
+            const input = document.getElementById('chatbotInput');
+            const messages = document.getElementById('chatbotMessages');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chatbot-message user';
+            userMessage.innerHTML = `
+                <div class="chatbot-avatar">👤</div>
+                <div class="chatbot-text">${escapeHtml(message)}</div>
+            `;
+            messages.appendChild(userMessage);
+            messages.scrollTop = messages.scrollHeight;
+
+            input.value = '';
+            input.disabled = true;
+
+            // Simulate AI response (you can replace this with actual API call)
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(message);
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'chatbot-message';
+                aiMessage.innerHTML = `
+                    <div class="chatbot-avatar">🤖</div>
+                    <div class="chatbot-text">${aiResponse}</div>
+                `;
+                messages.appendChild(aiMessage);
+                messages.scrollTop = messages.scrollHeight;
+                input.disabled = false;
+                input.focus();
+            }, 500);
+        }
+
+        function generateAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            const currentLang = window.i18n ? window.i18n.currentLanguage : 'en';
+            const isGreek = currentLang === 'el';
+            
+            // Course-related queries
+            if (lowerMessage.includes('course') || lowerMessage.includes('module') || lowerMessage.includes('learn') || 
+                (isGreek && (lowerMessage.includes('μάθημα') || lowerMessage.includes('ενότητα') || lowerMessage.includes('μάθηση')))) {
+                return isGreek 
+                    ? `Το μάθημα Κριτικής Σκέψης έχει 8 ολοκληρωμένες ενότητες που καλύπτουν τα πάντα από τα θεμέλια έως τη λήψη αποφάσεων. Θα θέλατε να μάθετε περισσότερα για μια συγκεκριμένη ενότητα;`
+                    : `Our Critical Thinking course has 8 comprehensive modules covering everything from foundations to decision-making. Would you like to know more about a specific module?`;
+            }
+            
+            if (lowerMessage.includes('quiz') || lowerMessage.includes('test') || lowerMessage.includes('assessment') ||
+                (isGreek && (lowerMessage.includes('κουίζ') || lowerMessage.includes('τεστ') || lowerMessage.includes('αξιολόγηση')))) {
+                return isGreek
+                    ? `Κάθε ενότητα περιλαμβάνει διαδραστικά κουίζ για να δοκιμάσετε την κατανόησή σας. Μπορείτε να κάνετε κουίζ οποιαδήποτε στιγμή και να παρακολουθήσετε την πρόοδό σας!`
+                    : `Each module includes interactive quizzes to test your understanding. You can take quizzes anytime and track your progress!`;
+            }
+            
+            if (lowerMessage.includes('certificate') || lowerMessage.includes('certification') ||
+                (isGreek && (lowerMessage.includes('πιστοποιητικό') || lowerMessage.includes('πιστοποίηση')))) {
+                return isGreek
+                    ? `Ολοκληρώστε και τις 8 ενότητες και περάστε τα κουίζ για να κερδίσετε το πιστοποιητικό ολοκλήρωσης. Είναι ένας υπέροχος τρόπος να επιδείξετε τις δεξιότητες κριτικής σκέψης σας!`
+                    : `Complete all 8 modules and pass the quizzes to earn your certificate of completion. It's a great way to showcase your critical thinking skills!`;
+            }
+            
+            if (lowerMessage.includes('start') || lowerMessage.includes('begin') || lowerMessage.includes('how') ||
+                (isGreek && (lowerMessage.includes('ξεκίνησε') || lowerMessage.includes('αρχή') || lowerMessage.includes('πώς')))) {
+                return isGreek
+                    ? `Για να ξεκινήσετε, απλά κάντε κλικ σε οποιαδήποτε κάρτα μαθήματος ή ενότητα. Μπορείτε να εξερευνήσετε το περιεχόμενο στον δικό σας ρυθμό. Χρειάζεστε βοήθεια στην πλοήγηση; Απλά ρωτήστε!`
+                    : `To get started, simply click on any course card or module. You can explore the content at your own pace. Need help navigating? Just ask!`;
+            }
+            
+            if (lowerMessage.includes('progress') || lowerMessage.includes('track') ||
+                (isGreek && (lowerMessage.includes('πρόοδος') || lowerMessage.includes('παρακολούθηση')))) {
+                return isGreek
+                    ? `Η πρόοδός σας αποθηκεύεται αυτόματα καθώς ολοκληρώνετε ενότητες και κουίζ. Συνδεθείτε για να παρακολουθήσετε το ταξίδι μάθησής σας!`
+                    : `Your progress is automatically saved as you complete modules and quizzes. Sign in to track your learning journey!`;
+            }
+            
+            // Default responses
+            const responses = isGreek ? [
+                `Είναι μια εξαιρετική ερώτηση! Μπορώ να σας βοηθήσω να πλοηγηθείτε στο μάθημα, να εξηγήσω ενότητες ή να απαντήσω σε ερωτήσεις σχετικά με την πλατφόρμα μάθησης. Τι θα θέλατε να μάθετε;`,
+                `Είμαι εδώ για να βοηθήσω! Μπορείτε να με ρωτήσετε για μαθήματα, ενότητες, κουίζ, πιστοποιητικά ή οτιδήποτε άλλο σχετικό με την εμπειρία μάθησής σας.`,
+                `Αισθανθείτε ελεύθεροι να εξερευνήσετε τα μαθήματα παραπάνω ή να με ρωτήσετε οτιδήποτε σχετικά με την πλατφόρμα. Είμαι εδώ για να κάνω το ταξίδι μάθησής σας ομαλό και ευχάριστο!`
+            ] : [
+                `That's a great question! I can help you navigate the course, explain modules, or answer questions about the learning platform. What would you like to know?`,
+                `I'm here to help! You can ask me about courses, modules, quizzes, certificates, or anything else related to your learning experience.`,
+                `Feel free to explore the courses above or ask me anything about the platform. I'm here to make your learning journey smooth and enjoyable!`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close chatbot when clicking outside
+        document.addEventListener('click', (e) => {
+            const chatbotWindow = document.getElementById('chatbotWindow');
+            const chatbotBubble = document.getElementById('chatbotBubble');
+            
+            if (chatbotWindow && chatbotWindow.classList.contains('show')) {
+                if (!chatbotWindow.contains(e.target) && !chatbotBubble.contains(e.target)) {
+                    toggleChatbot();
+                }
+            }
+        });
+
+        // Make functions global
+        window.toggleChatbot = toggleChatbot;
+        window.handleChatbotKeyPress = handleChatbotKeyPress;
+        window.sendChatbotMessage = sendChatbotMessage;
+        window.scrollToCourses = scrollToCourses;
+        window.init3DScene = init3DScene;
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

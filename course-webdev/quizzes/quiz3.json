@@ -1,0 +1,86 @@
+{
+  "module": "Module 3: Advanced CSS & Responsive Design",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is the mobile-first approach?",
+      "options": ["Design for desktop first", "Design for mobile first, then enhance", "Only design for mobile", "Ignore mobile devices"],
+      "correct_answer": 1,
+      "explanation": "Mobile-first means designing for mobile devices first, then enhancing for larger screens using media queries."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Which CSS feature creates two-dimensional layouts?",
+      "options": ["Flexbox", "CSS Grid", "Float", "Position"],
+      "correct_answer": 1,
+      "explanation": "CSS Grid creates two-dimensional layouts (rows and columns), while Flexbox is one-dimensional."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What does 'fr' unit mean in CSS Grid?",
+      "options": ["Fixed ratio", "Fractional unit", "Frame rate", "Font size"],
+      "correct_answer": 1,
+      "explanation": "The 'fr' unit (fractional unit) represents a fraction of available space in CSS Grid."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "CSS variables are defined with:",
+      "options": ["$variable-name", "--variable-name", "var(variable-name)", "@variable-name"],
+      "correct_answer": 1,
+      "explanation": "CSS custom properties (variables) are defined with double dashes: --variable-name."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What property creates smooth transitions?",
+      "options": ["animation", "transition", "transform", "keyframes"],
+      "correct_answer": 1,
+      "explanation": "The transition property creates smooth changes between states over a specified duration."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Media queries use:",
+      "options": ["@media", "@query", "@screen", "@responsive"],
+      "correct_answer": 0,
+      "explanation": "Media queries use the @media at-rule to apply styles based on device characteristics."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What are three common breakpoints for responsive design?",
+      "acceptable_answers": [
+        "768px",
+        "1024px",
+        "mobile",
+        "tablet",
+        "desktop",
+        "480px",
+        "600px",
+        "1200px"
+      ],
+      "explanation": "Common breakpoints include mobile (up to 767px), tablet (768px-1023px), and desktop (1024px+), though exact values vary."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "What is the difference between transitions and animations?",
+      "acceptable_answers": [
+        "transitions simple",
+        "animations complex",
+        "transitions state changes",
+        "animations keyframes",
+        "transitions automatic",
+        "animations controlled"
+      ],
+      "explanation": "Transitions animate simple state changes (like hover), while animations use keyframes for more complex, controlled sequences."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

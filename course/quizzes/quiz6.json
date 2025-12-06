@@ -1,0 +1,56 @@
+{
+  "module": "Module 6: Fallacies & Rhetoric",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Straw man involves:",
+      "options": ["emotional appeal", "misrepresentation", "false authority", "hasty generalization"],
+      "correct_answer": 1,
+      "explanation": "Straw man fallacy misrepresents an opponent's argument to make it easier to attack."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Ad hominem targets:",
+      "options": ["the argument", "the person", "the evidence", "the conclusion"],
+      "correct_answer": 1,
+      "explanation": "Ad hominem attacks the person making the argument rather than addressing the argument itself."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "False dilemma presents:",
+      "options": ["multiple options", "two options only", "no options", "complex choices"],
+      "correct_answer": 1,
+      "explanation": "False dilemma artificially limits choices to only two options when more exist."
+    },
+    {
+      "id": 4,
+      "type": "short_answer",
+      "question": "Give example of one common fallacy:",
+      "acceptable_answers": [
+        "straw man",
+        "slippery slope",
+        "ad hominem",
+        "false dilemma",
+        "post hoc"
+      ],
+      "explanation": "Common fallacies include straw man, slippery slope, ad hominem, false dilemma, and many others."
+    },
+    {
+      "id": 5,
+      "type": "short_answer",
+      "question": "Why does rhetorical appeal often override logical reasoning?",
+      "acceptable_answers": [
+        "emotions are powerful",
+        "rhetoric is more persuasive",
+        "people respond to stories",
+        "logic requires effort"
+      ],
+      "explanation": "Rhetorical appeals often override logic because they engage emotions and require less cognitive effort."
+    }
+  ],
+  "passing_score": 4,
+  "time_limit": 10
+}

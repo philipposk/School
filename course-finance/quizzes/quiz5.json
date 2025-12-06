@@ -1,0 +1,88 @@
+{
+  "module": "Module 5: Stocks & Bonds Fundamentals",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "When interest rates rise, bond prices typically:",
+      "options": ["rise", "fall", "stay the same", "fluctuate randomly"],
+      "correct_answer": 1,
+      "explanation": "Bond prices have an inverse relationship with interest rates: when rates rise, existing bond prices fall."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "An ETF is best described as:",
+      "options": [
+        "a single stock",
+        "a basket of securities traded like a stock",
+        "a savings account",
+        "a bond"
+      ],
+      "correct_answer": 1,
+      "explanation": "An ETF (Exchange-Traded Fund) is a basket of securities that trades like a stock on an exchange."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Diversification works by:",
+      "options": [
+        "investing in only one asset",
+        "spreading investments across assets",
+        "timing the market",
+        "avoiding stocks"
+      ],
+      "correct_answer": 1,
+      "explanation": "Diversification reduces risk by spreading investments across different assets, sectors, and geographies."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "A common rule for stock allocation is:",
+      "options": [
+        "50% stocks always",
+        "110 - age = % in stocks",
+        "100% stocks for everyone",
+        "age = % in stocks"
+      ],
+      "correct_answer": 1,
+      "explanation": "The rule '110 - age = % in stocks' provides a guideline for age-appropriate asset allocation."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Index funds typically have:",
+      "options": ["high fees", "low fees", "no fees", "variable fees"],
+      "correct_answer": 1,
+      "explanation": "Index funds typically have low expense ratios because they passively track an index rather than active management."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Name one advantage of investing in ETFs over individual stocks:",
+      "acceptable_answers": [
+        "instant diversification",
+        "lower transaction costs",
+        "access to many securities",
+        "professional management",
+        "lower fees"
+      ],
+      "explanation": "ETFs provide instant diversification, allowing you to own many securities with a single purchase."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the purpose of rebalancing a portfolio?",
+      "acceptable_answers": [
+        "maintain target asset allocation",
+        "control risk level",
+        "sell winners and buy losers",
+        "adjust for market changes"
+      ],
+      "explanation": "Rebalancing maintains your target asset allocation and risk level by adjusting holdings back to your desired percentages."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

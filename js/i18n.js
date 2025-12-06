@@ -1,0 +1,342 @@
+// Internationalization (i18n) System
+// Supports English and Greek
+
+const i18n = {
+    currentLanguage: localStorage.getItem('language') || 'en',
+    
+    translations: {
+        en: {
+            // Header & Navigation
+            logo: "🎓 Learning Platform",
+            signIn: "Sign In",
+            signOut: "Sign Out",
+            myProfile: "My Profile",
+            editProfile: "Edit Profile",
+            myCertificates: "My Certificates",
+            messages: "Messages",
+            assignments: "Assignments",
+            friends: "Friends",
+            gdprData: "GDPR & Data",
+            
+            // Courses
+            courses: "Courses",
+            noCourses: "No courses available",
+            startCourse: "Start Course",
+            continueCourse: "Continue Course",
+            viewCourse: "View Course",
+            modules: "Modules",
+            module: "Module",
+            completed: "Completed",
+            inProgress: "In Progress",
+            notStarted: "Not Started",
+            
+            // Module Content
+            takeQuiz: "Take Quiz",
+            downloadPDF: "Download PDF",
+            previousModule: "Previous Module",
+            nextModule: "Next Module",
+            completeCourse: "Complete Course ✓",
+            loadingModule: "Loading module...",
+            errorLoadingModule: "Error Loading Module",
+            couldNotLoadModule: "Could not load module content. Please check that the file exists.",
+            
+            // Quiz
+            quiz: "Quiz",
+            question: "Question",
+            submitQuiz: "Submit Quiz",
+            yourScore: "Your Score",
+            passed: "Passed",
+            needToPass: "Need {score} to pass",
+            youScored: "You scored {score}/{total}",
+            
+            // Assignments
+            submitAssignment: "Submit Assignment",
+            resubmitAssignment: "Resubmit Assignment",
+            viewSubmission: "View Submission",
+            assignment: "Assignment",
+            assignments: "Assignments",
+            noAssignments: "No Assignments",
+            notSubmitted: "Not Submitted",
+            submitted: "Submitted",
+            grading: "Grading...",
+            graded: "Graded",
+            grade: "Grade",
+            feedback: "Feedback",
+            yourSubmission: "Your Submission",
+            previousSubmission: "Previous Submission",
+            previousGrade: "Previous Grade",
+            dueDate: "Due",
+            noDueDate: "No due date",
+            submissionMethod: "Submission Method",
+            writeText: "Write Text",
+            uploadFile: "Upload File",
+            chooseFile: "Choose File",
+            yourAnswer: "Your Answer",
+            minimumWords: "Minimum 200 words recommended",
+            fileAccepted: "PDF, Word, or Text files accepted (Max 10MB)",
+            cancel: "Cancel",
+            remove: "Remove",
+            submittedAt: "Submitted",
+            
+            // Easter Egg
+            loadingSubmission: "Loading Submission...",
+            oopsMyBad: "Oops my bad!",
+            heresYourSubmission: "Here's your actual submission...",
+            
+            // Messages
+            messaging: "Messaging",
+            sendMessage: "Send Message",
+            typeMessage: "Type a message...",
+            noMessages: "No messages yet",
+            startConversation: "Start a conversation by messaging a friend from your Friends list!",
+            
+            // Friends
+            allFriends: "All Friends",
+            discover: "Discover",
+            following: "Following",
+            follow: "Follow",
+            unfollow: "Unfollow",
+            message: "Message",
+            viewProfile: "View Profile",
+            
+            // Certificates
+            certificates: "Certificates",
+            noCertificates: "No certificates yet",
+            earnCertificates: "Complete courses to earn certificates!",
+            certificate: "Certificate",
+            issuedOn: "Issued on",
+            
+            // AI Chatbot
+            aiChatbot: "AI Chatbot",
+            askQuestion: "Ask a question...",
+            send: "Send",
+            
+            // Common
+            close: "Close",
+            save: "Save",
+            delete: "Delete",
+            edit: "Edit",
+            back: "Back",
+            next: "Next",
+            previous: "Previous",
+            search: "Search",
+            loading: "Loading...",
+            error: "Error",
+            success: "Success",
+            
+            // Settings
+            settings: "Settings",
+            theme: "Theme",
+            layout: "Layout",
+            language: "Language",
+            english: "English",
+            greek: "Greek",
+            
+            // Login/Signup
+            login: "Login",
+            signup: "Sign Up",
+            email: "Email",
+            password: "Password",
+            name: "Name",
+            confirmPassword: "Confirm Password",
+            alreadyHaveAccount: "Already have an account?",
+            dontHaveAccount: "Don't have an account?",
+            
+            // Errors
+            pleaseSignIn: "Please sign in",
+            pleaseSelectCourse: "Please select a course first",
+            fileSizeExceeds: "File size exceeds 10MB limit",
+            unsupportedFileType: "Unsupported file type. Please upload PDF, Word, Text, or RTF files.",
+            pleaseWriteAssignment: "Please write your assignment before submitting.",
+            pleaseSelectFile: "Please select a file to upload.",
+            pleaseChooseFile: "Please choose a file to upload.",
+        },
+        
+        el: {
+            // Header & Navigation
+            logo: "🎓 Πλατφόρμα Μάθησης",
+            signIn: "Σύνδεση",
+            signOut: "Αποσύνδεση",
+            myProfile: "Το Προφίλ Μου",
+            editProfile: "Επεξεργασία Προφίλ",
+            myCertificates: "Τα Πιστοποιητικά Μου",
+            messages: "Μηνύματα",
+            assignments: "Εργασίες",
+            friends: "Φίλοι",
+            gdprData: "GDPR & Δεδομένα",
+            
+            // Courses
+            courses: "Μαθήματα",
+            noCourses: "Δεν υπάρχουν διαθέσιμα μαθήματα",
+            startCourse: "Έναρξη Μαθήματος",
+            continueCourse: "Συνέχεια Μαθήματος",
+            viewCourse: "Προβολή Μαθήματος",
+            modules: "Ενότητες",
+            module: "Ενότητα",
+            completed: "Ολοκληρωμένο",
+            inProgress: "Σε Εξέλιξη",
+            notStarted: "Δεν Ξεκίνησε",
+            
+            // Module Content
+            takeQuiz: "Κάνε Κουίζ",
+            downloadPDF: "Λήψη PDF",
+            previousModule: "Προηγούμενη Ενότητα",
+            nextModule: "Επόμενη Ενότητα",
+            completeCourse: "Ολοκλήρωση Μαθήματος ✓",
+            loadingModule: "Φόρτωση ενότητας...",
+            errorLoadingModule: "Σφάλμα Φόρτωσης Ενότητας",
+            couldNotLoadModule: "Δεν ήταν δυνατή η φόρτωση του περιεχομένου της ενότητας. Παρακαλώ ελέγξτε ότι το αρχείο υπάρχει.",
+            
+            // Quiz
+            quiz: "Κουίζ",
+            question: "Ερώτηση",
+            submitQuiz: "Υποβολή Κουίζ",
+            yourScore: "Η Βαθμολογία Σου",
+            passed: "Πέρασες",
+            needToPass: "Χρειάζεσαι {score} για να περάσεις",
+            youScored: "Πέτυχες {score}/{total}",
+            
+            // Assignments
+            submitAssignment: "Υποβολή Εργασίας",
+            resubmitAssignment: "Επαναυποβολή Εργασίας",
+            viewSubmission: "Προβολή Υποβολής",
+            assignment: "Εργασία",
+            assignments: "Εργασίες",
+            noAssignments: "Δεν Υπάρχουν Εργασίες",
+            notSubmitted: "Δεν Υποβλήθηκε",
+            submitted: "Υποβλήθηκε",
+            grading: "Αξιολόγηση...",
+            graded: "Αξιολογήθηκε",
+            grade: "Βαθμός",
+            feedback: "Σχόλια",
+            yourSubmission: "Η Υποβολή Σου",
+            previousSubmission: "Προηγούμενη Υποβολή",
+            previousGrade: "Προηγούμενος Βαθμός",
+            dueDate: "Προθεσμία",
+            noDueDate: "Χωρίς προθεσμία",
+            submissionMethod: "Μέθοδος Υποβολής",
+            writeText: "Γράψε Κείμενο",
+            uploadFile: "Ανέβασε Αρχείο",
+            chooseFile: "Επίλεξε Αρχείο",
+            yourAnswer: "Η Απάντησή Σου",
+            minimumWords: "Συνιστάται ελάχιστα 200 λέξεις",
+            fileAccepted: "Αρχεία PDF, Word ή Text αποδεκτά (Μέγιστο 10MB)",
+            cancel: "Ακύρωση",
+            remove: "Αφαίρεση",
+            submittedAt: "Υποβλήθηκε",
+            
+            // Easter Egg
+            loadingSubmission: "Φόρτωση Υποβολής...",
+            oopsMyBad: "Ουπς, λάθος μου!",
+            heresYourSubmission: "Να η πραγματική σου υποβολή...",
+            
+            // Messages
+            messaging: "Αλληλογραφία",
+            sendMessage: "Αποστολή Μηνύματος",
+            typeMessage: "Γράψε ένα μήνυμα...",
+            noMessages: "Δεν υπάρχουν ακόμα μηνύματα",
+            startConversation: "Ξεκίνησε μια συνομιλία στέλνοντας μήνυμα σε έναν φίλο από τη λίστα Φίλων!",
+            
+            // Friends
+            allFriends: "Όλοι οι Φίλοι",
+            discover: "Ανακάλυψη",
+            following: "Ακολουθείς",
+            follow: "Ακολούθησε",
+            unfollow: "Κατάργηση Ακολούθησης",
+            message: "Μήνυμα",
+            viewProfile: "Προβολή Προφίλ",
+            
+            // Certificates
+            certificates: "Πιστοποιητικά",
+            noCertificates: "Δεν υπάρχουν ακόμα πιστοποιητικά",
+            earnCertificates: "Ολοκλήρωσε μαθήματα για να κερδίσεις πιστοποιητικά!",
+            certificate: "Πιστοποιητικό",
+            issuedOn: "Εκδόθηκε στις",
+            
+            // AI Chatbot
+            aiChatbot: "Chatbot AI",
+            askQuestion: "Κάνε μια ερώτηση...",
+            send: "Αποστολή",
+            
+            // Common
+            close: "Κλείσιμο",
+            save: "Αποθήκευση",
+            delete: "Διαγραφή",
+            edit: "Επεξεργασία",
+            back: "Πίσω",
+            next: "Επόμενο",
+            previous: "Προηγούμενο",
+            search: "Αναζήτηση",
+            loading: "Φόρτωση...",
+            error: "Σφάλμα",
+            success: "Επιτυχία",
+            
+            // Settings
+            settings: "Ρυθμίσεις",
+            theme: "Θέμα",
+            layout: "Διάταξη",
+            language: "Γλώσσα",
+            english: "Αγγλικά",
+            greek: "Ελληνικά",
+            
+            // Login/Signup
+            login: "Σύνδεση",
+            signup: "Εγγραφή",
+            email: "Email",
+            password: "Κωδικός",
+            name: "Όνομα",
+            confirmPassword: "Επιβεβαίωση Κωδικού",
+            alreadyHaveAccount: "Έχεις ήδη λογαριασμό;",
+            dontHaveAccount: "Δεν έχεις λογαριασμό;",
+            
+            // Errors
+            pleaseSignIn: "Παρακαλώ συνδέσου",
+            pleaseSelectCourse: "Παρακαλώ επιλέξτε πρώτα ένα μάθημα",
+            fileSizeExceeds: "Το μέγεθος του αρχείου υπερβαίνει το όριο των 10MB",
+            unsupportedFileType: "Μη υποστηριζόμενος τύπος αρχείου. Παρακαλώ ανέβασε αρχεία PDF, Word, Text ή RTF.",
+            pleaseWriteAssignment: "Παρακαλώ γράψε την εργασία σου πριν την υποβάλεις.",
+            pleaseSelectFile: "Παρακαλώ επιλέξτε ένα αρχείο για ανέβασμα.",
+            pleaseChooseFile: "Παρακαλώ επιλέξτε ένα αρχείο για ανέβασμα.",
+            
+            // Additional UI elements
+            viewModule: "Προβολή Ενότητας",
+        }
+    },
+    
+    // Get translation for a key
+    t(key, params = {}) {
+        const translation = this.translations[this.currentLanguage]?.[key] || this.translations.en[key] || key;
+        
+        // Replace parameters like {score} with actual values
+        return translation.replace(/\{(\w+)\}/g, (match, paramKey) => {
+            return params[paramKey] !== undefined ? params[paramKey] : match;
+        });
+    },
+    
+    // Set language
+    setLanguage(lang) {
+        if (this.translations[lang]) {
+            this.currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            document.documentElement.lang = lang;
+            this.updatePageLanguage();
+        }
+    },
+    
+    // Update page language attribute
+    updatePageLanguage() {
+        document.documentElement.lang = this.currentLanguage;
+    },
+    
+    // Initialize
+    init() {
+        this.updatePageLanguage();
+    }
+};
+
+// Make i18n globally available
+window.i18n = i18n;
+
+// Initialize on load
+i18n.init();
+

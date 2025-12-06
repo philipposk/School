@@ -1,0 +1,78 @@
+{
+  "module": "Module 4: Lists & Data",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What protocol makes items work directly in List?",
+      "options": ["Codable", "Identifiable", "Hashable", "Equatable"],
+      "correct_answer": 1,
+      "explanation": "The Identifiable protocol provides a unique id property that List uses to identify items."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "How do you iterate in a List?",
+      "options": ["For loop", "ForEach", "While loop", "Map"],
+      "correct_answer": 1,
+      "explanation": "ForEach is used to iterate over collections and create views for each item in a List."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is UserDefaults used for?",
+      "options": ["Complex data", "Simple persistence", "Networking", "Images"],
+      "correct_answer": 1,
+      "explanation": "UserDefaults is used for storing simple data like strings, numbers, and booleans persistently."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What does Identifiable require?",
+      "options": ["name property", "id property", "value property", "data property"],
+      "correct_answer": 1,
+      "explanation": "The Identifiable protocol requires an 'id' property that uniquely identifies each instance."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "How do you add swipe actions to List rows?",
+      "options": [".swipeActions()", ".swipe()", ".actions()", ".gesture()"],
+      "correct_answer": 0,
+      "explanation": "The .swipeActions() modifier adds swipe actions to List rows, like delete or edit."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What is Core Data used for?",
+      "options": ["Simple data", "Complex data persistence", "Networking", "UI"],
+      "correct_answer": 1,
+      "explanation": "Core Data is Apple's framework for managing complex object graphs and persistent storage."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What's the difference between UserDefaults and Core Data?",
+      "acceptable_answers": [
+        "UserDefaults for simple data, Core Data for complex relationships",
+        "UserDefaults is simpler, Core Data handles complex data models",
+        "Different persistence solutions for different needs"
+      ],
+      "explanation": "UserDefaults is for simple key-value storage, while Core Data is for complex data models with relationships and queries."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How do you make a List searchable?",
+      "acceptable_answers": [
+        "Use .searchable() modifier with @State search text",
+        "Add searchable modifier and filter the list",
+        "Combine searchable modifier with filtered array"
+      ],
+      "explanation": "Use the .searchable() modifier with a @State variable for search text, then filter your list based on that text."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

@@ -1,0 +1,76 @@
+{
+  "module": "Module 1: HTML Foundations",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What does HTML stand for?",
+      "options": ["HyperText Markup Language", "High-Level Text Language", "Home Tool Markup Language", "Hyperlink Text Markup"],
+      "correct_answer": 0,
+      "explanation": "HTML stands for HyperText Markup Language, the standard markup language for web pages."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Which tag is used for the most important heading?",
+      "options": ["<h6>", "<h1>", "<heading>", "<title>"],
+      "correct_answer": 1,
+      "explanation": "<h1> is used for the most important heading, with h2-h6 for subheadings."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is the purpose of semantic HTML?",
+      "options": ["Makes code prettier", "Describes meaning clearly", "Adds styling", "Improves speed"],
+      "correct_answer": 1,
+      "explanation": "Semantic HTML describes the meaning and structure of content clearly, improving accessibility and SEO."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Which attribute is required for images?",
+      "options": ["src", "alt", "width", "height"],
+      "correct_answer": 1,
+      "explanation": "The alt attribute is required for accessibility, providing alternative text for screen readers."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What does <nav> represent?",
+      "options": ["Navigation links", "Main content", "Footer", "Sidebar"],
+      "correct_answer": 0,
+      "explanation": "<nav> is a semantic element used for navigation links."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Which form input type validates email format?",
+      "options": ["text", "email", "mail", "input"],
+      "correct_answer": 1,
+      "explanation": "The email input type provides built-in email format validation."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Name three HTML5 semantic elements.",
+      "acceptable_answers": ["header", "nav", "main", "article", "section", "aside", "footer"],
+      "explanation": "HTML5 semantic elements include header, nav, main, article, section, aside, and footer."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is alt text important for images?",
+      "acceptable_answers": [
+        "accessibility",
+        "screen readers",
+        "accessibility for visually impaired",
+        "helps screen readers",
+        "accessibility purposes"
+      ],
+      "explanation": "Alt text is crucial for accessibility, allowing screen readers to describe images to visually impaired users."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

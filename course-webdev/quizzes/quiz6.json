@@ -1,0 +1,84 @@
+{
+  "module": "Module 6: JavaScript Advanced & APIs",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What does async/await do?",
+      "options": ["Makes code synchronous", "Handles asynchronous operations", "Speeds up code", "Deletes promises"],
+      "correct_answer": 1,
+      "explanation": "async/await provides a cleaner way to handle asynchronous operations, making async code look synchronous."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does fetch() return?",
+      "options": ["JSON data", "A Promise", "An object", "A string"],
+      "correct_answer": 1,
+      "explanation": "fetch() returns a Promise that resolves to a Response object."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is JSON?",
+      "options": ["JavaScript Object Notation", "Java Script Object Network", "JavaScript Online Network", "Just Simple Object Notation"],
+      "correct_answer": 0,
+      "explanation": "JSON stands for JavaScript Object Notation, a lightweight data interchange format."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What does response.json() do?",
+      "options": ["Converts response to JSON string", "Parses JSON response to object", "Validates JSON", "Sends JSON"],
+      "correct_answer": 1,
+      "explanation": "response.json() parses the JSON response body and returns a JavaScript object."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What is CORS?",
+      "options": ["Cross-Origin Resource Sharing", "Cross-Origin Request System", "Client Origin Resource Sharing", "Code Origin Request System"],
+      "correct_answer": 0,
+      "explanation": "CORS (Cross-Origin Resource Sharing) allows web pages to request resources from different domains."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What does await do?",
+      "options": ["Waits for promise to resolve", "Stops execution", "Creates delay", "Handles errors"],
+      "correct_answer": 0,
+      "explanation": "await pauses execution until the Promise resolves, then returns the resolved value."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between Promises and async/await?",
+      "acceptable_answers": [
+        "async await cleaner",
+        "async await syntax",
+        "promises then catch",
+        "async await easier",
+        "same functionality",
+        "different syntax"
+      ],
+      "explanation": "async/await is syntactic sugar over Promises, providing cleaner, more readable code while maintaining the same functionality."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is error handling important when working with APIs?",
+      "acceptable_answers": [
+        "network failures",
+        "api errors",
+        "user experience",
+        "prevent crashes",
+        "handle failures",
+        "graceful degradation"
+      ],
+      "explanation": "Error handling is crucial because APIs can fail due to network issues, server errors, or invalid requests. Proper error handling prevents crashes and provides better user experience."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

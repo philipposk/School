@@ -1,0 +1,97 @@
+{
+  "module": "Module 6: Retirement Planning",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "The 4% rule means you can withdraw:",
+      "options": [
+        "4% of portfolio annually in retirement",
+        "4% monthly",
+        "€4,000 per year",
+        "4% of income"
+      ],
+      "correct_answer": 0,
+      "explanation": "The 4% rule suggests withdrawing 4% of your portfolio value annually in retirement, adjusted for inflation."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Employer matching is like getting:",
+      "options": [
+        "a loan",
+        "100% return immediately",
+        "a tax deduction",
+        "free insurance"
+      ],
+      "correct_answer": 1,
+      "explanation": "Employer matching provides an immediate 100% return on your contribution up to the match percentage."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Compound interest works best:",
+      "options": [
+        "with high interest rates only",
+        "over long time periods",
+        "with small amounts",
+        "in savings accounts"
+      ],
+      "correct_answer": 1,
+      "explanation": "Compound interest's power increases exponentially with time, making long time periods most effective."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "A Roth IRA offers:",
+      "options": [
+        "tax deduction now",
+        "tax-free withdrawals in retirement",
+        "required distributions at 65",
+        "employer matching"
+      ],
+      "correct_answer": 1,
+      "explanation": "Roth IRAs offer tax-free growth and tax-free withdrawals in retirement, with no required minimum distributions."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "The Rule of 72 helps calculate:",
+      "options": [
+        "retirement age",
+        "years to double money",
+        "tax rate",
+        "contribution limit"
+      ],
+      "correct_answer": 1,
+      "explanation": "The Rule of 72 estimates how long it takes to double your money: divide 72 by the interest rate."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Why is starting retirement savings early so important?",
+      "acceptable_answers": [
+        "more time for compound growth",
+        "smaller contributions needed",
+        "time is your greatest asset",
+        "less financial stress later"
+      ],
+      "explanation": "Starting early allows compound interest more time to work, meaning smaller contributions are needed to reach retirement goals."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What percentage of pre-retirement income should you plan to replace?",
+      "acceptable_answers": [
+        "70-80%",
+        "70%",
+        "80%",
+        "70 to 80 percent"
+      ],
+      "explanation": "Most financial planners recommend replacing 70-80% of pre-retirement income to maintain your lifestyle."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

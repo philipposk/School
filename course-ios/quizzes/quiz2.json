@@ -1,0 +1,78 @@
+{
+  "module": "Module 2: Layout & Navigation",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is NavigationView used for?",
+      "options": ["Creating tabs", "Navigating between screens", "Laying out grids", "Showing alerts"],
+      "correct_answer": 1,
+      "explanation": "NavigationView provides navigation functionality, allowing you to push and pop views onto a navigation stack."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "How do you navigate to a new screen?",
+      "options": ["NavigationLink", "NavigationButton", "NavigateTo", "PushView"],
+      "correct_answer": 0,
+      "explanation": "NavigationLink creates a button that navigates to a destination view when tapped."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What does TabView create?",
+      "options": ["Navigation stack", "Tab bar at bottom", "Grid layout", "Scroll view"],
+      "correct_answer": 1,
+      "explanation": "TabView creates a tab bar interface at the bottom of the screen, allowing users to switch between different views."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What is LazyVGrid used for?",
+      "options": ["Horizontal scrolling", "Vertical grid layout", "Navigation", "Alerts"],
+      "correct_answer": 1,
+      "explanation": "LazyVGrid creates a vertical grid layout that efficiently displays items in columns."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "How do you present a modal sheet?",
+      "options": [".sheet() modifier", ".modal()", ".present()", ".show()"],
+      "correct_answer": 0,
+      "explanation": "The .sheet() modifier presents a modal sheet over the current view."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What does Spacer do?",
+      "options": ["Adds padding", "Pushes views apart", "Creates gaps", "Hides views"],
+      "correct_answer": 1,
+      "explanation": "Spacer expands to fill available space, pushing other views apart in the layout."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between NavigationView and TabView?",
+      "acceptable_answers": [
+        "NavigationView for hierarchical navigation, TabView for switching between sections",
+        "NavigationView uses push/pop, TabView uses tabs",
+        "Different navigation patterns for different use cases"
+      ],
+      "explanation": "NavigationView is for hierarchical navigation (drill-down), while TabView is for switching between different sections of an app (like tabs at the bottom)."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "When would you use LazyVGrid instead of VStack?",
+      "acceptable_answers": [
+        "When you need multiple columns",
+        "For grid layouts with items in rows and columns",
+        "When displaying collections in a grid format"
+      ],
+      "explanation": "Use LazyVGrid when you need to display items in a grid with multiple columns, rather than a single vertical column like VStack."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+
