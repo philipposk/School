@@ -130,11 +130,15 @@ const ScrollHeaderManager = {
                 }
             });
             
-            // Show sidebar
+            // Show sidebar - make absolutely sure it's visible
             if (this.sidebar) {
                 this.sidebar.style.setProperty('opacity', '1', 'important');
                 this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
                 this.sidebar.style.setProperty('visibility', 'visible', 'important');
+                this.sidebar.style.setProperty('display', 'flex', 'important');
+                // Force reflow
+                this.sidebar.offsetHeight;
+                console.log('Sidebar shown, children:', this.sidebar.children.length);
             }
             
             // Hide header buttons
