@@ -3558,6 +3558,33 @@ Keep responses concise (2-4 sentences). If asked about something not available, 
                 }
             }
             
+            // Check for difficulty/easiest questions
+            if (lowerMessage.includes('easiest') || lowerMessage.includes('easiest') || lowerMessage.includes('beginner') || 
+                lowerMessage.includes('which course') || lowerMessage.includes('what course') ||
+                (isGreek && (lowerMessage.includes('ευκολότερο') || lowerMessage.includes('πιο εύκολο') || lowerMessage.includes('αρχάριος') || lowerMessage.includes('ποιο μάθημα')))) {
+                // Find easiest course by level
+                const beginnerCourses = coursesList.filter(c => 
+                    c.level.toLowerCase().includes('beginner') || 
+                    c.level.toLowerCase().includes('αρχάριος')
+                );
+                
+                if (beginnerCourses.length > 0) {
+                    const easiest = beginnerCourses[0];
+                    return isGreek
+                        ? `Το πιο εύκολο μάθημα είναι το "${easiest.title}" - ${easiest.level} επιπέδου με ${easiest.modules} ενότητες. ${easiest.description} Θέλετε να το ξεκινήσετε;`
+                        : `The easiest course is "${easiest.title}" - ${easiest.level} level with ${easiest.modules} modules. ${easiest.description} Would you like to start it?`;
+                } else {
+                    // If no explicit beginner, find shortest/easiest by modules
+                    const sortedByModules = [...coursesList].sort((a, b) => 
+                        (a.modules_data?.length || 0) - (b.modules_data?.length || 0)
+                    );
+                    const easiest = sortedByModules[0];
+                    return isGreek
+                        ? `Το "${easiest.title}" είναι ένα καλό σημείο εκκίνησης - ${easiest.level} επιπέδου με ${easiest.modules} ενότητες. ${easiest.description}`
+                        : `"${easiest.title}" is a good starting point - ${easiest.level} level with ${easiest.modules} modules. ${easiest.description}`;
+                }
+            }
+            
             // Check user progress (with Greek support)
             if (lowerMessage.includes('progress') || lowerMessage.includes('completed') || lowerMessage.includes('how many') ||
                 (isGreek && (lowerMessage.includes('πρόοδος') || lowerMessage.includes('ολοκληρώθηκε') || lowerMessage.includes('πόσες')))) {
