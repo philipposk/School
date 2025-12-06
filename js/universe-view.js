@@ -87,9 +87,10 @@ const UniverseView = {
     },
     
     setupRenderer(container) {
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false }); // Solid background
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setClearColor(0x000000, 1); // Black background
         this.renderer.shadowMap.enabled = true;
         container.appendChild(this.renderer.domElement);
     },
@@ -101,6 +102,7 @@ const UniverseView = {
             this.controls.dampingFactor = 0.05;
             this.controls.minDistance = 50;
             this.controls.maxDistance = Infinity; // Allow infinite zoom out
+            this.controls.target.set(0, 0, 0); // Look at planet
             this.controls.zoomSpeed = 1.0; // Consistent zoom speed
             this.controls.addEventListener('change', () => {
                 this.onZoomChange();
@@ -292,6 +294,7 @@ const UniverseView = {
         
         this.travelingStars = new THREE.Points(geometry, material);
         this.travelingStars.visible = false; // Hidden by default
+        this.travelingStars.renderOrder = -1; // Render behind other objects
         this.scene.add(this.travelingStars);
         
         // Store references for updates
