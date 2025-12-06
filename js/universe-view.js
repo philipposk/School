@@ -730,14 +730,20 @@ const UniverseView = {
             }
         });
         
-        // Increase planet emissive when zoomed in for better visibility
+        // Increase planet emissive and improve material properties when zoomed in for better visibility
         if (this.planetMaterial) {
             if (distance < 200) {
-                this.planetMaterial.emissiveIntensity = 0.4;
+                this.planetMaterial.emissiveIntensity = 0.5;
+                this.planetMaterial.roughness = 0.5; // Less rough = more reflective/shiny
+                this.planetMaterial.metalness = 0.3;
             } else if (distance < 400) {
-                this.planetMaterial.emissiveIntensity = 0.25;
+                this.planetMaterial.emissiveIntensity = 0.3;
+                this.planetMaterial.roughness = 0.6;
+                this.planetMaterial.metalness = 0.2;
             } else {
                 this.planetMaterial.emissiveIntensity = 0.1;
+                this.planetMaterial.roughness = 0.7;
+                this.planetMaterial.metalness = 0.2;
             }
         }
         
