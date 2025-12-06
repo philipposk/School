@@ -347,6 +347,12 @@ const ScrollHeaderManager = {
                 const startX = sidebarRect.left + sidebarRect.width / 2;
                 const startY = sidebarRect.top + sidebarRect.height / 2;
                 
+                // Immediately hide/disappear sidebar button as animation starts
+                sidebarBtn.style.opacity = '0';
+                sidebarBtn.style.transform = 'scale(0)';
+                sidebarBtn.style.pointerEvents = 'none';
+                sidebarBtn.style.transition = 'all 0.2s ease';
+                
                 // Create flying clone for reverse animation
                 const clone = sidebarBtn.cloneNode(true);
                 clone.classList.add('flying-button');
@@ -367,13 +373,10 @@ const ScrollHeaderManager = {
                     z-index: 10000;
                     transform-style: preserve-3d;
                     pointer-events: none;
+                    opacity: 1;
                 `;
                 
                 document.body.appendChild(clone);
-                
-                // Hide original sidebar button
-                sidebarBtn.style.opacity = '0';
-                sidebarBtn.style.pointerEvents = 'none';
                 
                 // Calculate reverse flight path (opposite of forward)
                 const midX2 = window.innerWidth * 0.1;
