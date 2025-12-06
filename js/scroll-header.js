@@ -9,6 +9,7 @@ const ScrollHeaderManager = {
     animationSpeed: 1.0, // Default animation speed multiplier
     lastScrollTime: null,
     lastScrollY: 0,
+    isAnimating: false, // Prevent multiple simultaneous animations
     
     init() {
         // Create sounds directory reference (sounds will be in /sounds/ folder)
@@ -168,6 +169,9 @@ const ScrollHeaderManager = {
         if (!header || !headerRight) return;
         
         if (scrolled) {
+            // Clear sidebar first to prevent duplicates
+            this.sidebar.innerHTML = '';
+            
             // Get button positions for flight path calculation
             this.headerButtons.forEach((btn, index) => {
                 const rect = btn.getBoundingClientRect();
