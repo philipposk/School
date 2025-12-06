@@ -37,8 +37,10 @@ const ScrollHeaderManager = {
         sidebar.id = 'header-sidebar';
         sidebar.style.cssText = `
             position: fixed !important;
-            left: 0.5rem !important;
-            top: 1rem !important;
+            left: 8px !important;
+            top: 16px !important;
+            right: auto !important;
+            bottom: auto !important;
             z-index: 99999 !important;
             display: flex !important;
             flex-direction: column !important;
@@ -55,7 +57,8 @@ const ScrollHeaderManager = {
             min-height: 60px !important;
             border: 2px solid rgba(255, 255, 255, 0.3) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
-            transform: translateZ(0) !important;
+            margin: 0 !important;
+            transform: none !important;
             will-change: opacity, visibility !important;
         `;
         document.body.appendChild(sidebar);
