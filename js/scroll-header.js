@@ -331,16 +331,28 @@ const ScrollHeaderManager = {
                                         
                                         // Finalize button - move to sidebar
                                         setTimeout(() => {
+                                            console.log(`ScrollHeaderManager: Finalizing button ${index}, sidebar exists:`, !!this.sidebar);
+                                            
+                                            // Remove flying-button class
+                                            clone.classList.remove('flying-button');
+                                            
+                                            // Change to relative positioning for sidebar
                                             clone.style.setProperty('position', 'relative', 'important');
                                             clone.style.removeProperty('left');
                                             clone.style.removeProperty('top');
                                             clone.style.setProperty('pointer-events', 'auto', 'important');
                                             clone.style.setProperty('transition', 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 'important');
+                                            clone.style.setProperty('width', '48px', 'important');
+                                            clone.style.setProperty('height', '48px', 'important');
+                                            clone.style.setProperty('border-radius', '50%', 'important');
+                                            clone.style.setProperty('opacity', '1', 'important');
+                                            clone.style.setProperty('visibility', 'visible', 'important');
                                             
                                             // Move to sidebar (only if sidebar doesn't already have this button)
                                             if (this.sidebar && !this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
                                                 clone.setAttribute('data-button-index', index);
                                                 this.sidebar.appendChild(clone);
+                                                console.log(`ScrollHeaderManager: Button ${index} moved to sidebar, sidebar children:`, this.sidebar.children.length);
                                                 
                                                 // Add hover effect
                                                 clone.addEventListener('mouseenter', () => {
@@ -355,6 +367,7 @@ const ScrollHeaderManager = {
                                                 // Copy onclick handler
                                                 clone.onclick = btn.onclick;
                                             } else {
+                                                console.warn(`ScrollHeaderManager: Button ${index} already exists in sidebar or sidebar is null`);
                                                 // Button already exists, remove clone
                                                 clone.remove();
                                             }
