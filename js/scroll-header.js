@@ -6,6 +6,9 @@ const ScrollHeaderManager = {
     headerButtons: [],
     soundEnabled: true,
     sounds: {},
+    animationSpeed: 1.0, // Default animation speed multiplier
+    lastScrollTime: null,
+    lastScrollY: 0,
     
     init() {
         // Create sounds directory reference (sounds will be in /sounds/ folder)
