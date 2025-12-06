@@ -6,10 +6,10 @@ Here are **10 different options** for hosting your backend server, from easiest 
 
 ## Quick Comparison
 
-| Platform | Free Tier | Paid Starting | Ease | Best For |
-|----------|-----------|---------------|------|----------|
-| **Railway** | $5 credit | $5/month | ⭐⭐⭐⭐⭐ | Quick setup |
-| **Render** | Yes (sleeps) | $7/month | ⭐⭐⭐⭐ | Free tier users |
+| Platform | Free Tier | Paid Starting | Cold Starts? | Best For |
+|----------|-----------|---------------|-------------|----------|
+| **Railway** | $5 credit | $5/month | ❌ **No** | Quick setup |
+| **Render** | Yes (sleeps) | $7/month | ⚠️ **Yes** (free tier) | Free tier users |
 | **Fly.io** | 3 VMs free | $5/month | ⭐⭐⭐⭐ | Fast deployment |
 | **Vercel** | 100GB/mo | $20/month | ⭐⭐⭐⭐⭐ | Serverless |
 | **DigitalOcean** | $200 credit | $5/month | ⭐⭐⭐⭐ | Reliability |
@@ -35,7 +35,11 @@ Here are **10 different options** for hosting your backend server, from easiest 
 7. Get your URL: `https://your-app.up.railway.app`
 
 **Pricing**: $5 credit/month free, then ~$5-20/month  
-**Pros**: Easiest setup, auto-detects everything  
+**Pros**: 
+- ✅ Easiest setup, auto-detects everything
+- ✅ **NO cold starts** - Always running (unlike Render free tier)
+- ✅ Web UI (no CLI needed)
+- ✅ Auto-deploys on git push
 **Cons**: Can get expensive at scale
 
 ---
@@ -59,7 +63,10 @@ Here are **10 different options** for hosting your backend server, from easiest 
 
 **Pricing**: Free tier (sleeps after 15min), $7/month always-on  
 **Pros**: Free tier available, simple  
-**Cons**: Free tier spins down (slow first request)
+**Cons**: 
+- ⚠️ **Free tier spins down after 15min inactivity** (cold starts)
+- First request after sleep can take 30-60 seconds
+- Need paid plan ($7/month) for always-on
 
 ---
 
