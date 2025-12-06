@@ -4,12 +4,12 @@
 const ScrollHeaderManager = {
     isScrolled: false,
     headerButtons: [],
+    sidebar: null,
     soundEnabled: true,
     sounds: {},
     animationSpeed: 1.0, // Default animation speed multiplier
     lastScrollTime: null,
     lastScrollY: 0,
-    isAnimating: false, // Prevent multiple simultaneous animations
     
     init() {
         // Create sounds directory reference (sounds will be in /sounds/ folder)
