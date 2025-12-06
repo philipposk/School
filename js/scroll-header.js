@@ -57,19 +57,23 @@ const ScrollHeaderManager = {
             position: fixed !important;
             left: 0.5rem !important;
             top: 1rem !important;
-            z-index: 1000 !important;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            transform: translateZ(0);
-            will-change: opacity;
+            z-index: 99999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+            padding: 0.5rem !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: visible !important;
+            transition: opacity 0.3s ease !important;
+            transform: translateZ(0) !important;
+            will-change: opacity !important;
+            background: rgba(0, 0, 0, 0.1) !important;
+            border-radius: 8px !important;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
+        console.log('ScrollHeaderManager: Sidebar created and appended to body');
         
         // Create sound toggle button
         this.createSoundToggle();
