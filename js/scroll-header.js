@@ -180,9 +180,16 @@ const ScrollHeaderManager = {
         }
         
         if (scrolled) {
+            // Ensure sidebar exists
+            if (!this.sidebar) {
+                this.createSidebar();
+            }
+            
             // Clean up any existing flying buttons and clear sidebar
             document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
-            this.sidebar.innerHTML = '';
+            if (this.sidebar) {
+                this.sidebar.innerHTML = '';
+            }
             
             // Get button positions for flight path calculation
             this.headerButtons.forEach((btn, index) => {
