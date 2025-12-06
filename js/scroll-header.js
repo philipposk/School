@@ -54,18 +54,6 @@ const ScrollHeaderManager = {
         const scrollY = window.scrollY;
         const shouldBeScrolled = scrollY > 100;
         
-        if (shouldBeScrolled === this.isScrolled) {
-            // Keep sidebar visible if scrolled
-            if (shouldBeScrolled && this.sidebar) {
-                this.sidebar.style.setProperty('opacity', '1', 'important');
-                this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
-                this.sidebar.style.setProperty('visibility', 'visible', 'important');
-            }
-            return;
-        }
-        
-        this.isScrolled = shouldBeScrolled;
-        
         // Ensure buttons are found
         if (this.headerButtons.length === 0) {
             this.headerButtons = Array.from(document.querySelectorAll('.header-btn'));
@@ -73,7 +61,17 @@ const ScrollHeaderManager = {
         
         if (this.headerButtons.length === 0) return;
         
-        this.animateHeader(shouldBeScrolled);
+        // Only animate if state changed
+        if (shouldBeScrolled !== this.isScrolled) {
+            this.isScrolled = shouldBeScrolled;
+            this.animateHeader(shouldBeScrolled);
+        } else if (shouldBeScrolled && this.sidebar) {
+            // Keep sidebar visible if scrolled (even if state hasn't changed)
+            this.sidebar.style.setProperty('opacity', '1', 'important');
+            this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
+            this.sidebar.style.setProperty('visibility', 'visible', 'important');
+            this.sidebar.style.setProperty('display', 'flex', 'important');
+        }
     },
     
     animateHeader(scrolled) {
