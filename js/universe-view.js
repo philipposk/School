@@ -362,11 +362,11 @@ const UniverseView = {
             
             ctx.globalAlpha = 1.0;
             
-            // Store course region data
+            // Store course region data (use safe coordinates)
             this.courseRegions.push({
                 course: course,
-                x: x,
-                y: y,
+                x: safeX,
+                y: safeY,
                 width: width,
                 height: height,
                 color: color,
@@ -573,6 +573,10 @@ const UniverseView = {
             const scaledWidth = width * scaleFactor;
             const scaledHeight = height * scaleFactor;
             
+            // Ensure region fits within canvas bounds
+            const safeScaledX = Math.max(scaledWidth * 0.2, Math.min(scaledX, canvasWidth - scaledWidth * 0.8));
+            const safeScaledY = Math.max(scaledHeight * 0.2, Math.min(scaledY, canvasHeight - scaledHeight * 0.8));
+            
             // Draw country-like shape with better visibility
             ctx.fillStyle = color;
             ctx.globalAlpha = 0.95; // More opaque for better visibility
@@ -584,12 +588,12 @@ const UniverseView = {
             ctx.shadowOffsetY = 2 * scaleFactor;
             
             ctx.beginPath();
-            ctx.moveTo(scaledX, scaledY);
-            ctx.lineTo(scaledX + scaledWidth * 0.7, scaledY - scaledHeight * 0.2);
-            ctx.lineTo(scaledX + scaledWidth, scaledY + scaledHeight * 0.3);
-            ctx.lineTo(scaledX + scaledWidth * 0.8, scaledY + scaledHeight);
-            ctx.lineTo(scaledX + scaledWidth * 0.3, scaledY + scaledHeight * 0.9);
-            ctx.lineTo(scaledX - scaledWidth * 0.1, scaledY + scaledHeight * 0.5);
+            ctx.moveTo(safeScaledX, safeScaledY);
+            ctx.lineTo(safeScaledX + scaledWidth * 0.7, safeScaledY - scaledHeight * 0.2);
+            ctx.lineTo(safeScaledX + scaledWidth, safeScaledY + scaledHeight * 0.3);
+            ctx.lineTo(safeScaledX + scaledWidth * 0.8, safeScaledY + scaledHeight);
+            ctx.lineTo(safeScaledX + scaledWidth * 0.3, safeScaledY + scaledHeight * 0.9);
+            ctx.lineTo(safeScaledX - scaledWidth * 0.1, safeScaledY + scaledHeight * 0.5);
             ctx.closePath();
             ctx.fill();
             
@@ -613,7 +617,7 @@ const UniverseView = {
                 ctx.stroke();
             }
             
-            // Draw course name with wrapping if zoomed in enough
+            // Draw course name - truncated to fit within region
             if (showText && course.title) {
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `bold ${fontSize}px Arial`;
@@ -626,13 +630,40 @@ const UniverseView = {
                 ctx.shadowOffsetX = 2 * scaleFactor;
                 ctx.shadowOffsetY = 2 * scaleFactor;
                 
-                const textX = scaledX + scaledWidth / 2;
-                const textY = scaledY + scaledHeight / 2;
-                const maxTextWidth = scaledWidth * 0.9;
+                const textX = safeScaledX + scaledWidth / 2;
+                const textY = safeScaledY + scaledHeight / 2;
+                const maxTextWidth = scaledWidth * 0.85; // Leave more margin
+                const maxHeight = scaledHeight * 0.7; // Limit vertical space
                 const lineHeight = fontSize * 1.2;
+                const maxLines = Math.floor(maxHeight / lineHeight);
                 
-                // Wrap text to multiple lines
-                this.wrapText(ctx, course.title, maxTextWidth, textX, textY - (lineHeight / 2), lineHeight);
+                // Truncate text intelligently to fit within bounds
+                let displayText = course.title;
+                let textWidth = ctx.measureText(displayText).width;
+                
+                // If text is too wide, truncate it
+                if (textWidth > maxTextWidth) {
+                    // Try to fit on one line first
+                    let truncated = displayText;
+                    while (ctx.measureText(truncated + '...').width > maxTextWidth && truncated.length > 0) {
+                        truncated = truncated.slice(0, -1);
+                    }
+                    displayText = truncated + (truncated.length < course.title.length ? '...' : '');
+                }
+                
+                // If still too wide or too many lines, use abbreviated version
+                if (ctx.measureText(displayText).width > maxTextWidth || displayText.split(' ').length > maxLines * 2) {
+                    // Take first 2-3 words or first 20 characters
+                    const words = course.title.split(' ');
+                    if (words.length > 2) {
+                        displayText = words.slice(0, 2).join(' ') + '...';
+                    } else {
+                        displayText = course.title.substring(0, 20) + (course.title.length > 20 ? '...' : '');
+                    }
+                }
+                
+                // Wrap text to fit within region bounds
+                const textLines = this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, 2) - 1) * lineHeight / 2), lineHeight);
                 
                 // Reset shadow
                 ctx.shadowColor = 'transparent';
