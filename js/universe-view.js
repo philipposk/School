@@ -250,6 +250,52 @@ const UniverseView = {
             this.universeObjects.push(planetMesh);
             this.otherPlanets.push(planetMesh); // Store reference for auto-return detection
         });
+        
+        // Create traveling stars effect (for infinite travel illusion)
+        this.createTravelingStars();
+    },
+    
+    createTravelingStars() {
+        // Create efficient particle system for traveling stars
+        // Limited particles that recycle to avoid memory issues
+        const particleCount = 300; // Small number, recycled
+        
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        
+        // Initialize stars in front of camera (will move towards camera)
+        for (let i = 0; i < particleCount; i++) {
+            const i3 = i * 3;
+            // Random position in front of camera
+            positions[i3] = (Math.random() - 0.5) * 2000; // X
+            positions[i3 + 1] = (Math.random() - 0.5) * 2000; // Y
+            positions[i3 + 2] = Math.random() * 5000 + 100; // Z (in front)
+            
+            // Random sizes for variety
+            sizes[i] = Math.random() * 3 + 1;
+        }
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        // Material for traveling stars
+        const material = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 2,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+        
+        this.travelingStars = new THREE.Points(geometry, material);
+        this.travelingStars.visible = false; // Hidden by default
+        this.scene.add(this.travelingStars);
+        
+        // Store references for updates
+        this.travelingStarsGeometry = geometry;
+        this.travelingStarsMaterial = material;
     },
     
     createPlanet() {
