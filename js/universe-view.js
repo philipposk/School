@@ -11,6 +11,12 @@ const UniverseView = {
     selectedCourse: null,
     container: null,
     universeObjects: [],
+    otherPlanets: [], // Store references to background planets
+    lastCameraPosition: null,
+    lastCameraMovementTime: null,
+    autoReturnTimer: null,
+    isReturningToMainPlanet: false,
+    mainPlanetLabelVisible: false,
     
     init() {
         if (typeof THREE === 'undefined') {
@@ -237,6 +243,7 @@ const UniverseView = {
             
             this.scene.add(planetMesh);
             this.universeObjects.push(planetMesh);
+            this.otherPlanets.push(planetMesh); // Store reference for auto-return detection
         });
     },
     
@@ -265,8 +272,8 @@ const UniverseView = {
             map: this.planetTexture,
             roughness: 0.7,
             metalness: 0.2,
-            emissive: 0x000000,
-            emissiveIntensity: 0.1
+            emissive: 0x4a9eff, // Bright blue glow
+            emissiveIntensity: 0.5 // Much brighter than other planets
         });
         
         this.planet = new THREE.Mesh(geometry, material);
