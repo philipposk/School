@@ -1528,16 +1528,19 @@
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-input" id="loginName" placeholder="Enter your name" required>
+                    <label class="form-label">Email or Username</label>
+                    <input type="text" class="form-input" id="loginEmail" placeholder="Enter your email or username" required autocomplete="username">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="loginEmail" placeholder="Enter your email" required>
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
                 </div>
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">Start Learning</button>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
                 </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                    Don't have an account? <a href="#" onclick="event.preventDefault(); showSignUpForm();" style="color: var(--theme-primary);">Sign up</a>
+                </p>
             </form>
         </div>
     </div>
@@ -2769,42 +2772,168 @@
             document.getElementById('loginModal').classList.add('show');
         }
 
-        // Login Form
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nameInput = document.getElementById('loginName').value;
-            const emailInput = document.getElementById('loginEmail').value;
-            
-            // Validate inputs
-            const nameValidation = SecurityUtils.validateName(nameInput);
-            if (!nameValidation.valid) {
-                SecurityUtils.showError(nameValidation.error);
-                return;
+        // Simple password-based authentication (client-side only)
+        function hashPassword(password) {
+            // Simple hash for demo purposes (not secure for production)
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
             }
+            return hash.toString();
+        }
+
+        function showSignUpForm() {
+            const form = document.getElementById('loginForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const signUpLink = form.querySelector('a');
             
-            const emailValidation = SecurityUtils.validateEmail(emailInput);
-            if (!emailValidation.valid) {
-                SecurityUtils.showError(emailValidation.error);
-                return;
-            }
+            form.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="signupName" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="signupEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="signupPassword" placeholder="Create a password" required minlength="6">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="showLoginForm()">Back to Sign In</button>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </div>
+            `;
             
-            user = { 
-                name: nameValidation.name, 
-                email: emailValidation.email 
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const name = document.getElementById('signupName').value.trim();
+                const email = document.getElementById('signupEmail').value.trim().toLowerCase();
+                const password = document.getElementById('signupPassword').value;
+                
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters');
+                    return;
+                }
+                
+                const emailValidation = SecurityUtils.validateEmail(email);
+                if (!emailValidation.valid) {
+                    SecurityUtils.showError(emailValidation.error);
+                    return;
+                }
+                
+                // Check if user already exists
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                if (users[email]) {
+                    alert('An account with this email already exists. Please sign in instead.');
+                    showLoginForm();
+                    return;
+                }
+                
+                // Create new user account
+                users[email] = {
+                    name: name,
+                    email: emailValidation.email,
+                    passwordHash: hashPassword(password)
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Auto sign in
+                user = { name: name, email: emailValidation.email };
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                    UserProfileManager.initDefaultFriends();
+                }
+                
+                document.getElementById('loginModal').classList.remove('show');
+                updateUserDisplay();
+                if (state.currentCourseId) {
+                    renderCourseView();
+                }
             };
-            localStorage.setItem('user', JSON.stringify(user));
+        }
+
+        function showLoginForm() {
+            const form = document.getElementById('loginForm');
+            form.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Email or Username</label>
+                    <input type="text" class="form-input" id="loginEmail" placeholder="Enter your email or username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                    Don't have an account? <a href="#" onclick="event.preventDefault(); showSignUpForm();" style="color: var(--theme-primary);">Sign up</a>
+                </p>
+            `;
             
-            // Initialize default friends (AI Tutor, Course Instructor)
-            if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
-                UserProfileManager.initDefaultFriends();
-            }
-            
-            document.getElementById('loginModal').classList.remove('show');
-            updateUserDisplay();
-            if (state.currentCourseId) {
-                renderCourseView();
-            }
-        });
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const emailOrUsername = document.getElementById('loginEmail').value.trim().toLowerCase();
+                const password = document.getElementById('loginPassword').value;
+                
+                // Check if it's an email or username
+                const isEmail = emailOrUsername.includes('@');
+                const users = JSON.parse(localStorage.getItem('users') || '{}');
+                
+                let userAccount = null;
+                if (isEmail) {
+                    userAccount = users[emailOrUsername];
+                } else {
+                    // Find by username/name
+                    for (const email in users) {
+                        if (users[email].name.toLowerCase() === emailOrUsername) {
+                            userAccount = users[email];
+                            userAccount.email = email;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!userAccount) {
+                    alert('Account not found. Please sign up first.');
+                    showSignUpForm();
+                    return;
+                }
+                
+                if (userAccount.passwordHash !== hashPassword(password)) {
+                    alert('Incorrect password. Please try again.');
+                    return;
+                }
+                
+                user = { 
+                    name: userAccount.name, 
+                    email: userAccount.email 
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                    UserProfileManager.initDefaultFriends();
+                }
+                
+                document.getElementById('loginModal').classList.remove('show');
+                updateUserDisplay();
+                if (state.currentCourseId) {
+                    renderCourseView();
+                }
+            };
+        }
+
+        // Make functions globally accessible
+        window.showSignUpForm = showSignUpForm;
+        window.showLoginForm = showLoginForm;
+        
+        // Initialize login form
+        showLoginForm();
 
         // Profile Form
         document.getElementById('profileForm').addEventListener('submit', (e) => {
@@ -3079,5 +3208,4 @@
         init();
     </script>
 </body>
-</html>
 </html>
