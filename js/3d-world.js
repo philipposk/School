@@ -158,22 +158,27 @@ const ThreeDWorld = {
     },
     
     addDecorativeElements() {
-        // Add floating particles/atmosphere
+        // Add subtle floating particles/atmosphere - much less distracting
         const particleGeometry = new THREE.BufferGeometry();
-        const particleCount = 1000;
+        const particleCount = 300; // Reduced count
         const positions = new Float32Array(particleCount * 3);
         
-        for (let i = 0; i < particleCount * 3; i++) {
-            positions[i] = (Math.random() - 0.5) * 500;
+        // Position particles higher up and spread out more
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 600; // x
+            positions[i + 1] = 50 + Math.random() * 200; // y - higher up
+            positions[i + 2] = (Math.random() - 0.5) * 600; // z
         }
         
         particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         
+        // Much more subtle particles - smaller, less opaque, softer color
         const particleMaterial = new THREE.PointsMaterial({
-            color: 0xffffff,
-            size: 2,
+            color: 0x667eea, // Match theme color instead of white
+            size: 1, // Smaller
             transparent: true,
-            opacity: 0.6
+            opacity: 0.15, // Much more transparent
+            blending: THREE.AdditiveBlending // Softer glow effect
         });
         
         const particles = new THREE.Points(particleGeometry, particleMaterial);
@@ -274,10 +279,11 @@ const ThreeDWorld = {
         const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
         mesh.add(glowMesh);
         
-        // Position cards in a circle/spiral pattern
+        // Position cards in a circle/spiral pattern - all above ground
         const angle = (index / total) * Math.PI * 2;
         const radius = 40 + (index % 3) * 15;
-        const height = 5 + Math.sin(index) * 10;
+        // Ensure all courses are well above ground (15-35 range)
+        const height = 20 + Math.sin(index) * 15;
         
         mesh.position.set(
             Math.cos(angle) * radius,
@@ -607,10 +613,13 @@ const ThreeDWorld = {
             this.controls.update();
         }
         
-        // Animate course cards (gentle floating)
+        // Animate course cards (gentle floating) - ensure they stay above ground
         this.courseObjects.forEach((obj, i) => {
             const time = Date.now() * 0.001;
-            obj.mesh.position.y = obj.mesh.userData.originalPosition.y + Math.sin(time + i) * 2;
+            const baseY = obj.mesh.userData.originalPosition.y;
+            const floatOffset = Math.sin(time + i) * 2;
+            // Ensure cards never go below 10 units (well above ground)
+            obj.mesh.position.y = Math.max(10, baseY + floatOffset);
             obj.mesh.rotation.y += 0.005;
         });
         
