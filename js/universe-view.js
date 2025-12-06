@@ -691,39 +691,56 @@ const UniverseView = {
     },
     
     createTempleAndModules(region) {
-        // Create a temple at the center of the region
+        // Create a temple at the center of the region - larger and more visible
         const templeGroup = new THREE.Group();
         
-        // Temple base
-        const baseGeometry = new THREE.CylinderGeometry(8, 10, 6, 8);
+        // Temple base - larger
+        const baseGeometry = new THREE.CylinderGeometry(12, 15, 8, 8);
         const baseMaterial = new THREE.MeshStandardMaterial({
             color: 0xd4af37, // Gold color
-            roughness: 0.3,
-            metalness: 0.7
+            roughness: 0.2,
+            metalness: 0.8,
+            emissive: 0xd4af37,
+            emissiveIntensity: 0.3
         });
         const base = new THREE.Mesh(baseGeometry, baseMaterial);
-        base.position.y = 3;
+        base.position.y = 4;
+        base.castShadow = true;
+        base.receiveShadow = true;
         templeGroup.add(base);
         
-        // Temple pillars
+        // Temple pillars - taller
         for (let i = 0; i < 4; i++) {
             const angle = (i / 4) * Math.PI * 2;
-            const pillarGeometry = new THREE.CylinderGeometry(1, 1.2, 12, 8);
+            const pillarGeometry = new THREE.CylinderGeometry(1.5, 1.8, 18, 8);
             const pillar = new THREE.Mesh(pillarGeometry, baseMaterial);
             pillar.position.set(
-                Math.cos(angle) * 6,
-                6,
-                Math.sin(angle) * 6
+                Math.cos(angle) * 8,
+                9,
+                Math.sin(angle) * 8
             );
+            pillar.castShadow = true;
             templeGroup.add(pillar);
         }
         
-        // Temple roof
-        const roofGeometry = new THREE.ConeGeometry(12, 8, 8);
+        // Temple roof - larger
+        const roofGeometry = new THREE.ConeGeometry(16, 12, 8);
         const roof = new THREE.Mesh(roofGeometry, baseMaterial);
-        roof.position.y = 12;
+        roof.position.y = 18;
         roof.rotation.y = Math.PI / 8;
+        roof.castShadow = true;
         templeGroup.add(roof);
+        
+        // Add glowing orb on top for visibility
+        const orbGeometry = new THREE.SphereGeometry(2, 16, 16);
+        const orbMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            emissive: 0xffff00,
+            emissiveIntensity: 1.0
+        });
+        const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+        orb.position.y = 24;
+        templeGroup.add(orb);
         
         // Position temple at region center
         const radius = 100;
@@ -736,6 +753,9 @@ const UniverseView = {
             course: region.course,
             region: region
         };
+        
+        // Make temple visible when created (will be controlled by zoom level)
+        templeGroup.visible = true;
         
         this.scene.add(templeGroup);
         region.temple = templeGroup;
