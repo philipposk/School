@@ -3020,12 +3020,18 @@
                 if (isEmail) {
                     userAccount = users[emailOrUsername];
                 } else {
-                    // Find by username/name
-                    for (const email in users) {
-                        if (users[email].name.toLowerCase() === emailOrUsername) {
-                            userAccount = users[email];
-                            userAccount.email = email;
-                            break;
+                    // First check if username exists directly
+                    if (users[emailOrUsername]) {
+                        userAccount = users[emailOrUsername];
+                        userAccount.email = emailOrUsername.includes('@') ? emailOrUsername : users[emailOrUsername].email;
+                    } else {
+                        // Find by username/name
+                        for (const email in users) {
+                            if (users[email].name.toLowerCase() === emailOrUsername) {
+                                userAccount = users[email];
+                                userAccount.email = email;
+                                break;
+                            }
                         }
                     }
                 }
@@ -3066,7 +3072,8 @@
         // Initialize test account (for development/testing)
         function initTestAccount() {
             const users = JSON.parse(localStorage.getItem('users') || '{}');
-            if (!users['test@example.com']) {
+            // Create test account with username 'test' and password 'test'
+            if (!users['test']) {
                 // Simple hash function
                 function hashPassword(password) {
                     let hash = 0;
@@ -3078,11 +3085,15 @@
                     return hash.toString();
                 }
                 
-                users['test@example.com'] = {
+                const testPasswordHash = hashPassword('test');
+                
+                // Create test account
+                users['test'] = {
                     name: 'Test User',
                     email: 'test@example.com',
-                    passwordHash: hashPassword('test123')
+                    passwordHash: testPasswordHash
                 };
+                
                 localStorage.setItem('users', JSON.stringify(users));
             }
         }
