@@ -357,11 +357,8 @@ const UniverseView = {
             ctx.lineWidth = 4;
             ctx.stroke();
             
-            // Add course name when zoomed in (will be handled by zoom level)
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(course.title.substring(0, 15), x + width / 2, y + height / 2);
+            // Store text for later rendering (will be drawn dynamically based on zoom)
+            // Don't draw text here - it will be drawn dynamically based on zoom level
             
             ctx.globalAlpha = 1.0;
             
@@ -474,8 +471,127 @@ const UniverseView = {
         this.updateZoomLevel();
     },
     
+    // Helper function to wrap text to multiple lines
+    wrapText(ctx, text, maxWidth, x, y, lineHeight) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = ctx.measureText(currentLine + ' ' + word).width;
+            if (width < maxWidth) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+
+        // Draw lines
+        lines.forEach((line, index) => {
+            ctx.fillText(line, x, y + (index * lineHeight));
+        });
+
+        return lines.length;
+    },
+    
+    // Update planet texture with course names based on zoom level
+    updatePlanetTexture() {
+        if (!this.planetTexture || !this.courseRegions.length) return;
+        
+        const distance = this.camera.position.length();
+        const canvas = document.createElement('canvas');
+        canvas.width = 2048;
+        canvas.height = 1024;
+        const ctx = canvas.getContext('2d');
+        
+        // Base ocean
+        ctx.fillStyle = '#2a5a7a';
+        ctx.fillRect(0, 0, 2048, 1024);
+        
+        // Draw continents/landmasses
+        ctx.fillStyle = '#3a6a4a';
+        ctx.beginPath();
+        ctx.ellipse(500, 300, 200, 150, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(1500, 400, 250, 180, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(800, 700, 180, 120, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Determine font size based on zoom
+        let fontSize = 20;
+        let showText = false;
+        if (distance < 300) {
+            fontSize = 36;
+            showText = true;
+        } else if (distance < 500) {
+            fontSize = 28;
+            showText = true;
+        } else if (distance < 800) {
+            fontSize = 22;
+            showText = true;
+        }
+        
+        // Draw course regions
+        this.courseRegions.forEach(region => {
+            const { x, y, width, height, color, course } = region;
+            
+            // Draw country-like shape
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + width * 0.7, y - height * 0.2);
+            ctx.lineTo(x + width, y + height * 0.3);
+            ctx.lineTo(x + width * 0.8, y + height);
+            ctx.lineTo(x + width * 0.3, y + height * 0.9);
+            ctx.lineTo(x - width * 0.1, y + height * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Add bright border for visibility
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // Draw course name with wrapping if zoomed in enough
+            if (showText && course.title) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const textX = x + width / 2;
+                const textY = y + height / 2;
+                const maxTextWidth = width * 0.9;
+                const lineHeight = fontSize * 1.2;
+                
+                // Wrap text to multiple lines
+                this.wrapText(ctx, course.title, maxTextWidth, textX, textY - (lineHeight / 2), lineHeight);
+            }
+            
+            ctx.globalAlpha = 1.0;
+        });
+        
+        // Update texture
+        this.planetTexture.image = canvas;
+        this.planetTexture.needsUpdate = true;
+        if (this.planetMaterial) {
+            this.planetMaterial.map = this.planetTexture;
+            this.planetMaterial.needsUpdate = true;
+        }
+    },
+    
     updateZoomLevel() {
         const distance = this.camera.position.length();
+        
+        // Update planet texture with appropriate text size based on zoom
+        this.updatePlanetTexture();
         
         // Always show planet
         if (this.planet) {
@@ -550,10 +666,12 @@ const UniverseView = {
         
         // Increase planet emissive when zoomed in for better visibility
         if (this.planetMaterial) {
-            if (this.zoomLevel >= 2) {
-                this.planetMaterial.emissiveIntensity = 0.5;
+            if (distance < 200) {
+                this.planetMaterial.emissiveIntensity = 0.4;
+            } else if (distance < 400) {
+                this.planetMaterial.emissiveIntensity = 0.25;
             } else {
-                this.planetMaterial.emissiveIntensity = 0.2;
+                this.planetMaterial.emissiveIntensity = 0.1;
             }
         }
         
@@ -995,6 +1113,13 @@ const UniverseView = {
         
         if (this.controls) {
             this.controls.update();
+        }
+        
+        // Update zoom level check
+        const currentDistance = this.camera.position.length();
+        if (Math.abs(currentDistance - (this.lastDistance || 0)) > 10) {
+            this.onZoomChange();
+            this.lastDistance = currentDistance;
         }
         
         // Rotate planet slowly - realistic speed (one full rotation every ~2 minutes)
