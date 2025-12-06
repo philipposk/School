@@ -2,7 +2,7 @@
 // Theme System, UI Layouts, AI Search, Learning Prediction
 
 // ========== VIEW MODE MANAGER ==========
-// Controls HOW courses are displayed (Simple, Enhanced, 3D World)
+// Controls HOW courses are displayed (Simple, Enhanced, 3D World, Universe)
 const ViewModeManager = {
     modes: {
         'simple': {
@@ -19,6 +19,11 @@ const ViewModeManager = {
             name: '3D World',
             icon: '🌍',
             description: 'Game-like 3D exploration'
+        },
+        'universe': {
+            name: 'Universe',
+            icon: '🌌',
+            description: 'Galaxy view - courses as countries on a planet'
         }
     },
     
@@ -45,13 +50,19 @@ const ViewModeManager = {
                 ThreeDWorld.destroy();
             }
             
-            // Reload courses view if switching to/from 3D world
-            if (modeName === '3d-world' || previousMode === '3d-world') {
+            // Reload courses view if switching to/from 3D world or universe
+            if (modeName === '3d-world' || previousMode === '3d-world' || 
+                modeName === 'universe' || previousMode === 'universe') {
                 setTimeout(() => {
                     if (typeof showCourses === 'function') {
                         showCourses();
                     }
                 }, 100);
+            }
+            
+            // Destroy universe view if switching away from it
+            if (previousMode === 'universe' && typeof UniverseView !== 'undefined') {
+                UniverseView.destroy();
             }
         }
     },

@@ -1,0 +1,589 @@
+// Universe View Manager - Galaxy/Planet view with courses as countries
+// Courses are represented as countries on a globe, with zoom levels showing modules
+
+const UniverseView = {
+    scene: null,
+    camera: null,
+    renderer: null,
+    controls: null,
+    courseRegions: [],
+    zoomLevel: 0, // 0 = galaxy view, 1 = planet view, 2 = course regions, 3 = modules
+    selectedCourse: null,
+    container: null,
+    universeObjects: [],
+    
+    init() {
+        if (typeof THREE === 'undefined') {
+            console.warn('Three.js not loaded, universe view disabled');
+            return;
+        }
+        
+        this.container = document.getElementById('courses-container') || document.querySelector('.courses-container');
+        if (!this.container) {
+            console.warn('Courses container not found');
+            return;
+        }
+        
+        const canvasContainer = document.createElement('div');
+        canvasContainer.id = 'universe-view-container';
+        canvasContainer.style.cssText = 'width: 100%; height: 100vh; position: relative; overflow: hidden;';
+        this.container.innerHTML = '';
+        this.container.appendChild(canvasContainer);
+        
+        this.setupScene();
+        this.setupCamera();
+        this.setupRenderer(canvasContainer);
+        this.setupControls();
+        this.createUniverse();
+        this.createPlanet();
+        this.loadCourses();
+        this.setupInteraction();
+        this.animate();
+        this.addUI();
+        
+        window.addEventListener('resize', () => this.onWindowResize());
+    },
+    
+    setupScene() {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x000000);
+    },
+    
+    setupCamera() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100000);
+        this.camera.position.set(0, 0, 500);
+    },
+    
+    setupRenderer(container) {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.shadowMap.enabled = true;
+        container.appendChild(this.renderer.domElement);
+    },
+    
+    setupControls() {
+        if (typeof THREE.OrbitControls !== 'undefined') {
+            this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+            this.controls.enableDamping = true;
+            this.controls.dampingFactor = 0.05;
+            this.controls.minDistance = 50;
+            this.controls.maxDistance = 5000;
+            this.controls.addEventListener('change', () => this.onZoomChange());
+        } else {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+            script.onload = () => {
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+                this.controls.minDistance = 50;
+                this.controls.maxDistance = 5000;
+                this.controls.addEventListener('change', () => this.onZoomChange());
+            };
+            document.head.appendChild(script);
+        }
+    },
+    
+    createUniverse() {
+        // Create starfield background
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 5000;
+        const positions = new Float32Array(starCount * 3);
+        const colors = new Float32Array(starCount * 3);
+        
+        for (let i = 0; i < starCount * 3; i += 3) {
+            // Random positions in a large sphere
+            const radius = 2000 + Math.random() * 3000;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(Math.random() * 2 - 1);
+            
+            positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+            positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+            positions[i + 2] = radius * Math.cos(phi);
+            
+            // Random star colors (white, blue, yellow)
+            const color = Math.random();
+            if (color < 0.7) {
+                colors[i] = 1; colors[i + 1] = 1; colors[i + 2] = 1; // White
+            } else if (color < 0.85) {
+                colors[i] = 0.7; colors[i + 1] = 0.8; colors[i + 2] = 1; // Blue
+            } else {
+                colors[i] = 1; colors[i + 1] = 0.9; colors[i + 2] = 0.7; // Yellow
+            }
+        }
+        
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        
+        const starMaterial = new THREE.PointsMaterial({
+            size: 2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        this.scene.add(stars);
+        this.universeObjects.push(stars);
+        
+        // Create distant galaxies (glowing orbs)
+        for (let i = 0; i < 20; i++) {
+            const galaxyGeometry = new THREE.SphereGeometry(50, 16, 16);
+            const galaxyMaterial = new THREE.MeshBasicMaterial({
+                color: new THREE.Color().setHSL(Math.random(), 0.5, 0.5),
+                transparent: true,
+                opacity: 0.3
+            });
+            const galaxy = new THREE.Mesh(galaxyGeometry, galaxyMaterial);
+            
+            const radius = 3000 + Math.random() * 2000;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(Math.random() * 2 - 1);
+            galaxy.position.set(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.sin(phi) * Math.sin(theta),
+                radius * Math.cos(phi)
+            );
+            
+            this.scene.add(galaxy);
+            this.universeObjects.push(galaxy);
+        }
+        
+        // Create Milky Way (large glowing band)
+        const milkyWayGeometry = new THREE.TorusGeometry(2500, 200, 16, 100);
+        const milkyWayMaterial = new THREE.MeshBasicMaterial({
+            color: 0x4a4a6a,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.DoubleSide
+        });
+        const milkyWay = new THREE.Mesh(milkyWayGeometry, milkyWayMaterial);
+        milkyWay.rotation.x = Math.PI / 4;
+        this.scene.add(milkyWay);
+        this.universeObjects.push(milkyWay);
+        
+        // Create planets in background
+        const planetData = [
+            { name: 'Mercury', color: 0x8c7853, size: 15, distance: 1800 },
+            { name: 'Venus', color: 0xffc649, size: 20, distance: 2000 },
+            { name: 'Mars', color: 0xcd5c5c, size: 18, distance: 2200 },
+            { name: 'Jupiter', color: 0xd8ca9d, size: 40, distance: 2500 },
+            { name: 'Saturn', color: 0xfad5a5, size: 35, distance: 2800 }
+        ];
+        
+        planetData.forEach((planet, i) => {
+            const planetGeometry = new THREE.SphereGeometry(planet.size, 32, 32);
+            const planetMaterial = new THREE.MeshStandardMaterial({
+                color: planet.color,
+                emissive: planet.color,
+                emissiveIntensity: 0.2
+            });
+            const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+            
+            const angle = (i / planetData.length) * Math.PI * 2;
+            planetMesh.position.set(
+                Math.cos(angle) * planet.distance,
+                0,
+                Math.sin(angle) * planet.distance
+            );
+            
+            this.scene.add(planetMesh);
+            this.universeObjects.push(planetMesh);
+        });
+    },
+    
+    createPlanet() {
+        // Create Earth-like planet with course regions
+        const radius = 100;
+        const segments = 64;
+        
+        const geometry = new THREE.SphereGeometry(radius, segments, segments);
+        
+        // Create texture for the planet with course regions
+        const canvas = document.createElement('canvas');
+        canvas.width = 2048;
+        canvas.height = 1024;
+        const ctx = canvas.getContext('2d');
+        
+        // Base ocean color
+        ctx.fillStyle = '#1a4a6a';
+        ctx.fillRect(0, 0, 2048, 1024);
+        
+        // This will be updated when courses are loaded
+        this.planetTexture = new THREE.CanvasTexture(canvas);
+        this.planetTexture.needsUpdate = true;
+        
+        const material = new THREE.MeshStandardMaterial({
+            map: this.planetTexture,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        
+        this.planet = new THREE.Mesh(geometry, material);
+        this.planet.position.set(0, 0, 0);
+        this.scene.add(this.planet);
+        
+        // Add atmosphere glow
+        const atmosphereGeometry = new THREE.SphereGeometry(radius * 1.05, 32, 32);
+        const atmosphereMaterial = new THREE.MeshBasicMaterial({
+            color: 0x4a9eff,
+            transparent: true,
+            opacity: 0.1,
+            side: THREE.BackSide
+        });
+        const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+        this.planet.add(atmosphere);
+    },
+    
+    loadCourses() {
+        const courses = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
+        
+        // Color scheme for courses
+        const courseColors = [
+            { active: '#48bb78', coming: '#718096', undefined: '#4a5568' }, // Green/Grey
+            { active: '#667eea', coming: '#9f7aea', undefined: '#6b7280' }, // Purple
+            { active: '#ed8936', coming: '#f6ad55', undefined: '#718096' }, // Orange
+            { active: '#38b2ac', coming: '#4fd1c7', undefined: '#4a5568' }, // Teal
+            { active: '#f56565', coming: '#fc8181', undefined: '#6b7280' }, // Red
+            { active: '#805ad5', coming: '#b794f4', undefined: '#718096' }, // Violet
+        ];
+        
+        // Update planet texture with course regions
+        const canvas = document.createElement('canvas');
+        canvas.width = 2048;
+        canvas.height = 1024;
+        const ctx = canvas.getContext('2d');
+        
+        // Base ocean
+        ctx.fillStyle = '#1a4a6a';
+        ctx.fillRect(0, 0, 2048, 1024);
+        
+        courses.forEach((course, index) => {
+            const colorSet = courseColors[index % courseColors.length];
+            const isActive = true; // You can determine this based on course status
+            const color = isActive ? colorSet.active : colorSet.coming;
+            
+            // Draw course region as a country-like shape
+            const x = (index % 6) * 300 + 200;
+            const y = Math.floor(index / 6) * 200 + 200;
+            const width = 250;
+            const height = 150;
+            
+            // Draw irregular country shape
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + width * 0.8, y);
+            ctx.lineTo(x + width, y + height * 0.3);
+            ctx.lineTo(x + width * 0.9, y + height);
+            ctx.lineTo(x + width * 0.2, y + height * 0.8);
+            ctx.lineTo(x, y + height * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Add border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Store course region data
+            this.courseRegions.push({
+                course: course,
+                x: x,
+                y: y,
+                width: width,
+                height: height,
+                color: color,
+                isActive: isActive
+            });
+            
+            // Create 3D emoji/icon above the region
+            this.createCourseIcon(course, index, courses.length);
+        });
+        
+        // Update planet texture
+        this.planetTexture.image = canvas;
+        this.planetTexture.needsUpdate = true;
+    },
+    
+    createCourseIcon(course, index, total) {
+        // Create 3D text sprite for course emoji/icon
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.font = 'bold 180px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 8;
+        ctx.strokeText(course.icon, 128, 128);
+        ctx.fillText(course.icon, 128, 128);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        
+        const spriteMaterial = new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true,
+            sizeAttenuation: true
+        });
+        
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.scale.set(30, 30, 1);
+        
+        // Position above the course region on the planet
+        const angle = (index / total) * Math.PI * 2;
+        const radius = 120; // Slightly above planet surface
+        sprite.position.set(
+            Math.cos(angle) * radius,
+            Math.sin(index) * 40 + 20,
+            Math.sin(angle) * radius
+        );
+        
+        sprite.userData = { course: course, index: index };
+        this.scene.add(sprite);
+        this.courseRegions.push({ sprite: sprite, course: course });
+        
+        // Add floating animation
+        sprite.userData.baseY = sprite.position.y;
+    },
+    
+    onZoomChange() {
+        const distance = this.camera.position.length();
+        
+        // Update zoom level based on distance
+        if (distance > 1000) {
+            this.zoomLevel = 0; // Galaxy view
+        } else if (distance > 300) {
+            this.zoomLevel = 1; // Planet view
+        } else if (distance > 150) {
+            this.zoomLevel = 2; // Course regions visible
+        } else {
+            this.zoomLevel = 3; // Module detail view
+        }
+        
+        // Update visibility of elements based on zoom level
+        this.updateZoomLevel();
+    },
+    
+    updateZoomLevel() {
+        // Show/hide course icons based on zoom
+        this.courseRegions.forEach(region => {
+            if (region.sprite) {
+                if (this.zoomLevel >= 1) {
+                    region.sprite.visible = true;
+                    // Scale based on zoom
+                    const scale = Math.max(20, 50 - (this.camera.position.length() / 20));
+                    region.sprite.scale.set(scale, scale, 1);
+                } else {
+                    region.sprite.visible = false;
+                }
+            }
+        });
+    },
+    
+    setupInteraction() {
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        this.renderer.domElement.addEventListener('click', (e) => this.onMouseClick(e));
+    },
+    
+    onMouseMove(event) {
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(
+            this.courseRegions.filter(r => r.sprite).map(r => r.sprite)
+        );
+        
+        if (intersects.length > 0) {
+            const hoveredSprite = intersects[0].object;
+            hoveredSprite.scale.multiplyScalar(1.2);
+            this.showCourseInfo(hoveredSprite.userData.course, event);
+        } else {
+            this.hideCourseInfo();
+            // Reset scales
+            this.courseRegions.forEach(region => {
+                if (region.sprite) {
+                    region.sprite.scale.set(30, 30, 1);
+                }
+            });
+        }
+    },
+    
+    onMouseClick(event) {
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(
+            this.courseRegions.filter(r => r.sprite).map(r => r.sprite)
+        );
+        
+        if (intersects.length > 0) {
+            const course = intersects[0].object.userData.course;
+            this.zoomToCourse(course, intersects[0].object);
+        }
+    },
+    
+    zoomToCourse(course, sprite) {
+        // Smoothly zoom to the course
+        const targetPosition = sprite.position.clone().multiplyScalar(1.5);
+        const startPosition = this.camera.position.clone();
+        const duration = 2000;
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            
+            this.camera.position.lerpVectors(startPosition, targetPosition, ease);
+            this.camera.lookAt(sprite.position);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Show course details
+                setTimeout(() => {
+                    if (window.loadCourse) {
+                        window.loadCourse(course.id);
+                    }
+                }, 500);
+            }
+        };
+        
+        animate();
+    },
+    
+    showCourseInfo(course, event) {
+        let popup = document.getElementById('course-info-popup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'course-info-popup';
+            popup.style.cssText = `
+                position: fixed;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 12px;
+                pointer-events: none;
+                z-index: 10000;
+                max-width: 300px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            `;
+            document.body.appendChild(popup);
+        }
+        
+        popup.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${course.icon}</div>
+            <div style="font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem;">${course.title}</div>
+            <div style="font-size: 0.9rem; opacity: 0.8;">${course.description}</div>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
+                Click to explore →
+            </div>
+        `;
+        
+        popup.style.left = event.clientX + 'px';
+        popup.style.top = event.clientY + 'px';
+        popup.style.display = 'block';
+    },
+    
+    hideCourseInfo() {
+        const popup = document.getElementById('course-info-popup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    },
+    
+    addUI() {
+        const ui = document.createElement('div');
+        ui.id = 'universe-view-ui';
+        ui.style.cssText = `
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        `;
+        ui.innerHTML = `
+            <div style="margin-bottom: 0.5rem; font-weight: bold;">🌌 Universe View</div>
+            <div>🖱️ Drag to rotate • Scroll to zoom</div>
+            <div>👆 Hover courses • Click to explore</div>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
+                Zoom in to see course details
+            </div>
+        `;
+        this.container.appendChild(ui);
+    },
+    
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        if (this.controls) {
+            this.controls.update();
+        }
+        
+        // Rotate planet slowly
+        if (this.planet) {
+            this.planet.rotation.y += 0.002;
+        }
+        
+        // Animate course icons (floating)
+        this.courseRegions.forEach(region => {
+            if (region.sprite) {
+                const time = Date.now() * 0.001;
+                region.sprite.position.y = region.sprite.userData.baseY + Math.sin(time + region.sprite.userData.index) * 5;
+            }
+        });
+        
+        // Rotate universe objects slowly
+        this.universeObjects.forEach(obj => {
+            if (obj.rotation) {
+                obj.rotation.y += 0.0001;
+            }
+        });
+        
+        this.renderer.render(this.scene, this.camera);
+    },
+    
+    onWindowResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    },
+    
+    destroy() {
+        if (this.renderer) {
+            this.renderer.dispose();
+        }
+        if (this.container) {
+            this.container.innerHTML = '';
+        }
+    }
+};
+
+// Initialize when universe view mode is selected
+window.initUniverseView = function() {
+    if (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode() === 'universe') {
+        setTimeout(() => {
+            if (typeof UniverseView !== 'undefined') {
+                UniverseView.init();
+            }
+        }, 500);
+    }
+};
+

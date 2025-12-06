@@ -1753,6 +1753,7 @@
     <script src="js/migration-to-supabase.js"></script>
     <script src="js/enhanced-features.js"></script>
     <script src="js/3d-world.js"></script>
+    <script src="js/universe-view.js"></script>
     <script src="js/certificates.js"></script>
     <script src="js/user-profiles.js"></script>
     <script src="js/messaging.js"></script>
@@ -2142,6 +2143,24 @@
                         init3DWorld();
                     } else if (typeof ThreeDWorld !== 'undefined') {
                         ThreeDWorld.init();
+                    }
+                }, 100);
+                return;
+            }
+            
+            // Handle Universe view mode
+            if (viewMode === 'universe') {
+                app.innerHTML = `
+                    <div class="courses-container" id="courses-container" style="padding: 0; height: 100vh; overflow: hidden;">
+                        <!-- Universe View will be initialized here -->
+                    </div>
+                `;
+                // Initialize Universe view
+                setTimeout(() => {
+                    if (typeof initUniverseView === 'function') {
+                        initUniverseView();
+                    } else if (typeof UniverseView !== 'undefined') {
+                        UniverseView.init();
                     }
                 }, 100);
                 return;
@@ -4103,7 +4122,7 @@
                 const isGreek = currentLang === 'el';
                 errorMessage.innerHTML = `
                     <div class="chatbot-avatar">🤖</div>
-                    <div class="chatbot-text">${isGreek ? 'Συγγνώμη, συνάντησα σφάλμα. Παρακαλώ δοκιμάστε ξανά.' : 'Sorry, I encountered an error. Please try again.'}</div>
+                    <div class="chatbot-text">${isGreek ? 'Συγγνώμη, συνάντησα σφάλμα. Παρακαλώ δοκίμασε ξανά.' : 'Sorry, I encountered an error. Please try again.'}</div>
                 `;
                 messages.appendChild(errorMessage);
                 messages.scrollTop = messages.scrollHeight;
@@ -4170,15 +4189,15 @@ ${siteContext.currentCourse ? `ΤΡΕΧΟΝ ΜΑΘΗΜΑ: ${siteContext.currentC
 
 ΠΡΟΟΔΟΣ ΧΡΗΣΤΗ:
 - Ολοκληρωμένες ενότητες: ${siteContext.userProgress.completedModules} από ${siteContext.userProgress.totalModules}
-- Κουίζ που έχουν γίνει: ${siteContext.userProgress.quizScores}
+- Κουίζ που έχουν ολοκληρωθεί: ${siteContext.userProgress.quizScores}
 
 ${siteContext.currentUser ? `Τρέχων χρήστης: ${siteContext.currentUser.name} (${siteContext.currentUser.email})` : 'Ο χρήστης δεν είναι συνδεδεμένος'}
 
 ΟΔΗΓΙΕΣ:
 - Απάντησε σε ερωτήσεις βάσει του πραγματικού περιεχομένου μαθήματος που είναι διαθέσιμο στον ιστότοπο
-- Αν ρωτηθείς "ποιο είναι το ευκολότερο;" ή "easiest course", σύγκρινε τα επίπεδα δυσκολίας (Beginner < Intermediate < Advanced) και συνιστά το πιο εύκολο
+- Αν ρωτηθείς "ποιο είναι το ευκολότερο;" ή "easiest course", σύγκρινε τα επίπεδα δυσκολίας (Beginner < Intermediate < Advanced) και συνίστα το πιο εύκολο
 - Να είσαι χρήσιμος, συγκεκριμένος και να αναφέρεσαι σε πραγματικά μαθήματα/ενότητες όταν είναι σχετικό
-- Κρατήσε τις απαντήσεις σύντομες (2-4 προτάσεις)
+- Κράτα τις απαντήσεις σύντομες (2-4 προτάσεις)
 - Αν ρωτηθείς για κάτι που δεν είναι διαθέσιμο, πες το ευγενικά` 
                         : `You are a helpful AI assistant for an online learning platform. 
 You have access to the following information:
@@ -4229,7 +4248,7 @@ INSTRUCTIONS:
                     course.title.toLowerCase().includes(lowerMessage.split(' ')[0])) {
                     const moduleCount = course.modules_data?.length || 0;
                     return isGreek
-                        ? `Το μάθημα "${course.title}" έχει ${moduleCount} ενότητες και είναι ${course.level} επιπέδου. ${course.description} Θέλετε να ξεκινήσετε αυτό το μάθημα;`
+                        ? `Το μάθημα "${course.title}" έχει ${moduleCount} ενότητες και είναι ${course.level} επιπέδου. ${course.description} Θέλεις να ξεκινήσεις αυτό το μάθημα;`
                         : `The "${course.title}" course has ${moduleCount} modules and is ${course.level} level. ${course.description} Would you like to start this course?`;
                 }
                 
@@ -4239,7 +4258,7 @@ INSTRUCTIONS:
                         if (lowerMessage.includes(module.title.toLowerCase().split(' ')[0]) ||
                             module.title.toLowerCase().includes(lowerMessage.split(' ')[0])) {
                             return isGreek
-                                ? `Η ενότητα "${module.title}" είναι μέρος του μαθήματος "${course.title}". ${module.subtitle} Μπορείτε να την βρείτε στο μάθημα.`
+                                ? `Η ενότητα "${module.title}" είναι μέρος του μαθήματος "${course.title}". ${module.subtitle} Μπορείς να τη βρεις στο μάθημα.`
                                 : `The module "${module.title}" is part of the "${course.title}" course. ${module.subtitle} You can find it in the course.`;
                         }
                     }
@@ -4259,7 +4278,7 @@ INSTRUCTIONS:
                 if (beginnerCourses.length > 0) {
                     const easiest = beginnerCourses[0];
                     return isGreek
-                        ? `Το πιο εύκολο μάθημα είναι το "${easiest.title}" - ${easiest.level} επιπέδου με ${easiest.modules} ενότητες. ${easiest.description} Θέλετε να το ξεκινήσετε;`
+                        ? `Το πιο εύκολο μάθημα είναι το "${easiest.title}" - ${easiest.level} επιπέδου με ${easiest.modules} ενότητες. ${easiest.description} Θέλεις να το ξεκινήσεις;`
                         : `The easiest course is "${easiest.title}" - ${easiest.level} level with ${easiest.modules} modules. ${easiest.description} Would you like to start it?`;
                 } else {
                     // If no explicit beginner, find shortest/easiest by modules
@@ -4280,7 +4299,7 @@ INSTRUCTIONS:
                 const completed = siteContext.userProgress.completedModules;
                 const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
                 return isGreek
-                    ? `Έχετε ολοκληρώσει ${completed} από ${total} ενότητες (${percentage}%). Συνεχίστε την εξαιρετική δουλειά!`
+                    ? `Έχεις ολοκληρώσει ${completed} από ${total} ενότητες (${percentage}%). Συνέχισε την εξαιρετική δουλειά!`
                     : `You've completed ${completed} out of ${total} modules (${percentage}%). Keep up the great work!`;
             }
             
@@ -4289,7 +4308,7 @@ INSTRUCTIONS:
                 (isGreek && (lowerMessage.includes('ποια μαθήματα') || lowerMessage.includes('διαθέσιμα μαθήματα') || lowerMessage.includes('λίστα μαθημάτων')))) {
                 const courseList = coursesList.map(c => `- ${c.title} (${c.modules} ${isGreek ? 'ενότητες' : 'modules'}, ${c.level})`).join('\n');
                 return isGreek
-                    ? `Διαθέσιμα μαθήματα:\n${courseList}\n\nΚάντε κλικ σε οποιοδήποτε μάθημα για να ξεκινήσετε!`
+                    ? `Διαθέσιμα μαθήματα:\n${courseList}\n\nΚάνε κλικ σε οποιοδήποτε μάθημα για να ξεκινήσεις!`
                     : `Available courses:\n${courseList}\n\nClick on any course to get started!`;
             }
             
@@ -4297,29 +4316,29 @@ INSTRUCTIONS:
             if (lowerMessage.includes('course') || lowerMessage.includes('module') || lowerMessage.includes('learn') ||
                 (isGreek && (lowerMessage.includes('μάθημα') || lowerMessage.includes('ενότητα') || lowerMessage.includes('μάθηση')))) {
                 return isGreek 
-                    ? `Έχουμε ${coursesList.length} διαθέσιμα μαθήματα με συνολικά ${siteContext.userProgress.totalModules} ενότητες. Ποιο μάθημα σας ενδιαφέρει; Μπορώ να σας βοηθήσω να βρείτε το κατάλληλο μάθημα.`
+                    ? `Έχουμε ${coursesList.length} διαθέσιμα μαθήματα με συνολικά ${siteContext.userProgress.totalModules} ενότητες. Ποιο μάθημα σε ενδιαφέρει; Μπορώ να σε βοηθήσω να βρεις το κατάλληλο μάθημα.`
                     : `We have ${coursesList.length} available courses with ${siteContext.userProgress.totalModules} total modules. Which course interests you? I can help you find the right course.`;
             }
             
             if (lowerMessage.includes('quiz') || lowerMessage.includes('test') ||
                 (isGreek && (lowerMessage.includes('κουίζ') || lowerMessage.includes('τεστ')))) {
                 return isGreek
-                    ? `Κάθε ενότητα έχει διαδραστικό κουίζ. Έχετε ολοκληρώσει ${siteContext.userProgress.quizScores} κουίζ. Μπορείτε να κάνετε κουίζ από οποιαδήποτε ενότητα!`
+                    ? `Κάθε ενότητα έχει διαδραστικό κουίζ. Έχεις ολοκληρώσει ${siteContext.userProgress.quizScores} κουίζ. Μπορείς να κάνεις κουίζ από οποιαδήποτε ενότητα!`
                     : `Each module has an interactive quiz. You've completed ${siteContext.userProgress.quizScores} quizzes. You can take quizzes from any module!`;
             }
             
             if (lowerMessage.includes('certificate') ||
                 (isGreek && lowerMessage.includes('πιστοποιητικό'))) {
                 return isGreek
-                    ? `Για να κερδίσετε πιστοποιητικό, ολοκληρώστε όλες τις ενότητες ενός μαθήματος και περάστε τα κουίζ. Έχετε ολοκληρώσει ${completedModules.length} ενότητες μέχρι στιγμής!`
+                    ? `Για να κερδίσεις πιστοποιητικό, ολοκλήρωσε όλες τις ενότητες ενός μαθήματος και πέρασε τα κουίζ. Έχεις ολοκληρώσει ${completedModules.length} ενότητες μέχρι στιγμής!`
                     : `To earn a certificate, complete all modules in a course and pass the quizzes. You've completed ${completedModules.length} modules so far!`;
             }
             
             // Default intelligent response
             const responses = isGreek ? [
-                `Μπορώ να σας βοηθήσω με τα ${coursesList.length} διαθέσιμα μαθήματα, ${siteContext.userProgress.totalModules} ενότητες, κουίζ, και την πρόοδό σας. Τι θα θέλατε να μάθετε;`,
-                `Έχουμε ${coursesList.length} μαθήματα διαθέσιμα. Μπορώ να σας βοηθήσω να βρείτε το κατάλληλο μάθημα, να εξηγήσω ενότητες, ή να απαντήσω σε ερωτήσεις σχετικά με την πλατφόρμα.`,
-                `Είμαι εδώ για να βοηθήσω! Ρωτήστε με για συγκεκριμένα μαθήματα, ενότητες, ή οτιδήποτε άλλο σχετικό με την εμπειρία μάθησής σας.`
+                `Μπορώ να σε βοηθήσω με τα ${coursesList.length} διαθέσιμα μαθήματα, ${siteContext.userProgress.totalModules} ενότητες, κουίζ, και την πρόοδό σου. Τι θα θέλες να μάθεις;`,
+                `Έχουμε ${coursesList.length} μαθήματα διαθέσιμα. Μπορώ να σε βοηθήσω να βρεις το κατάλληλο μάθημα, να εξηγήσω ενότητες, ή να απαντήσω σε ερωτήσεις σχετικά με την πλατφόρμα.`,
+                `Είμαι εδώ για να βοηθήσω! Ρώτησέ με για συγκεκριμένα μαθήματα, ενότητες, ή οτιδήποτε άλλο σχετικό με την εμπειρία μάθησής σου.`
             ] : [
                 `I can help you with the ${coursesList.length} available courses, ${siteContext.userProgress.totalModules} modules, quizzes, and your progress. What would you like to know?`,
                 `We have ${coursesList.length} courses available. I can help you find the right course, explain modules, or answer questions about the platform.`,
