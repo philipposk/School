@@ -22,10 +22,10 @@ const ViewModeManager = {
         }
     },
     
-    currentMode: 'enhanced',
+    currentMode: '3d-world',
     
     init() {
-        const saved = localStorage.getItem('viewMode') || 'enhanced';
+        const saved = localStorage.getItem('viewMode') || '3d-world'; // Default to 3D World
         this.setMode(saved);
     },
     
