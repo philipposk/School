@@ -90,8 +90,9 @@ const ThreeDWorld = {
         const width = window.innerWidth;
         const height = window.innerHeight;
         this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000);
-        this.camera.position.set(0, 50, 100);
-        this.camera.lookAt(0, 0, 0);
+        // Position camera to see the globe curvature better
+        this.camera.position.set(0, 100, 150);
+        this.camera.lookAt(0, 50, 0); // Look at a point above the ground to see curvature
     },
     
     setupRenderer(container) {
