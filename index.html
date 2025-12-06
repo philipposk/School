@@ -220,6 +220,21 @@
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            position: relative;
+            z-index: 2001;
+        }
+        
+        /* Prevent modal content clicks from closing modal */
+        .modal-content {
+            pointer-events: auto;
+        }
+        
+        .modal {
+            cursor: pointer; /* Show pointer on backdrop */
+        }
+        
+        .modal .modal-content {
+            cursor: default; /* Default cursor on content */
         }
 
         /* Split-screen modal for assignment submission */
@@ -3133,6 +3148,92 @@
         window.openGDPRSettings = openGDPRSettings;
         window.closeGDPRSettings = closeGDPRSettings;
 
+        // Universal modal close function
+        function closeModal(modalElement) {
+            if (!modalElement) return;
+            
+            // Handle different modal types
+            const modalId = modalElement.id;
+            
+            if (modalId === 'settingsModal') {
+                if (typeof closeSettings === 'function') {
+                    closeSettings();
+                    return;
+                }
+            } else if (modalId === 'assignmentsModal') {
+                if (typeof closeAssignments === 'function') {
+                    closeAssignments();
+                    return;
+                }
+            } else if (modalId === 'messagingModal') {
+                if (typeof closeMessaging === 'function') {
+                    closeMessaging();
+                    return;
+                }
+            } else if (modalId === 'friendsModal') {
+                if (typeof closeFriendsModal === 'function') {
+                    closeFriendsModal();
+                    return;
+                }
+            } else if (modalId === 'profileEditModal') {
+                if (typeof closeProfileEditModal === 'function') {
+                    closeProfileEditModal();
+                    return;
+                }
+            } else if (modalId === 'course-details-modal') {
+                // 3D world course details modal - remove it
+                modalElement.remove();
+                return;
+            } else if (modalId === 'predictionModal') {
+                if (typeof closePrediction === 'function') {
+                    closePrediction();
+                    return;
+                }
+            }
+            
+            // Default: just remove show class
+            modalElement.classList.remove('show');
+        }
+        
+        // Add click-outside-to-close functionality to all modals
+        document.addEventListener('click', function(e) {
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                // Check if click is on the backdrop (modal itself, not modal-content)
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+        
+        // Improve ESC key handler
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeElement = document.activeElement;
+                const isInputFocused = activeElement && (
+                    activeElement.tagName === 'INPUT' ||
+                    activeElement.tagName === 'TEXTAREA' ||
+                    activeElement.isContentEditable
+                );
+                
+                // Only close if not typing in an input field
+                if (!isInputFocused) {
+                    const modals = document.querySelectorAll('.modal.show');
+                    if (modals.length > 0) {
+                        // Close the topmost modal (last one in DOM order)
+                        const topModal = modals[modals.length - 1];
+                        closeModal(topModal);
+                        
+                        // Also close any dropdowns
+                        const dropdown = document.getElementById('profileDropdown');
+                        if (dropdown) {
+                            dropdown.classList.remove('show');
+                        }
+                    }
+                }
+            }
+        });
+
         function openLoginModal() {
             document.getElementById('loginModal').classList.add('show');
         }
@@ -3425,39 +3526,7 @@
             }
         });
 
-        // Close modals with ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.keyCode === 27) {
-                // Don't close if user is typing in an input, textarea, or contenteditable element
-                const activeElement = document.activeElement;
-                const isInputFocused = activeElement && (
-                    activeElement.tagName === 'INPUT' ||
-                    activeElement.tagName === 'TEXTAREA' ||
-                    activeElement.isContentEditable
-                );
-                
-                // Only close if not typing in an input field
-                if (!isInputFocused) {
-                    // Get all visible modals
-                    const modals = document.querySelectorAll('.modal.show');
-                    
-                    if (modals.length > 0) {
-                        // Close the topmost modal (last one in DOM order)
-                        const topModal = modals[modals.length - 1];
-                        topModal.classList.remove('show');
-                        
-                        // Also close any dropdowns
-                        const dropdown = document.getElementById('profileDropdown');
-                        if (dropdown) {
-                            dropdown.classList.remove('show');
-                        }
-                        
-                        // Prevent default behavior
-                        e.preventDefault();
-                    }
-                }
-            }
-        });
+        // ESC key handler is now handled by the universal handler above (removed duplicate)
 
         // Make functions global
         window.showCourses = showCourses;
