@@ -1391,18 +1391,18 @@
             transform: translateX(5px);
         }
 
-        /* AI Chatbot Bubble */
+        /* AI Chatbot Bubble - Always fixed bottom-right */
         .chatbot-bubble {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
+            position: fixed !important;
+            bottom: 2rem !important;
+            right: 2rem !important;
             width: 64px;
             height: 64px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
             cursor: pointer;
-            z-index: 1000;
+            z-index: 9999 !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1434,9 +1434,9 @@
         }
 
         .chatbot-window {
-            position: fixed;
-            bottom: 100px;
-            right: 2rem;
+            position: fixed !important;
+            bottom: 100px !important;
+            right: 2rem !important;
             width: 400px;
             max-width: calc(100vw - 4rem);
             height: 600px;
@@ -1444,7 +1444,7 @@
             background: var(--card);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            z-index: 999;
+            z-index: 9998 !important;
             display: none;
             flex-direction: column;
             border: 1px solid var(--border);
@@ -1756,6 +1756,8 @@
     <script src="js/universe-view.js"></script>
     <script src="js/certificates.js"></script>
     <script src="js/user-profiles.js"></script>
+    <script src="js/scroll-header.js"></script>
+    <script src="js/resizable-panels.js"></script>
     <script src="js/messaging.js"></script>
     <script src="js/assignments.js"></script>
     <script src="js/gdpr-compliance.js"></script>
