@@ -203,9 +203,18 @@ const ScrollHeaderManager = {
                 this.createSidebar();
             }
             
-            // Clean up any existing flying buttons and clear sidebar
+            // Clean up any existing flying buttons
             document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
-            if (this.sidebar) {
+            
+            // Only clear sidebar if it has old buttons (not the ones we're about to create)
+            if (this.sidebar && this.sidebar.querySelectorAll('.header-sidebar-btn').length > 0) {
+                // Check if these are the buttons we want to keep
+                const existingButtons = Array.from(this.sidebar.querySelectorAll('.header-sidebar-btn'));
+                const shouldKeep = existingButtons.length === this.headerButtons.length;
+                if (!shouldKeep) {
+                    this.sidebar.innerHTML = '';
+                }
+            } else if (this.sidebar) {
                 this.sidebar.innerHTML = '';
             }
             
@@ -213,6 +222,11 @@ const ScrollHeaderManager = {
             
             // First, create simple buttons in sidebar immediately (no animation for now)
             console.log('ScrollHeaderManager: Creating sidebar buttons, sidebar exists:', !!this.sidebar);
+            if (!this.sidebar) {
+                console.error('ScrollHeaderManager: Sidebar is null after creation check!');
+                return;
+            }
+            
             this.headerButtons.forEach((btn, index) => {
                 const clone = btn.cloneNode(true);
                 clone.classList.add('header-sidebar-btn');
