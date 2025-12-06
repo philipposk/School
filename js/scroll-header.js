@@ -151,7 +151,10 @@ const ScrollHeaderManager = {
                 
                 if (this.sidebar) {
                     this.sidebar.appendChild(clone);
-                    console.log('Button', index, 'appended to sidebar');
+                    // Force reflow to ensure button is rendered
+                    clone.offsetHeight;
+                    const rect = clone.getBoundingClientRect();
+                    console.log('Button', index, 'appended to sidebar, size:', rect.width, 'x', rect.height, 'at', rect.left, rect.top);
                 } else {
                     console.error('Sidebar is null!');
                 }
