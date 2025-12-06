@@ -166,7 +166,18 @@ const ScrollHeaderManager = {
         const header = document.querySelector('header');
         const headerRight = document.querySelector('.header-right');
         
-        if (!header || !headerRight) return;
+        if (!header || !headerRight) {
+            console.warn('ScrollHeaderManager: Header or header-right not found');
+            return;
+        }
+        
+        // Re-fetch header buttons in case they've changed
+        this.headerButtons = Array.from(document.querySelectorAll('.header-btn'));
+        
+        if (this.headerButtons.length === 0) {
+            console.warn('ScrollHeaderManager: No header buttons found');
+            return;
+        }
         
         if (scrolled) {
             // Clean up any existing flying buttons and clear sidebar
