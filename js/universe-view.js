@@ -7,10 +7,15 @@ const UniverseView = {
     renderer: null,
     controls: null,
     courseRegions: [],
-    zoomLevel: 0, // 0 = galaxy view, 1 = planet view, 2 = course regions, 3 = modules
+    zoomLevel: 0, // 0 = galaxy view, 1 = planet view, 2 = course regions, 3 = neighborhoods, 4 = modules
     selectedCourse: null,
+    selectedRegion: null,
+    selectedNeighborhood: null,
     container: null,
     universeObjects: [],
+    isLanding: false,
+    isLanded: false,
+    walkingControls: null,
     otherPlanets: [], // Store references to background planets
     lastCameraPosition: null,
     lastCameraMovementTime: null,
@@ -117,7 +122,7 @@ const UniverseView = {
             this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
             this.controls.enableDamping = true;
             this.controls.dampingFactor = 0.05;
-            this.controls.minDistance = 50;
+            this.controls.minDistance = 10; // Allow very close zoom for module details
             this.controls.maxDistance = Infinity; // Allow infinite zoom out
             this.controls.target.set(0, 0, 0); // Look at planet
             this.controls.zoomSpeed = 1.0; // Consistent zoom speed
@@ -132,7 +137,7 @@ const UniverseView = {
                 this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
                 this.controls.enableDamping = true;
                 this.controls.dampingFactor = 0.05;
-                this.controls.minDistance = 50;
+                this.controls.minDistance = 10; // Allow very close zoom for module details
                 this.controls.maxDistance = Infinity;
                 this.controls.target.set(0, 0, 0); // Look at planet
                 this.controls.zoomSpeed = 1.0;
@@ -143,6 +148,18 @@ const UniverseView = {
             };
             document.head.appendChild(script);
         }
+    },
+    
+    hexToRgb(hex) {
+        // Remove # if present
+        hex = hex.replace('#', '');
+        
+        // Parse hex to RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        
+        return { r, g, b };
     },
     
     handleZoomSpeed() {
@@ -442,6 +459,10 @@ const UniverseView = {
             
             ctx.globalAlpha = 1.0;
             
+            // Create hierarchical structure: Course -> Regions -> Neighborhoods -> Modules
+            // Divide course into regions (like Greece has Ipeiros, Veroia, Kalamata)
+            const regions = this.createCourseRegions(course, lat, lon);
+            
             // Store course region data (use safe coordinates)
             this.courseRegions.push({
                 course: course,
@@ -452,7 +473,9 @@ const UniverseView = {
                 color: color,
                 isActive: isActive,
                 lat: lat,
-                lon: lon
+                lon: lon,
+                regions: regions, // Sub-regions within this course
+                neighborhoods: [] // Will be populated when zoomed in
             });
             
             // Create 3D emoji/icon above the region
@@ -1027,38 +1050,95 @@ const UniverseView = {
     },
     
     zoomToCourse(course, sprite) {
-        // Smoothly zoom to the course - but don't open it yet
+        // Smooth landing animation like 3D World mode
+        this.isLanding = true;
+        
         // Get world position since sprite is child of planet
         const worldPos = new THREE.Vector3();
         sprite.getWorldPosition(worldPos);
-        const targetPosition = worldPos.clone().multiplyScalar(1.3);
+        
+        // Calculate landing position - closer to surface for better view
+        const landingDistance = 120; // Close enough to see details
+        const direction = worldPos.clone().normalize();
+        const targetPosition = direction.multiplyScalar(landingDistance);
+        
         const startPosition = this.camera.position.clone();
-        const duration = 2000;
+        const duration = 2500; // Slightly longer for smoother landing
         const startTime = Date.now();
         
         const animate = () => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
+            
+            // Smooth easing function (ease-out cubic)
             const ease = 1 - Math.pow(1 - progress, 3);
             
+            // Smooth camera movement
             this.camera.position.lerpVectors(startPosition, targetPosition, ease);
+            
             // Update world position each frame since planet rotates
             const currentWorldPos = new THREE.Vector3();
             sprite.getWorldPosition(currentWorldPos);
             this.camera.lookAt(currentWorldPos);
             
+            // Update controls target
+            if (this.controls) {
+                this.controls.target.lerpVectors(this.controls.target.clone(), currentWorldPos, ease * 0.1);
+                this.controls.update();
+            }
+            
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Create temple and modules when landed
-                const region = this.courseRegions.find(r => r.course.id === course.id);
-                if (region && !region.temple) {
-                    this.createTempleAndModules(region);
+                // Landing complete
+                this.isLanding = false;
+                this.isLanded = true;
+                this.selectedCourse = course;
+                
+                // Create temple, regions, and modules when landed
+                const courseRegion = this.courseRegions.find(r => r.course.id === course.id);
+                if (courseRegion) {
+                    if (!courseRegion.temple) {
+                        this.createTempleAndModules(courseRegion);
+                    }
+                    // Create regions within the course
+                    this.createSubRegions(courseRegion);
                 }
             }
         };
         
         animate();
+    },
+    
+    // Create sub-regions within a course (like Ipeiros, Veroia, Kalamata)
+    createSubRegions(courseRegion) {
+        if (!courseRegion.regions || courseRegion.regions.length === 0) return;
+        
+        courseRegion.regions.forEach((region, index) => {
+            // Create visual representation of region on planet surface
+            const radius = 100;
+            const x = Math.cos(region.lat) * Math.cos(region.lon) * radius;
+            const y = Math.sin(region.lat) * radius;
+            const z = Math.cos(region.lat) * Math.sin(region.lon) * radius;
+            
+            // Create region marker
+            const regionGeometry = new THREE.CylinderGeometry(3, 3, 2, 8);
+            const regionMaterial = new THREE.MeshStandardMaterial({
+                color: courseRegion.color,
+                emissive: courseRegion.color,
+                emissiveIntensity: 0.4
+            });
+            const regionMarker = new THREE.Mesh(regionGeometry, regionMaterial);
+            regionMarker.position.set(x, y, z);
+            regionMarker.userData = {
+                region: region,
+                courseRegion: courseRegion
+            };
+            
+            // Make region marker child of planet
+            this.planet.add(regionMarker);
+            region.marker = regionMarker;
+        });
     },
     
     createTempleAndModules(region) {
