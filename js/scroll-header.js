@@ -287,10 +287,12 @@ const ScrollHeaderManager = {
                                             clone.style.pointerEvents = 'auto';
                                             clone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                                             
-                                            // Move to sidebar
-                                            this.sidebar.appendChild(clone);
-                                            
-                                            // Add hover effect
+                                            // Move to sidebar (only if sidebar doesn't already have this button)
+                                            if (!this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
+                                                clone.setAttribute('data-button-index', index);
+                                                this.sidebar.appendChild(clone);
+                                                
+                                                // Add hover effect
                                             clone.addEventListener('mouseenter', () => {
                                                 clone.style.transform = 'translateX(10px) scale(1.1) translateZ(20px)';
                                                 clone.style.background = 'rgba(255, 255, 255, 0.25)';
