@@ -3839,19 +3839,24 @@
             
             document.body.appendChild(modal);
             
-            // Scroll to modal content smoothly to ensure it's fully visible
+            // Scroll window to center to ensure modal is visible
+            // Since modals are fixed and centered, we need to scroll the page to show center area
             setTimeout(() => {
-                const modalContent = modal.querySelector('.modal-content');
-                if (modalContent) {
-                    modalContent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } else {
-                    // Fallback: scroll window to center
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                // Calculate center position
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                
+                // Only scroll if we're not already near the center
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
                     window.scrollTo({ 
-                        top: window.scrollY + (window.innerHeight / 2), 
+                        top: centerPosition, 
                         behavior: 'smooth' 
                     });
                 }
-            }, 100);
+            }, 150);
         };
         
         window.closeSettings = function() {
