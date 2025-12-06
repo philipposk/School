@@ -770,19 +770,22 @@ const UniverseView = {
                 ctx.stroke();
             }
             
-            // Draw course name - show full name with proper contrast
-            if (showText && course.title) {
+            // Draw course name - show full name with proper contrast and gradual visibility
+            if (showText && course.title && textOpacity > 0) {
                 // Calculate text color based on region color brightness for contrast
                 const rgb = this.hexToRgb(color);
                 const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
                 const textColor = brightness > 128 ? '#000000' : '#ffffff'; // Dark text on light bg, light text on dark bg
                 
+                // Apply opacity to text (gradual fade-in as you approach)
+                ctx.save();
+                ctx.globalAlpha = textOpacity;
                 ctx.fillStyle = textColor;
                 ctx.font = `bold ${fontSize}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                // Add contrasting text shadow for readability
+                // Add contrasting text shadow for readability (also with opacity)
                 const shadowColor = brightness > 128 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)';
                 ctx.shadowColor = shadowColor;
                 ctx.shadowBlur = 4 * scaleFactor;
@@ -799,11 +802,12 @@ const UniverseView = {
                 // Always show full course name, wrap to multiple lines
                 this.wrapText(ctx, course.title, maxTextWidth, textX, textY - ((Math.min(maxLines, 3) - 1) * lineHeight / 2), lineHeight);
                 
-                // Reset shadow
+                // Reset shadow and restore context
                 ctx.shadowColor = 'transparent';
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
+                ctx.restore();
             }
             
             ctx.globalAlpha = 1.0;
