@@ -736,21 +736,12 @@ window.openPrediction = function() {
         }
         if (modal) {
             modal.classList.add('show');
+            
+            // Scroll to modal smoothly to ensure it's fully visible
+            setTimeout(() => {
+                modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         }
-        
-        // Scroll to courses section smoothly - wait a bit longer for DOM to update
-        setTimeout(() => {
-            const coursesSection = document.getElementById('coursesSection');
-            if (coursesSection) {
-                coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else {
-                // Fallback: scroll to app container
-                const app = document.getElementById('app');
-                if (app) {
-                    app.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-        }, 300);
     } catch (error) {
         console.error('Error opening prediction modal:', error);
         alert('Unable to open Learning Potential. Please try again.');

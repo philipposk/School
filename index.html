@@ -3839,19 +3839,10 @@
             
             document.body.appendChild(modal);
             
-            // Scroll to courses section smoothly - wait for DOM to update
+            // Scroll to modal smoothly to ensure it's fully visible
             setTimeout(() => {
-                const coursesSection = document.getElementById('coursesSection');
-                if (coursesSection) {
-                    coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else {
-                    // Fallback: scroll to app container
-                    const app = document.getElementById('app');
-                    if (app) {
-                        app.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            }, 300);
+                modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         };
         
         window.closeSettings = function() {
