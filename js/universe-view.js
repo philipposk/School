@@ -424,17 +424,12 @@ const UniverseView = {
             const safeX = Math.max(width * 0.2, Math.min(x, 2048 - width * 0.8));
             const safeY = Math.max(height * 0.2, Math.min(y, 1024 - height * 0.8));
             
-            // Draw country-like shape with better visibility
+            // Draw smooth, rounded country-like shape (not weird polygons)
             ctx.fillStyle = color;
             ctx.globalAlpha = 0.9;
+            const radius = Math.min(width, height) * 0.3;
             ctx.beginPath();
-            ctx.moveTo(safeX, safeY);
-            ctx.lineTo(safeX + width * 0.7, safeY - height * 0.2);
-            ctx.lineTo(safeX + width, safeY + height * 0.3);
-            ctx.lineTo(safeX + width * 0.8, safeY + height);
-            ctx.lineTo(safeX + width * 0.3, safeY + height * 0.9);
-            ctx.lineTo(safeX - width * 0.1, safeY + height * 0.5);
-            ctx.closePath();
+            ctx.roundRect(safeX, safeY, width, height, radius);
             ctx.fill();
             
             // Add bright border for visibility
@@ -730,67 +725,34 @@ const UniverseView = {
                 ctx.stroke();
             }
             
-            // Draw course name - truncated to fit within region
+            // Draw course name - show full name with proper contrast
             if (showText && course.title) {
-                ctx.fillStyle = '#ffffff';
+                // Calculate text color based on region color brightness for contrast
+                const rgb = this.hexToRgb(color);
+                const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+                const textColor = brightness > 128 ? '#000000' : '#ffffff'; // Dark text on light bg, light text on dark bg
+                
+                ctx.fillStyle = textColor;
                 ctx.font = `bold ${fontSize}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                // Add text shadow for readability
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                // Add contrasting text shadow for readability
+                const shadowColor = brightness > 128 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowColor = shadowColor;
                 ctx.shadowBlur = 4 * scaleFactor;
                 ctx.shadowOffsetX = 2 * scaleFactor;
                 ctx.shadowOffsetY = 2 * scaleFactor;
                 
                 const textX = safeScaledX + scaledWidth / 2;
                 const textY = safeScaledY + scaledHeight / 2;
-                const maxTextWidth = scaledWidth * 0.85; // Leave more margin
-                const maxHeight = scaledHeight * 0.7; // Limit vertical space
+                const maxTextWidth = scaledWidth * 0.9; // More space for text
+                const maxHeight = scaledHeight * 0.8; // More vertical space
                 const lineHeight = fontSize * 1.2;
-                const maxLines = Math.floor(maxHeight / lineHeight);
+                const maxLines = Math.max(3, Math.floor(maxHeight / lineHeight)); // Allow up to 3 lines
                 
-                // First, check if full text fits when wrapped (without drawing)
-                let displayText = course.title;
-                const words = displayText.split(' ');
-                
-                // Estimate how many lines the wrapped text will take
-                let estimatedLines = 1;
-                let currentLine = '';
-                for (let i = 0; i < words.length; i++) {
-                    const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
-                    if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
-                        estimatedLines++;
-                        currentLine = words[i];
-                    } else {
-                        currentLine = testLine;
-                    }
-                }
-                
-                // If wrapped text has too many lines, truncate intelligently
-                if (estimatedLines > maxLines) {
-                    // Try to fit on maxLines by taking first N words that fit
-                    let truncated = '';
-                    let lineCount = 1;
-                    for (let i = 0; i < words.length && lineCount <= maxLines; i++) {
-                        const testText = truncated ? truncated + ' ' + words[i] : words[i];
-                        const testWidth = ctx.measureText(testText).width;
-                        if (testWidth > maxTextWidth && truncated) {
-                            lineCount++;
-                            if (lineCount <= maxLines) {
-                                truncated = words[i];
-                            } else {
-                                break;
-                            }
-                        } else {
-                            truncated = testText;
-                        }
-                    }
-                    displayText = truncated + (truncated.length < course.title.length ? '...' : '');
-                }
-                
-                // Now wrap and draw the text (either full or truncated) - only once
-                this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, estimatedLines) - 1) * lineHeight / 2), lineHeight);
+                // Always show full course name, wrap to multiple lines
+                this.wrapText(ctx, course.title, maxTextWidth, textX, textY - ((Math.min(maxLines, 3) - 1) * lineHeight / 2), lineHeight);
                 
                 // Reset shadow
                 ctx.shadowColor = 'transparent';
