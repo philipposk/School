@@ -1473,10 +1473,14 @@ const UniverseView = {
         }
         
         // Track camera movement for auto-return
-        this.trackCameraMovement();
+        if (typeof this.trackCameraMovement === 'function') {
+            this.trackCameraMovement();
+        }
         
         // Update traveling stars effect
-        this.updateTravelingStars();
+        if (typeof this.updateTravelingStars === 'function') {
+            this.updateTravelingStars();
+        }
         
         // Update zoom level check
         const currentDistance = this.camera.position.length();
