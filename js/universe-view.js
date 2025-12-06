@@ -481,17 +481,31 @@ const UniverseView = {
         // Show/hide course icons and update planet visibility based on zoom
         this.courseRegions.forEach(region => {
             if (region.sprite) {
-                if (this.zoomLevel >= 1 && distance < 2000) {
+                // Emojis visible when far/mid distance, fade out when zooming in close
+                if (this.zoomLevel >= 1 && distance > 200) {
+                    // Far/mid distance - show emojis clearly
                     region.sprite.visible = true;
-                    // Scale based on zoom - larger when closer
                     const scale = Math.max(30, 80 - (distance / 15));
                     region.sprite.scale.set(scale, scale, 1);
+                    region.sprite.material.opacity = 1.0;
                     
                     // Make sprite face camera
                     if (this.camera) {
                         region.sprite.lookAt(this.camera.position);
                     }
+                } else if (distance <= 200 && distance > 150) {
+                    // Transition zone - fade out emojis
+                    region.sprite.visible = true;
+                    const scale = Math.max(20, 50 - (distance / 20));
+                    region.sprite.scale.set(scale, scale, 1);
+                    // Fade out opacity as we zoom in
+                    const opacity = (distance - 150) / 50; // 1.0 at 200, 0.0 at 150
+                    region.sprite.material.opacity = Math.max(0, opacity);
+                    if (this.camera) {
+                        region.sprite.lookAt(this.camera.position);
+                    }
                 } else {
+                    // Close distance - hide emojis completely so countries are visible
                     region.sprite.visible = false;
                 }
             }
@@ -526,7 +540,7 @@ const UniverseView = {
         // Increase planet emissive when zoomed in for better visibility
         if (this.planetMaterial) {
             if (this.zoomLevel >= 2) {
-                this.planetMaterial.emissiveIntensity = 0.4;
+                this.planetMaterial.emissiveIntensity = 0.5;
             } else {
                 this.planetMaterial.emissiveIntensity = 0.2;
             }
