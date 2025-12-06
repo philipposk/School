@@ -2055,6 +2055,9 @@
         function init() {
             initTheme();
             // Initialize theme and layout managers
+            if (typeof ViewModeManager !== 'undefined') {
+                ViewModeManager.init();
+            }
             if (typeof ThemeManager !== 'undefined') {
                 ThemeManager.init();
             }
@@ -2091,9 +2094,9 @@
                 return;
             }
             
-            // Check view mode from theme
-            const viewMode = (typeof ThemeManager !== 'undefined' && ThemeManager.getViewMode) 
-                ? ThemeManager.getViewMode() 
+            // Check view mode from ViewModeManager
+            const viewMode = (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode) 
+                ? ViewModeManager.getCurrentMode() 
                 : (localStorage.getItem('viewMode') || 'enhanced');
             
             // Use custom layout if available, otherwise use default
@@ -3513,9 +3516,30 @@
                             </div>
                         </div>
                         
+                        <!-- View Mode Selector -->
+                        <div style="margin-bottom: 2rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem;">View Mode</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.75rem;">Choose how courses are displayed</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                                ${Object.entries(typeof ViewModeManager !== 'undefined' ? ViewModeManager.modes : {}).map(([key, mode]) => `
+                                    <div onclick="ViewModeManager.setMode('${key}'); updateSettingsModal();" 
+                                         style="padding: 1rem; border: 2px solid ${(typeof ViewModeManager !== 'undefined' && ViewModeManager.currentMode === key) ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                                border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;
+                                                background: ${(typeof ViewModeManager !== 'undefined' && ViewModeManager.currentMode === key) ? 'var(--hover-bg)' : 'transparent'};"
+                                         onmouseover="this.style.transform='scale(1.05)'" 
+                                         onmouseout="this.style.transform='scale(1)'">
+                                        <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${mode.icon}</div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text);">${mode.name}</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-light); margin-top: 0.25rem;">${mode.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
                         <!-- Color Theme Selector -->
                         <div style="margin-bottom: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem;">Color Theme</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.75rem;">Choose colors and styling (works with any view mode)</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem;">
                                 ${Object.entries(ThemeManager.themes).map(([key, theme]) => `
                                     <div onclick="ThemeManager.setTheme('${key}'); updateSettingsModal();" 

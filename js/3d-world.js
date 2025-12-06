@@ -599,9 +599,13 @@ const ThreeDWorld = {
     }
 };
 
-// Initialize 3D world when theme is set to 3d-world
+// Initialize 3D world when view mode is set to 3d-world
 window.init3DWorld = function() {
-    if (typeof ThemeManager !== 'undefined' && ThemeManager.getViewMode() === '3d-world') {
+    const viewMode = (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode) 
+        ? ViewModeManager.getCurrentMode() 
+        : localStorage.getItem('viewMode') || 'enhanced';
+    
+    if (viewMode === '3d-world') {
         setTimeout(() => {
             if (typeof ThreeDWorld !== 'undefined') {
                 ThreeDWorld.init();
@@ -610,10 +614,14 @@ window.init3DWorld = function() {
     }
 };
 
-// Auto-initialize if already on 3D world theme
+// Auto-initialize if already on 3D world view mode
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('viewMode') === '3d-world') {
+        const viewMode = (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode) 
+            ? ViewModeManager.getCurrentMode() 
+            : localStorage.getItem('viewMode') || 'enhanced';
+        
+        if (viewMode === '3d-world') {
             setTimeout(() => {
                 if (typeof ThreeDWorld !== 'undefined') {
                     ThreeDWorld.init();
@@ -622,7 +630,11 @@ if (document.readyState === 'loading') {
         }
     });
 } else {
-    if (localStorage.getItem('viewMode') === '3d-world') {
+    const viewMode = (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode) 
+        ? ViewModeManager.getCurrentMode() 
+        : localStorage.getItem('viewMode') || 'enhanced';
+    
+    if (viewMode === '3d-world') {
         setTimeout(() => {
             if (typeof ThreeDWorld !== 'undefined') {
                 ThreeDWorld.init();
