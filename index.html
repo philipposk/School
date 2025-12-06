@@ -3291,6 +3291,62 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- AI API Keys Section -->
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🤖</span> AI Configuration
+                        </h3>
+                        <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 1rem; padding: 0.75rem; background: var(--hover-bg); border-radius: 8px;">
+                            ${typeof AIConfig !== 'undefined' && (AIConfig.groqApiKey || AIConfig.openaiApiKey) 
+                                ? '<span style="color: var(--success);">✓ API keys configured - AI features enabled</span>' 
+                                : '<span style="color: var(--warning);">⚠ No API keys configured - using fallback mode</span>'}
+                        </div>
+                        
+                        <!-- Groq API Key -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Groq API Key (for AI Search & Chat)
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" id="groqApiKeyInput" 
+                                       placeholder="gsk_..." 
+                                       value="${typeof AIConfig !== 'undefined' && AIConfig.groqApiKey ? '••••••••••••' : ''}"
+                                       style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: monospace; font-size: 0.85rem;"
+                                       oninput="document.getElementById('groqApiKeyStatus').textContent = ''">
+                                <button onclick="saveGroqKey()" 
+                                        style="padding: 0.75rem 1.5rem; background: var(--theme-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    Save
+                                </button>
+                            </div>
+                            <div id="groqApiKeyStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-light);">
+                                Get free API key at <a href="https://console.groq.com" target="_blank" style="color: var(--theme-primary);">console.groq.com</a>
+                            </div>
+                        </div>
+                        
+                        <!-- OpenAI API Key -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                OpenAI API Key (for AI Grading)
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" id="openaiApiKeyInput" 
+                                       placeholder="sk-..." 
+                                       value="${typeof AIConfig !== 'undefined' && AIConfig.openaiApiKey ? '••••••••••••' : ''}"
+                                       style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: monospace; font-size: 0.85rem;"
+                                       oninput="document.getElementById('openaiApiKeyStatus').textContent = ''">
+                                <button onclick="saveOpenAIKey()" 
+                                        style="padding: 0.75rem 1.5rem; background: var(--theme-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    Save
+                                </button>
+                            </div>
+                            <div id="openaiApiKeyStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-light);">
+                                Get API key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--theme-primary);">platform.openai.com</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             
@@ -3304,6 +3360,64 @@
         window.closeSettings = function() {
             const modal = document.getElementById('settingsModal');
             if (modal) modal.remove();
+        };
+        
+        window.saveGroqKey = function() {
+            const input = document.getElementById('groqApiKeyInput');
+            const status = document.getElementById('groqApiKeyStatus');
+            const key = input.value.trim();
+            
+            if (!key) {
+                status.textContent = 'Please enter an API key';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            if (typeof AIConfig !== 'undefined') {
+                AIConfig.setGroqKey(key);
+                status.textContent = '✓ Groq API key saved successfully!';
+                status.style.color = 'var(--success)';
+                input.value = '••••••••••••';
+                // Refresh the modal to show updated status
+                setTimeout(() => {
+                    const modal = document.getElementById('settingsModal');
+                    if (modal) {
+                        openSettings();
+                    }
+                }, 1000);
+            } else {
+                status.textContent = 'Error: AI config not loaded';
+                status.style.color = 'var(--error)';
+            }
+        };
+        
+        window.saveOpenAIKey = function() {
+            const input = document.getElementById('openaiApiKeyInput');
+            const status = document.getElementById('openaiApiKeyStatus');
+            const key = input.value.trim();
+            
+            if (!key) {
+                status.textContent = 'Please enter an API key';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            if (typeof AIConfig !== 'undefined') {
+                AIConfig.setOpenAIKey(key);
+                status.textContent = '✓ OpenAI API key saved successfully!';
+                status.style.color = 'var(--success)';
+                input.value = '••••••••••••';
+                // Refresh the modal to show updated status
+                setTimeout(() => {
+                    const modal = document.getElementById('settingsModal');
+                    if (modal) {
+                        openSettings();
+                    }
+                }, 1000);
+            } else {
+                status.textContent = 'Error: AI config not loaded';
+                status.style.color = 'var(--error)';
+            }
         };
         
         window.setLanguage = function(lang) {
