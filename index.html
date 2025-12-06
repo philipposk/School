@@ -1737,6 +1737,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/migration-to-supabase.js"></script>
     <script src="js/enhanced-features.js"></script>
+    <script src="js/3d-world.js"></script>
     <script src="js/certificates.js"></script>
     <script src="js/user-profiles.js"></script>
     <script src="js/messaging.js"></script>
@@ -2090,6 +2091,11 @@
                 return;
             }
             
+            // Check view mode from theme
+            const viewMode = (typeof ThemeManager !== 'undefined' && ThemeManager.getViewMode) 
+                ? ThemeManager.getViewMode() 
+                : (localStorage.getItem('viewMode') || 'enhanced');
+            
             // Use custom layout if available, otherwise use default
             const translatedCourses = window.getTranslatedCourses ? window.getTranslatedCourses() : courses;
             
@@ -2105,6 +2111,53 @@
                 return;
             }
             
+            // Handle 3D World view mode
+            if (viewMode === '3d-world') {
+                app.innerHTML = `
+                    <div class="courses-container" id="courses-container" style="padding: 0; height: 100vh; overflow: hidden;">
+                        <!-- 3D World will be initialized here -->
+                    </div>
+                `;
+                // Initialize 3D world
+                setTimeout(() => {
+                    if (typeof init3DWorld === 'function') {
+                        init3DWorld();
+                    } else if (typeof ThreeDWorld !== 'undefined') {
+                        ThreeDWorld.init();
+                    }
+                }, 100);
+                return;
+            }
+            
+            // Handle Simple view mode (no 3D effects)
+            if (viewMode === 'simple') {
+                const simpleHTML = `
+                    <div class="courses-container">
+                        <div class="page-header">
+                            <h1 class="page-title">${window.i18n ? (window.i18n.t('courses') || 'Courses') : 'Courses'}</h1>
+                            <p class="page-subtitle">${window.i18n ? (window.i18n.t('selectCourse') || 'Select a course to begin') : 'Select a course to begin'}</p>
+                        </div>
+                        <div class="courses-grid" id="coursesSection">
+                            ${translatedCourses.map(course => `
+                                <div class="course-card" onclick="loadCourse('${course.id}')" style="transform: none !important;">
+                                    <div class="course-icon">${course.icon}</div>
+                                    <h2 class="course-title">${course.title}</h2>
+                                    <p class="course-description">${course.description}</p>
+                                    <div class="course-meta">
+                                        <span>📚 ${course.modules} ${window.i18n ? window.i18n.t('modules') : 'modules'}</span>
+                                        <span>⏱️ ${course.duration}</span>
+                                        <span>📊 ${course.level}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                app.innerHTML = simpleHTML;
+                return;
+            }
+            
+            // Enhanced view mode (with 3D effects) - default behavior
             let layoutHTML = null;
             if (typeof UILayoutManager !== 'undefined' && UILayoutManager.renderCourses) {
                 try {

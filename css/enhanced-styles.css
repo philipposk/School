@@ -1174,3 +1174,52 @@ header {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
+/* Simple Theme - Disable 3D Effects */
+[data-view-mode="simple"] .course-card,
+[data-view-mode="simple"] .beauty-card,
+[data-view-mode="simple"] .modern-card,
+[data-view-mode="simple"] .feed-item {
+    transform: none !important;
+    transform-style: flat !important;
+    perspective: none !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-view-mode="simple"] .course-card:hover,
+[data-view-mode="simple"] .beauty-card:hover,
+[data-view-mode="simple"] .modern-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+[data-view-mode="simple"] .courses-grid,
+[data-view-mode="simple"] .beauty-card-grid,
+[data-view-mode="simple"] .modern-grid {
+    perspective: none !important;
+    transform-style: flat !important;
+}
+
+/* Disable 3D effects manager for simple theme */
+[data-view-mode="simple"] body {
+    perspective: none !important;
+}
+
+/* Enhanced Theme - Keep 3D Effects (default) */
+[data-view-mode="enhanced"] {
+    /* 3D effects are enabled by default */
+}
+
+/* 3D World Theme - Full screen container */
+[data-view-mode="3d-world"] #app {
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+[data-view-mode="3d-world"] .courses-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+

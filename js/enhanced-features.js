@@ -4,44 +4,63 @@
 // ========== THEME SYSTEM ==========
 const ThemeManager = {
     themes: {
+        'simple': {
+            name: 'Simple',
+            icon: '📄',
+            colors: { primary: '#667eea', secondary: '#764ba2', accent: '#48bb78' },
+            viewMode: 'simple' // No 3D effects
+        },
         'default': {
             name: 'Default',
             icon: '🎨',
-            colors: { primary: '#667eea', secondary: '#764ba2', accent: '#48bb78' }
+            colors: { primary: '#667eea', secondary: '#764ba2', accent: '#48bb78' },
+            viewMode: 'enhanced' // With 3D hover effects
+        },
+        '3d-world': {
+            name: '3D World',
+            icon: '🌍',
+            colors: { primary: '#667eea', secondary: '#764ba2', accent: '#48bb78' },
+            viewMode: '3d-world' // Full 3D game-like experience
         },
         'liquid-glass': {
             name: 'Liquid Glass',
             icon: '✨',
             colors: { primary: '#00d4ff', secondary: '#0099cc', accent: '#00ffcc' },
-            style: 'backdrop-filter: blur(10px); background: rgba(0, 212, 255, 0.1);'
+            style: 'backdrop-filter: blur(10px); background: rgba(0, 212, 255, 0.1);',
+            viewMode: 'enhanced'
         },
         'instagram': {
             name: 'Instagram Style',
             icon: '📷',
             colors: { primary: '#E1306C', secondary: '#F56040', accent: '#FCAF45' },
-            gradient: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)'
+            gradient: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
+            viewMode: 'enhanced'
         },
         'minimal': {
             name: 'Minimal',
             icon: '⚪',
-            colors: { primary: '#2d3748', secondary: '#4a5568', accent: '#718096' }
+            colors: { primary: '#2d3748', secondary: '#4a5568', accent: '#718096' },
+            viewMode: 'simple'
         },
         'luxury': {
             name: 'Luxury',
             icon: '👑',
             colors: { primary: '#d4af37', secondary: '#b8941f', accent: '#f4d03f' },
-            gradient: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)'
+            gradient: 'linear-gradient(135deg, #d4af37 0%, #b8941f 100%)',
+            viewMode: 'enhanced'
         },
         'nature': {
             name: 'Nature',
             icon: '🌿',
-            colors: { primary: '#48bb78', secondary: '#38a169', accent: '#2f855a' }
+            colors: { primary: '#48bb78', secondary: '#38a169', accent: '#2f855a' },
+            viewMode: 'enhanced'
         },
         'cyber': {
             name: 'Cyber',
             icon: '💻',
             colors: { primary: '#00ff88', secondary: '#00cc6a', accent: '#00ff00' },
-            style: 'background: #0a0a0a; color: #00ff88;'
+            style: 'background: #0a0a0a; color: #00ff88;',
+            viewMode: 'enhanced'
         }
     },
     
@@ -54,9 +73,34 @@ const ThemeManager = {
     
     setTheme(themeName) {
         if (!this.themes[themeName]) return;
+        
+        const previousTheme = this.currentTheme;
         this.currentTheme = themeName;
         localStorage.setItem('visualTheme', themeName);
+        
+        // Store view mode preference
+        const viewMode = this.themes[themeName].viewMode || 'enhanced';
+        localStorage.setItem('viewMode', viewMode);
+        
         this.applyTheme();
+        
+        // Handle view mode changes
+        const previousViewMode = this.themes[previousTheme]?.viewMode || 'enhanced';
+        if (previousViewMode !== viewMode) {
+            // Destroy 3D world if switching away from it
+            if (previousViewMode === '3d-world' && typeof ThreeDWorld !== 'undefined') {
+                ThreeDWorld.destroy();
+            }
+            
+            // Reload courses view if switching to/from 3D world
+            if (viewMode === '3d-world' || previousViewMode === '3d-world') {
+                setTimeout(() => {
+                    if (typeof showCourses === 'function') {
+                        showCourses();
+                    }
+                }, 100);
+            }
+        }
     },
     
     applyTheme() {
@@ -79,6 +123,10 @@ const ThemeManager = {
             document.body.removeAttribute('data-theme-style');
         }
         
+        // Apply view mode
+        const viewMode = theme.viewMode || 'enhanced';
+        document.body.setAttribute('data-view-mode', viewMode);
+        
         // Apply inline styles if provided
         if (theme.style) {
             const styleId = 'theme-custom-style';
@@ -90,6 +138,10 @@ const ThemeManager = {
             }
             styleEl.textContent = `body[data-theme-style="${this.currentTheme}"] { ${theme.style} }`;
         }
+    },
+    
+    getViewMode() {
+        return this.themes[this.currentTheme]?.viewMode || 'enhanced';
     }
 };
 
