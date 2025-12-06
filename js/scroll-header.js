@@ -91,25 +91,36 @@ const ScrollHeaderManager = {
         if (!header || !headerRight) return;
         
         if (scrolled) {
-            // Move header buttons to sidebar
+            // Get button positions for flight path calculation
             this.headerButtons.forEach((btn, index) => {
+                const rect = btn.getBoundingClientRect();
+                const startX = rect.left + rect.width / 2;
+                const startY = rect.top + rect.height / 2;
+                
+                // Target position on sidebar
+                const targetX = 24; // Center of sidebar button
+                const targetY = window.innerHeight / 2 + (index - this.headerButtons.length / 2) * 56;
+                
+                // Create flying button clone
                 const clone = btn.cloneNode(true);
-                clone.classList.add('header-sidebar-btn');
+                clone.classList.add('header-sidebar-btn', 'flying-button');
                 clone.style.cssText = `
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 50%;
+                    position: fixed;
+                    left: ${startX}px;
+                    top: ${startY}px;
+                    width: ${rect.width}px;
+                    height: ${rect.height}px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     background: rgba(255, 255, 255, 0.15);
                     backdrop-filter: blur(10px);
                     border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 8px;
                     cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    position: relative;
+                    z-index: 10000;
                     transform-style: preserve-3d;
-                    animation: slideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s both;
+                    pointer-events: none;
                 `;
                 
                 // Add tooltip with button name
@@ -117,20 +128,74 @@ const ScrollHeaderManager = {
                 clone.setAttribute('title', title);
                 clone.setAttribute('data-tooltip', title);
                 
-                // Add hover effect to show name
-                clone.addEventListener('mouseenter', () => {
-                    clone.style.transform = 'translateX(10px) scale(1.1) translateZ(20px)';
-                    clone.style.background = 'rgba(255, 255, 255, 0.25)';
-                });
-                clone.addEventListener('mouseleave', () => {
-                    clone.style.transform = 'translateX(0) scale(1) translateZ(0)';
-                    clone.style.background = 'rgba(255, 255, 255, 0.15)';
-                });
+                document.body.appendChild(clone);
                 
-                // Copy onclick handler
-                clone.onclick = btn.onclick;
+                // Calculate flight path: fly along top, sharp turn, land
+                const midX = window.innerWidth * 0.1; // Turn point
+                const midY = 50; // Fly along top
                 
-                this.sidebar.appendChild(clone);
+                // Animate flight path with sharp turn
+                setTimeout(() => {
+                    // Phase 1: Fly along top
+                    clone.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    clone.style.left = `${midX}px`;
+                    clone.style.top = `${midY}px`;
+                    clone.style.transform = 'rotateZ(0deg) scale(1)';
+                    
+                    // Phase 2: Sharp turn and dive
+                    setTimeout(() => {
+                        clone.style.transition = 'all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19)';
+                        clone.style.left = `${targetX}px`;
+                        clone.style.top = `${targetY - 20}px`;
+                        clone.style.transform = 'rotateZ(-45deg) scale(1.2)';
+                        
+                        // Phase 3: Land with splash/bang
+                        setTimeout(() => {
+                            clone.style.transition = 'all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                            clone.style.left = `${targetX}px`;
+                            clone.style.top = `${targetY}px`;
+                            clone.style.transform = 'rotateZ(0deg) scale(1)';
+                            clone.style.borderRadius = '50%';
+                            clone.style.width = '48px';
+                            clone.style.height = '48px';
+                            
+                            // Create splash/bang effect
+                            this.createSplashEffect(targetX, targetY, index);
+                            
+                            // Play landing sound
+                            if (this.soundEnabled && this.sounds.pop) {
+                                setTimeout(() => {
+                                    this.sounds.pop.play().catch(() => {});
+                                }, 100);
+                            }
+                            
+                            // Finalize button
+                            setTimeout(() => {
+                                clone.style.position = 'relative';
+                                clone.style.left = '';
+                                clone.style.top = '';
+                                clone.style.pointerEvents = 'auto';
+                                clone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                                
+                                // Move to sidebar
+                                this.sidebar.appendChild(clone);
+                                
+                                // Add hover effect
+                                clone.addEventListener('mouseenter', () => {
+                                    clone.style.transform = 'translateX(10px) scale(1.1) translateZ(20px)';
+                                    clone.style.background = 'rgba(255, 255, 255, 0.25)';
+                                });
+                                clone.addEventListener('mouseleave', () => {
+                                    clone.style.transform = 'translateX(0) scale(1) translateZ(0)';
+                                    clone.style.background = 'rgba(255, 255, 255, 0.15)';
+                                });
+                                
+                                // Copy onclick handler
+                                clone.onclick = btn.onclick;
+                            }, 200);
+                        }, 300);
+                    }, 400);
+                }, index * 100);
             });
             
             // Hide original header buttons with 3D animation
@@ -154,6 +219,9 @@ const ScrollHeaderManager = {
                 transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             `;
         } else {
+            // Remove flying buttons
+            document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
+            
             // Restore header buttons
             this.headerButtons.forEach((btn, index) => {
                 btn.style.cssText = '';
@@ -175,6 +243,67 @@ const ScrollHeaderManager = {
             // Restore header
             header.style.cssText = '';
         }
+    },
+    
+    createSplashEffect(x, y, index) {
+        // Create splash/bang animation particles
+        const splash = document.createElement('div');
+        splash.className = 'splash-effect';
+        splash.style.cssText = `
+            position: fixed;
+            left: ${x}px;
+            top: ${y}px;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 10001;
+            transform: translate(-50%, -50%);
+        `;
+        
+        // Create multiple particles for splash effect
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            const angle = (i / 8) * Math.PI * 2;
+            const distance = 30 + Math.random() * 20;
+            const size = 4 + Math.random() * 6;
+            
+            particle.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.4) 100%);
+                border-radius: 50%;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                animation: splashParticle 0.6s ease-out forwards;
+                --angle: ${angle}rad;
+                --distance: ${distance}px;
+            `;
+            splash.appendChild(particle);
+        }
+        
+        // Add central bang effect
+        const bang = document.createElement('div');
+        bang.style.cssText = `
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(102, 126, 234, 0.6) 50%, transparent 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: splashBang 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        `;
+        splash.appendChild(bang);
+        
+        document.body.appendChild(splash);
+        
+        // Remove after animation
+        setTimeout(() => {
+            splash.remove();
+        }, 600);
     }
 };
 
@@ -191,12 +320,47 @@ const scrollHeaderCSS = `
         }
     }
     
+    @keyframes splashParticle {
+        0% {
+            transform: translate(-50%, -50%) translate(0, 0) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) translate(calc(cos(var(--angle)) * var(--distance)), calc(sin(var(--angle)) * var(--distance))) scale(0);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes splashBang {
+        0% {
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 1;
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0.8;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(2);
+            opacity: 0;
+        }
+    }
+    
+    .splash-effect {
+        transform-style: preserve-3d;
+    }
+    
     #header-sidebar {
         transform-style: preserve-3d;
     }
     
     .header-sidebar-btn {
         transform-style: preserve-3d;
+    }
+    
+    .flying-button {
+        transform-style: preserve-3d;
+        will-change: transform, left, top;
     }
     
     @media (max-width: 768px) {
