@@ -493,6 +493,53 @@ const UniverseView = {
         }
     },
     
+    // Create regions within a course (like Ipeiros, Veroia, Kalamata in Greece)
+    createCourseRegions(course, courseLat, courseLon) {
+        const regions = [];
+        
+        // Divide course modules into regions (3-4 modules per region)
+        const modulesPerRegion = 3;
+        const modules = course.modules_data || [];
+        
+        for (let i = 0; i < modules.length; i += modulesPerRegion) {
+            const regionModules = modules.slice(i, i + modulesPerRegion);
+            const regionIndex = Math.floor(i / modulesPerRegion);
+            
+            // Calculate position for this region within the course
+            const angle = (regionIndex / Math.max(1, Math.ceil(modules.length / modulesPerRegion))) * Math.PI * 2;
+            const offsetDistance = 0.1; // Small offset from course center
+            
+            const regionLat = courseLat + Math.cos(angle) * offsetDistance;
+            const regionLon = courseLon + Math.sin(angle) * offsetDistance;
+            
+            regions.push({
+                id: `region_${course.id}_${regionIndex}`,
+                name: this.generateRegionName(course, regionIndex),
+                modules: regionModules,
+                lat: regionLat,
+                lon: regionLon,
+                neighborhoods: [] // Will be populated when zoomed in
+            });
+        }
+        
+        return regions;
+    },
+    
+    // Generate region names (like Ipeiros, Veroia, Kalamata)
+    generateRegionName(course, index) {
+        // Use Greek city names or module-based names
+        const greekCities = ['Ιπείρος', 'Βέροια', 'Καλαμάτα', 'Θεσσαλονίκη', 'Αθήνα', 'Πάτρα', 'Λάρισα', 'Ηράκλειο'];
+        if (index < greekCities.length) {
+            return greekCities[index];
+        }
+        // Fallback to module-based names
+        const modules = course.modules_data || [];
+        if (modules[index * 3]) {
+            return modules[index * 3].title.substring(0, 15);
+        }
+        return `Region ${index + 1}`;
+    },
+    
     createCourseIcon(course, index, total, lat, lon) {
         // Create 3D text sprite for course emoji/icon - larger and more visible
         const canvas = document.createElement('canvas');
