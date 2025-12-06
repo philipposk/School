@@ -141,7 +141,15 @@ const ScrollHeaderManager = {
         const shouldBeScrolled = scrollY > 100; // Threshold for animation
         
         // Only proceed if state changed
-        if (shouldBeScrolled === this.isScrolled) return;
+        if (shouldBeScrolled === this.isScrolled) {
+            // Keep sidebar visible if scrolled (even if state hasn't changed)
+            if (shouldBeScrolled && this.sidebar) {
+                this.sidebar.style.setProperty('opacity', '1', 'important');
+                this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
+                this.sidebar.style.setProperty('visibility', 'visible', 'important');
+            }
+            return;
+        }
         
         // Prevent multiple simultaneous animations
         if (this.isAnimating) return;
