@@ -76,7 +76,12 @@ const ScrollHeaderManager = {
     
     animateHeader(scrolled) {
         const header = document.querySelector('header');
-        if (!header) return;
+        if (!header) {
+            console.warn('ScrollHeaderManager: Header not found');
+            return;
+        }
+        
+        console.log('ScrollHeaderManager: animateHeader called, scrolled:', scrolled);
         
         if (scrolled) {
             // Ensure sidebar exists
