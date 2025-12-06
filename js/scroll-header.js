@@ -55,6 +55,8 @@ const ScrollHeaderManager = {
             min-height: 60px !important;
             border: 2px solid rgba(255, 255, 255, 0.3) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+            transform: translateZ(0) !important;
+            will-change: opacity, visibility !important;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
