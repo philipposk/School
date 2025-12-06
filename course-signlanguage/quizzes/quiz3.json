@@ -1,0 +1,78 @@
+{
+  "module": "Module 3: Daily Life & Activities",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "ASL sentence structure typically follows:",
+      "options": ["Subject-Verb-Object (like English)", "Time-Topic-Comment", "Verb-Subject-Object", "Object-Verb-Subject"],
+      "correct_answer": 1,
+      "explanation": "ASL typically uses Time-Topic-Comment structure, where time comes first, then the topic, then the comment."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "The sign MOTHER involves:",
+      "options": ["Hand on forehead", "Hand on chin", "Hand on chest", "Hand waving"],
+      "correct_answer": 1,
+      "explanation": "MOTHER is signed by placing an open hand with thumb on chin and tapping twice."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "To sign 'I eat breakfast every morning' in ASL, you would sign:",
+      "options": ["I EAT BREAKFAST EVERY MORNING", "EVERY MORNING BREAKFAST I EAT", "BREAKFAST EVERY MORNING EAT I", "EAT I BREAKFAST MORNING EVERY"],
+      "correct_answer": 1,
+      "explanation": "ASL uses Time-Topic-Comment structure, so time (EVERY MORNING) comes first, then topic (BREAKFAST), then comment (I EAT)."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "The sign LIKE involves:",
+      "options": ["Hand moving away from chest", "Hand moving toward chest", "Hand circling", "Hand tapping chest"],
+      "correct_answer": 0,
+      "explanation": "LIKE is signed with a flat hand, palm on chest, moving forward away from the body."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "To sign BROTHER, you:",
+      "options": ["Tap chin, then tap other hand", "Tap forehead, then tap other hand", "Circle near cheek", "Tap side of head"],
+      "correct_answer": 1,
+      "explanation": "BROTHER combines the DAD sign (tap forehead) with tapping the other hand's index finger."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "The sign UNDERSTAND involves:",
+      "options": ["Hand touching ear", "Hand touching forehead, then moving forward", "Hand circling near head", "Hand moving away from head"],
+      "correct_answer": 1,
+      "explanation": "UNDERSTAND is signed by touching the index finger to the forehead, then moving it forward."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give an example of ASL sentence structure using Time-Topic-Comment:",
+      "acceptable_answers": [
+        "EVERY MORNING BREAKFAST I EAT",
+        "YESTERDAY PIZZA I EAT",
+        "TOMORROW SCHOOL I GO",
+        "NOW HOME I GO"
+      ],
+      "explanation": "ASL sentences typically start with time, then topic, then comment. Example: 'EVERY MORNING BREAKFAST I EAT' or 'YESTERDAY PIZZA I EAT'."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How do you sign 'I like pizza' in ASL? (Show the word order)",
+      "acceptable_answers": [
+        "PIZZA I LIKE",
+        "I LIKE PIZZA"
+      ],
+      "explanation": "Both 'PIZZA I LIKE' (Topic-Comment) and 'I LIKE PIZZA' are acceptable in ASL, though Topic-Comment is more common."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+
