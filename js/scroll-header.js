@@ -329,31 +329,35 @@ const ScrollHeaderManager = {
                                             }, 50);
                                         }
                                         
-                                        // Finalize button
+                                        // Finalize button - move to sidebar
                                         setTimeout(() => {
-                                            clone.style.position = 'relative';
-                                            clone.style.left = '';
-                                            clone.style.top = '';
-                                            clone.style.pointerEvents = 'auto';
-                                            clone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                                            clone.style.setProperty('position', 'relative', 'important');
+                                            clone.style.removeProperty('left');
+                                            clone.style.removeProperty('top');
+                                            clone.style.setProperty('pointer-events', 'auto', 'important');
+                                            clone.style.setProperty('transition', 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 'important');
                                             
-                                                // Move to sidebar (only if sidebar doesn't already have this button)
-                                                if (this.sidebar && !this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
-                                                    clone.setAttribute('data-button-index', index);
-                                                    this.sidebar.appendChild(clone);
+                                            // Move to sidebar (only if sidebar doesn't already have this button)
+                                            if (this.sidebar && !this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
+                                                clone.setAttribute('data-button-index', index);
+                                                this.sidebar.appendChild(clone);
                                                 
                                                 // Add hover effect
-                                            clone.addEventListener('mouseenter', () => {
-                                                clone.style.transform = 'translateX(10px) scale(1.1) translateZ(20px)';
-                                                clone.style.background = 'rgba(255, 255, 255, 0.25)';
-                                            });
-                                            clone.addEventListener('mouseleave', () => {
-                                                clone.style.transform = 'translateX(0) scale(1) translateZ(0)';
-                                                clone.style.background = 'rgba(255, 255, 255, 0.15)';
-                                            });
-                                            
-                                            // Copy onclick handler
-                                            clone.onclick = btn.onclick;
+                                                clone.addEventListener('mouseenter', () => {
+                                                    clone.style.setProperty('transform', 'translateX(10px) scale(1.1) translateZ(20px)', 'important');
+                                                    clone.style.setProperty('background', 'rgba(255, 255, 255, 0.25)', 'important');
+                                                });
+                                                clone.addEventListener('mouseleave', () => {
+                                                    clone.style.setProperty('transform', 'translateX(0) scale(1) translateZ(0)', 'important');
+                                                    clone.style.setProperty('background', 'rgba(255, 255, 255, 0.15)', 'important');
+                                                });
+                                                
+                                                // Copy onclick handler
+                                                clone.onclick = btn.onclick;
+                                            } else {
+                                                // Button already exists, remove clone
+                                                clone.remove();
+                                            }
                                         }, 100);
                                     }, phase5Duration);
                                 }, phase4Duration);
