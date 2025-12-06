@@ -1336,6 +1336,40 @@ const UniverseView = {
         
         if (deltaTime > 0.1) return; // Skip if too much time passed
         
+        // Play walking sound effect
+        if (!this.walkSound) {
+            this.walkSound = new Audio('sounds/walk.mp3');
+            this.walkSound.volume = 0.15;
+            this.walkSound.loop = true;
+        }
+        
+        // Play flying sound if space is pressed
+        if (!this.flySound) {
+            this.flySound = new Audio('sounds/fly.mp3');
+            this.flySound.volume = 0.2;
+            this.flySound.loop = true;
+        }
+        
+        const isMoving = this.keys.w || this.keys.a || this.keys.s || this.keys.d;
+        const isFlying = this.keys.space || (this.keys.shift && !this.keys.space);
+        
+        // Play/stop sounds based on movement
+        if (isMoving && !this.walkSound.playing) {
+            this.walkSound.play().catch(() => {}); // Ignore errors if file doesn't exist
+            this.walkSound.playing = true;
+        } else if (!isMoving && this.walkSound.playing) {
+            this.walkSound.pause();
+            this.walkSound.playing = false;
+        }
+        
+        if (isFlying && !this.flySound.playing) {
+            this.flySound.play().catch(() => {});
+            this.flySound.playing = true;
+        } else if (!isFlying && this.flySound.playing) {
+            this.flySound.pause();
+            this.flySound.playing = false;
+        }
+        
         // Calculate movement direction based on camera orientation
         const direction = new THREE.Vector3();
         const camera = this.camera;
