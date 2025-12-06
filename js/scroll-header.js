@@ -169,7 +169,8 @@ const ScrollHeaderManager = {
         if (!header || !headerRight) return;
         
         if (scrolled) {
-            // Clear sidebar first to prevent duplicates
+            // Clean up any existing flying buttons and clear sidebar
+            document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
             this.sidebar.innerHTML = '';
             
             // Get button positions for flight path calculation
@@ -334,6 +335,9 @@ const ScrollHeaderManager = {
                 transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             `;
         } else {
+            // Clean up any existing flying buttons first
+            document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
+            
             // Animate buttons back to header (reverse animation)
             const sidebarButtons = Array.from(this.sidebar.querySelectorAll('.header-sidebar-btn'));
             
