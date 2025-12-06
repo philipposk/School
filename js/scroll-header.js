@@ -92,6 +92,7 @@ const ScrollHeaderManager = {
             }
             
             // Create buttons directly in sidebar
+            console.log('Creating', this.headerButtons.length, 'buttons in sidebar');
             this.headerButtons.forEach((btn, index) => {
                 const clone = btn.cloneNode(true);
                 clone.classList.add('header-sidebar-btn');
@@ -111,6 +112,7 @@ const ScrollHeaderManager = {
                     visibility: visible !important;
                     transition: all 0.3s ease !important;
                     font-size: 1.2rem !important;
+                    z-index: 100000 !important;
                 `;
                 clone.onclick = btn.onclick;
                 clone.setAttribute('title', btn.getAttribute('title') || btn.textContent.trim());
@@ -127,6 +129,9 @@ const ScrollHeaderManager = {
                 
                 if (this.sidebar) {
                     this.sidebar.appendChild(clone);
+                    console.log('Button', index, 'appended to sidebar');
+                } else {
+                    console.error('Sidebar is null!');
                 }
             });
             
