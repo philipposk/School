@@ -226,6 +226,30 @@ const ScrollHeaderManager = {
                         };
                         console.log('ScrollHeaderManager: Sidebar state check:', state);
                         
+                        // Log button positions relative to sidebar
+                        Array.from(this.sidebar.children).forEach((child, idx) => {
+                            const childRect = child.getBoundingClientRect();
+                            const childComputed = window.getComputedStyle(child);
+                            console.log(`Button ${idx} position:`, {
+                                absolute: {
+                                    x: childRect.left,
+                                    y: childRect.top,
+                                    width: childRect.width,
+                                    height: childRect.height
+                                },
+                                relativeToSidebar: {
+                                    x: childRect.left - rect.left,
+                                    y: childRect.top - rect.top
+                                },
+                                computed: {
+                                    position: childComputed.position,
+                                    transform: childComputed.transform,
+                                    top: childComputed.top,
+                                    left: childComputed.left
+                                }
+                            });
+                        });
+                        
                         // If sidebar has 0 size, force it to have size
                         if (rect.width === 0 || rect.height === 0) {
                             console.warn('ScrollHeaderManager: Sidebar has 0 size! Forcing size...');
