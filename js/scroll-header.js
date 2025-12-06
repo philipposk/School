@@ -220,63 +220,6 @@ const ScrollHeaderManager = {
             
             console.log('ScrollHeaderManager: Starting animation with', this.headerButtons.length, 'buttons');
             
-            // First, create simple buttons in sidebar immediately (no animation for now)
-            console.log('ScrollHeaderManager: Creating sidebar buttons, sidebar exists:', !!this.sidebar);
-            if (!this.sidebar) {
-                console.error('ScrollHeaderManager: Sidebar is null after creation check!');
-                return;
-            }
-            
-            this.headerButtons.forEach((btn, index) => {
-                const clone = btn.cloneNode(true);
-                clone.classList.add('header-sidebar-btn');
-                clone.style.cssText = `
-                    width: 48px !important;
-                    height: 48px !important;
-                    border-radius: 50% !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    background: rgba(255, 255, 255, 0.9) !important;
-                    backdrop-filter: blur(10px) !important;
-                    border: 2px solid rgba(255, 255, 255, 0.5) !important;
-                    cursor: pointer !important;
-                    pointer-events: auto !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                    z-index: 10001 !important;
-                `;
-                clone.onclick = btn.onclick;
-                const title = btn.getAttribute('title') || btn.textContent.trim();
-                clone.setAttribute('title', title);
-                console.log(`ScrollHeaderManager: Created button ${index}: ${title}`);
-                if (this.sidebar) {
-                    this.sidebar.appendChild(clone);
-                    console.log(`ScrollHeaderManager: Appended button ${index} to sidebar`);
-                } else {
-                    console.error('ScrollHeaderManager: Sidebar is null!');
-                }
-            });
-            
-            // Show sidebar - make sure it's visible
-            if (this.sidebar) {
-                console.log('ScrollHeaderManager: Showing sidebar');
-                this.sidebar.style.setProperty('opacity', '1', 'important');
-                this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
-                this.sidebar.style.setProperty('visibility', 'visible', 'important');
-                this.sidebar.style.setProperty('display', 'flex', 'important');
-                console.log('ScrollHeaderManager: Sidebar styles applied, children:', this.sidebar.children.length);
-            } else {
-                console.error('ScrollHeaderManager: Cannot show sidebar - it does not exist!');
-            }
-            
-            // Hide original header buttons
-            this.headerButtons.forEach((btn) => {
-                btn.style.opacity = '0';
-                btn.style.pointerEvents = 'none';
-            });
-            
-            // Now do the animation (but keep the simple buttons visible)
             // Get button positions for flight path calculation
             this.headerButtons.forEach((btn, index) => {
                 const rect = btn.getBoundingClientRect();
