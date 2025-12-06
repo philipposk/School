@@ -437,21 +437,23 @@ const UniverseView = {
         
         sprite.position.set(x, y, z);
         
-        // Make sprite always face camera
-        sprite.lookAt(this.camera.position);
+        sprite.userData = { 
+            course: course, 
+            index: index, 
+            lat: lat, 
+            lon: lon,
+            baseY: y,
+            basePosition: new THREE.Vector3(x, y, z)
+        };
         
-        sprite.userData = { course: course, index: index, lat: lat, lon: lon };
-        this.scene.add(sprite);
+        // Add sprite as child of planet so it rotates with the planet
+        this.planet.add(sprite);
         
         // Store sprite reference
         const regionIndex = this.courseRegions.findIndex(r => r.course.id === course.id);
         if (regionIndex >= 0) {
             this.courseRegions[regionIndex].sprite = sprite;
         }
-        
-        // Add floating animation
-        sprite.userData.baseY = y;
-        sprite.userData.basePosition = sprite.position.clone();
     },
     
     onZoomChange() {
@@ -483,17 +485,22 @@ const UniverseView = {
         // Show/hide course icons and update planet visibility based on zoom
         this.courseRegions.forEach(region => {
             if (region.sprite) {
+                // Make sprite always face camera (update each frame since planet rotates)
+                // Get world position since sprite is child of planet
+                if (this.camera) {
+                    const worldPos = new THREE.Vector3();
+                    region.sprite.getWorldPosition(worldPos);
+                    region.sprite.lookAt(this.camera.position);
+                }
+                
                 // Emojis visible when far/mid distance, fade out when zooming in close
                 if (this.zoomLevel >= 1 && distance > 200) {
                     // Far/mid distance - show emojis clearly
                     region.sprite.visible = true;
                     const scale = Math.max(30, 80 - (distance / 15));
                     region.sprite.scale.set(scale, scale, 1);
-                    region.sprite.material.opacity = 1.0;
-                    
-                    // Make sprite face camera
-                    if (this.camera) {
-                        region.sprite.lookAt(this.camera.position);
+                    if (region.sprite.material) {
+                        region.sprite.material.opacity = 1.0;
                     }
                 } else if (distance <= 200 && distance > 150) {
                     // Transition zone - fade out emojis
@@ -504,9 +511,6 @@ const UniverseView = {
                     const opacity = (distance - 150) / 50; // 1.0 at 200, 0.0 at 150
                     if (region.sprite.material) {
                         region.sprite.material.opacity = Math.max(0, Math.min(1, opacity));
-                    }
-                    if (this.camera) {
-                        region.sprite.lookAt(this.camera.position);
                     }
                 } else {
                     // Close distance - hide emojis completely so countries are visible
@@ -714,7 +718,10 @@ const UniverseView = {
     
     zoomToCourse(course, sprite) {
         // Smoothly zoom to the course - but don't open it yet
-        const targetPosition = sprite.position.clone().multiplyScalar(1.3);
+        // Get world position since sprite is child of planet
+        const worldPos = new THREE.Vector3();
+        sprite.getWorldPosition(worldPos);
+        const targetPosition = worldPos.clone().multiplyScalar(1.3);
         const startPosition = this.camera.position.clone();
         const duration = 2000;
         const startTime = Date.now();
@@ -725,7 +732,10 @@ const UniverseView = {
             const ease = 1 - Math.pow(1 - progress, 3);
             
             this.camera.position.lerpVectors(startPosition, targetPosition, ease);
-            this.camera.lookAt(sprite.position);
+            // Update world position each frame since planet rotates
+            const currentWorldPos = new THREE.Vector3();
+            sprite.getWorldPosition(currentWorldPos);
+            this.camera.lookAt(currentWorldPos);
             
             if (progress < 1) {
                 requestAnimationFrame(animate);
@@ -1001,11 +1011,19 @@ const UniverseView = {
             }
         }
         
-        // Animate course icons (floating)
+        // Animate course icons (floating) - update Y position relative to base
         this.courseRegions.forEach(region => {
-            if (region.sprite) {
+            if (region.sprite && region.sprite.userData.baseY !== undefined) {
                 const time = Date.now() * 0.001;
-                region.sprite.position.y = region.sprite.userData.baseY + Math.sin(time + region.sprite.userData.index) * 5;
+                // Keep sprite floating animation but maintain base position
+                const basePos = region.sprite.userData.basePosition;
+                if (basePos) {
+                    region.sprite.position.set(
+                        basePos.x,
+                        basePos.y + Math.sin(time + (region.sprite.userData.index || 0)) * 5,
+                        basePos.z
+                    );
+                }
             }
         });
         
