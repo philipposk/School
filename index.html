@@ -3838,6 +3838,20 @@
             if (existing) existing.remove();
             
             document.body.appendChild(modal);
+            
+            // Scroll to courses section smoothly - wait for DOM to update
+            setTimeout(() => {
+                const coursesSection = document.getElementById('coursesSection');
+                if (coursesSection) {
+                    coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    // Fallback: scroll to app container
+                    const app = document.getElementById('app');
+                    if (app) {
+                        app.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            }, 300);
         };
         
         window.closeSettings = function() {
