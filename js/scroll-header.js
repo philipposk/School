@@ -49,14 +49,14 @@ const ScrollHeaderManager = {
     },
     
     createSidebar() {
-        // Create sidebar container on top-left side
+        // Create sidebar container on top-left side - always fixed
         const sidebar = document.createElement('div');
         sidebar.id = 'header-sidebar';
         sidebar.style.cssText = `
-            position: fixed;
-            left: 0.5rem;
-            top: 1rem;
-            z-index: 1000;
+            position: fixed !important;
+            left: 0.5rem !important;
+            top: 1rem !important;
+            z-index: 1000 !important;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
@@ -64,6 +64,8 @@ const ScrollHeaderManager = {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            transform: translateZ(0);
+            will-change: opacity;
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
