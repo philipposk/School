@@ -120,18 +120,22 @@ const ScrollHeaderManager = {
             // Create buttons directly in sidebar
             console.log('Creating', this.headerButtons.length, 'buttons in sidebar');
             this.headerButtons.forEach((btn, index) => {
-                const clone = btn.cloneNode(true);
+                // Create a fresh button element instead of cloning
+                const clone = document.createElement('button');
+                clone.type = 'button';
                 clone.classList.add('header-sidebar-btn');
-                // Remove any existing transforms or positioning
-                clone.style.removeProperty('transform');
-                clone.style.removeProperty('position');
-                clone.style.removeProperty('top');
-                clone.style.removeProperty('left');
-                clone.style.removeProperty('right');
-                clone.style.removeProperty('bottom');
                 
+                // Copy only the text content and icon
+                clone.innerHTML = btn.innerHTML;
+                clone.textContent = btn.textContent;
+                
+                // Copy onclick handler
+                clone.onclick = btn.onclick;
+                clone.setAttribute('title', btn.getAttribute('title') || btn.textContent.trim());
+                
+                // Set all styles explicitly - no inheritance
                 clone.style.cssText = `
-                    position: relative !important;
+                    position: static !important;
                     width: 48px !important;
                     height: 48px !important;
                     min-width: 48px !important;
@@ -157,6 +161,7 @@ const ScrollHeaderManager = {
                     left: auto !important;
                     right: auto !important;
                     bottom: auto !important;
+                    transform: none !important;
                 `;
                 clone.onclick = btn.onclick;
                 clone.setAttribute('title', btn.getAttribute('title') || btn.textContent.trim());
