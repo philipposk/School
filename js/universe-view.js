@@ -461,7 +461,7 @@ const UniverseView = {
             
             // Create hierarchical structure: Course -> Regions -> Neighborhoods -> Modules
             // Divide course into regions (like Greece has Ipeiros, Veroia, Kalamata)
-            const regions = this.createCourseRegions(course, lat, lon);
+            const subRegions = this.createCourseRegions(course, lat, lon);
             
             // Store course region data (use safe coordinates)
             this.courseRegions.push({
@@ -474,7 +474,7 @@ const UniverseView = {
                 isActive: isActive,
                 lat: lat,
                 lon: lon,
-                regions: regions, // Sub-regions within this course
+                regions: subRegions, // Sub-regions within this course
                 neighborhoods: [] // Will be populated when zoomed in
             });
             
@@ -677,28 +677,50 @@ const UniverseView = {
         ctx.ellipse(800 * scaleFactor, 700 * scaleFactor, 180 * scaleFactor, 120 * scaleFactor, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Determine font size and border width based on zoom
+        // Determine font size, border width, and text visibility based on zoom
+        // Text becomes gradually more visible as you approach
         let fontSize = 20;
         let borderWidth = 4;
         let showText = false;
+        let textOpacity = 0;
+        
         if (distance < 200) {
+            // Very close - full visibility, large text
             fontSize = 48 * scaleFactor;
             borderWidth = 8 * scaleFactor;
             showText = true;
+            textOpacity = 1.0;
         } else if (distance < 300) {
+            // Close - full visibility, medium-large text
             fontSize = 36 * scaleFactor;
             borderWidth = 6 * scaleFactor;
             showText = true;
+            textOpacity = 1.0;
         } else if (distance < 500) {
+            // Mid distance - full visibility, medium text
             fontSize = 28 * scaleFactor;
             borderWidth = 5 * scaleFactor;
             showText = true;
+            textOpacity = 1.0;
         } else if (distance < 800) {
+            // Far but visible - gradually fade in
             fontSize = 22 * scaleFactor;
             borderWidth = 4 * scaleFactor;
             showText = true;
-        } else {
+            // Fade in from 800 to 500 distance
+            textOpacity = Math.max(0, (800 - distance) / 300); // 0 at 800, 1 at 500
+        } else if (distance < 1200) {
+            // Very far - start fading in
+            fontSize = 18 * scaleFactor;
             borderWidth = 3 * scaleFactor;
+            showText = true;
+            // Very faint, gradually appearing
+            textOpacity = Math.max(0, (1200 - distance) / 400); // 0 at 1200, 1 at 800
+        } else {
+            // Too far - no text visible
+            borderWidth = 3 * scaleFactor;
+            showText = false;
+            textOpacity = 0;
         }
         
         // Draw course regions
