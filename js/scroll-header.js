@@ -199,6 +199,8 @@ const ScrollHeaderManager = {
                 this.sidebar.innerHTML = '';
             }
             
+            console.log('ScrollHeaderManager: Starting animation with', this.headerButtons.length, 'buttons');
+            
             // Get button positions for flight path calculation
             this.headerButtons.forEach((btn, index) => {
                 const rect = btn.getBoundingClientRect();
@@ -209,26 +211,30 @@ const ScrollHeaderManager = {
                 const targetX = 24; // Center of sidebar button
                 const targetY = 80 + index * 56; // Top-left, stacked vertically
                 
+                console.log(`ScrollHeaderManager: Animating button ${index} from (${startX}, ${startY}) to (${targetX}, ${targetY})`);
+                
                 // Create flying button clone
                 const clone = btn.cloneNode(true);
                 clone.classList.add('header-sidebar-btn', 'flying-button');
                 clone.style.cssText = `
-                    position: fixed;
-                    left: ${startX}px;
-                    top: ${startY}px;
-                    width: ${rect.width}px;
-                    height: ${rect.height}px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: rgba(255, 255, 255, 0.15);
-                    backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 8px;
-                    cursor: pointer;
-                    z-index: 10000;
-                    transform-style: preserve-3d;
-                    pointer-events: none;
+                    position: fixed !important;
+                    left: ${startX}px !important;
+                    top: ${startY}px !important;
+                    width: ${rect.width}px !important;
+                    height: ${rect.height}px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    background: rgba(255, 255, 255, 0.15) !important;
+                    backdrop-filter: blur(10px) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                    border-radius: 8px !important;
+                    cursor: pointer !important;
+                    z-index: 10000 !important;
+                    transform-style: preserve-3d !important;
+                    pointer-events: none !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
                 `;
                 
                 // Add tooltip with button name
@@ -237,6 +243,7 @@ const ScrollHeaderManager = {
                 clone.setAttribute('data-tooltip', title);
                 
                 document.body.appendChild(clone);
+                console.log(`ScrollHeaderManager: Clone ${index} created and appended to body`);
                 
                 // Calculate flight path: fly along top with multiple bounces
                 const midX1 = window.innerWidth * 0.2; // First bounce point
