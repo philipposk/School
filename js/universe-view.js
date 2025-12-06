@@ -34,6 +34,7 @@ const UniverseView = {
         this.setupCamera();
         this.setupRenderer(canvasContainer);
         this.setupControls();
+        this.setupLights();
         this.createUniverse();
         this.createPlanet();
         this.loadCourses();
@@ -47,6 +48,23 @@ const UniverseView = {
     setupScene() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x000000);
+    },
+    
+    setupLights() {
+        // Brighter ambient light so planet is visible
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+        this.scene.add(ambientLight);
+        
+        // Strong directional light (sun) to illuminate the planet
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        directionalLight.position.set(200, 300, 200);
+        directionalLight.castShadow = true;
+        this.scene.add(directionalLight);
+        
+        // Additional point light near planet
+        const planetLight = new THREE.PointLight(0xffffff, 1.0, 500);
+        planetLight.position.set(150, 150, 150);
+        this.scene.add(planetLight);
     },
     
     setupCamera() {
