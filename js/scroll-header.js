@@ -65,8 +65,8 @@ const ScrollHeaderManager = {
             padding: 0.5rem !important;
             opacity: 0 !important;
             pointer-events: none !important;
-            visibility: visible !important;
-            transition: opacity 0.3s ease !important;
+            visibility: hidden !important;
+            transition: opacity 0.3s ease, visibility 0.3s ease !important;
             transform: translateZ(0) !important;
             will-change: opacity !important;
             background: rgba(0, 0, 0, 0.1) !important;
