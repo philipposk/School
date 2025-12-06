@@ -71,8 +71,24 @@ const ThemeManager = {
             root.style.setProperty('--theme-gradient', theme.gradient);
         }
         
+        // Apply theme-specific styles
         if (theme.style) {
-            document.body.setAttribute('data-theme-style', themeName);
+            document.body.setAttribute('data-theme-style', this.currentTheme);
+        } else {
+            // Remove any existing theme style attribute
+            document.body.removeAttribute('data-theme-style');
+        }
+        
+        // Apply inline styles if provided
+        if (theme.style) {
+            const styleId = 'theme-custom-style';
+            let styleEl = document.getElementById(styleId);
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = styleId;
+                document.head.appendChild(styleEl);
+            }
+            styleEl.textContent = `body[data-theme-style="${this.currentTheme}"] { ${theme.style} }`;
         }
     }
 };
@@ -140,9 +156,10 @@ const UILayoutManager = {
     
     renderBeautyCardLayout() {
         // Instagram-style large cards
+        const coursesList = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
         return `
             <div class="beauty-card-grid">
-                ${courses.map(course => `
+                ${coursesList.map(course => `
                     <div class="beauty-card" onclick="loadCourse('${course.id}')">
                         <div class="beauty-card-image" style="background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));">
                             <div class="beauty-card-icon">${course.icon}</div>
