@@ -310,39 +310,58 @@ If the query is about progress, include an action result with type "action" and 
     keywordSearch(query) {
         const results = [];
         const lowerQuery = query.toLowerCase();
+        const coursesList = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
+        const queryWords = lowerQuery.split(' ').filter(w => w.length > 2); // Filter out short words
         
-        // Search courses
-        courses.forEach(course => {
-            if (course.title.toLowerCase().includes(lowerQuery) ||
+        // Intelligent course search - matches multiple words
+        coursesList.forEach(course => {
+            const courseText = `${course.title} ${course.description} ${course.level}`.toLowerCase();
+            const matchScore = queryWords.reduce((score, word) => {
+                return score + (courseText.includes(word) ? 1 : 0);
+            }, 0);
+            
+            if (matchScore > 0 || course.title.toLowerCase().includes(lowerQuery) ||
                 course.description.toLowerCase().includes(lowerQuery)) {
                 results.push({
                     type: 'course',
                     title: course.title,
-                    description: course.description,
-                    action: () => loadCourse(course.id)
+                    description: `${course.description} (${course.modules} modules, ${course.duration})`,
+                    action: () => loadCourse(course.id),
+                    score: matchScore
                 });
             }
             
-            // Search modules
-            course.modules_data.forEach(module => {
-                if (module.title.toLowerCase().includes(lowerQuery) ||
-                    module.subtitle.toLowerCase().includes(lowerQuery)) {
-                    results.push({
-                        type: 'module',
-                        title: `${course.title} - ${module.title}`,
-                        description: module.subtitle,
-                        action: () => {
-                            loadCourse(course.id);
-                            setTimeout(() => loadModule(module.id), 100);
-                        }
-                    });
-                }
-            });
+            // Search modules with better matching
+            if (course.modules_data) {
+                course.modules_data.forEach(module => {
+                    const moduleText = `${module.title} ${module.subtitle}`.toLowerCase();
+                    const moduleMatchScore = queryWords.reduce((score, word) => {
+                        return score + (moduleText.includes(word) ? 1 : 0);
+                    }, 0);
+                    
+                    if (moduleMatchScore > 0 || module.title.toLowerCase().includes(lowerQuery) ||
+                        module.subtitle.toLowerCase().includes(lowerQuery)) {
+                        results.push({
+                            type: 'module',
+                            title: `${course.title} - ${module.title}`,
+                            description: module.subtitle,
+                            action: () => {
+                                loadCourse(course.id);
+                                setTimeout(() => loadModule(module.id), 100);
+                            },
+                            score: moduleMatchScore
+                        });
+                    }
+                });
+            }
         });
         
-        // Natural language queries
-        if (lowerQuery.includes('quiz') || lowerQuery.includes('test')) {
-            results.push({
+        // Sort by relevance score
+        results.sort((a, b) => (b.score || 0) - (a.score || 0));
+        
+        // Natural language queries with better understanding
+        if (lowerQuery.includes('quiz') || lowerQuery.includes('test') || lowerQuery.includes('assessment')) {
+            results.unshift({
                 type: 'action',
                 title: 'View All Quizzes',
                 description: 'See all available quizzes',
@@ -350,16 +369,29 @@ If the query is about progress, include an action result with type "action" and 
             });
         }
         
-        if (lowerQuery.includes('progress') || lowerQuery.includes('completed')) {
-            results.push({
+        if (lowerQuery.includes('progress') || lowerQuery.includes('completed') || lowerQuery.includes('how many') || lowerQuery.includes('my progress')) {
+            const completed = state.completedModules?.length || 0;
+            const total = coursesList.reduce((sum, c) => sum + (c.modules_data?.length || 0), 0);
+            results.unshift({
                 type: 'action',
                 title: 'View Progress',
-                description: 'See your learning progress',
+                description: `You've completed ${completed} out of ${total} modules`,
                 action: () => showProgress()
             });
         }
         
-        return results;
+        if (lowerQuery.includes('certificate') || lowerQuery.includes('certification')) {
+            results.unshift({
+                type: 'action',
+                title: 'View Certificates',
+                description: 'See your earned certificates',
+                action: () => {
+                    if (typeof viewCertificates === 'function') viewCertificates();
+                }
+            });
+        }
+        
+        return results.slice(0, 10); // Limit to top 10 results
     },
     
     mapAIResultsToActions(aiResults) {
