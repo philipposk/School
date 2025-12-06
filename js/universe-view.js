@@ -421,10 +421,12 @@ const UniverseView = {
         const spriteMaterial = new THREE.SpriteMaterial({
             map: texture,
             transparent: true,
-            sizeAttenuation: true
+            sizeAttenuation: true,
+            opacity: 1.0 // Start fully visible
         });
         
         const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.userData.material = spriteMaterial; // Store reference for opacity updates
         sprite.scale.set(40, 40, 1);
         
         // Position above the course region on the planet using spherical coordinates
@@ -500,13 +502,18 @@ const UniverseView = {
                     region.sprite.scale.set(scale, scale, 1);
                     // Fade out opacity as we zoom in
                     const opacity = (distance - 150) / 50; // 1.0 at 200, 0.0 at 150
-                    region.sprite.material.opacity = Math.max(0, opacity);
+                    if (region.sprite.material) {
+                        region.sprite.material.opacity = Math.max(0, Math.min(1, opacity));
+                    }
                     if (this.camera) {
                         region.sprite.lookAt(this.camera.position);
                     }
                 } else {
                     // Close distance - hide emojis completely so countries are visible
                     region.sprite.visible = false;
+                    if (region.sprite.material) {
+                        region.sprite.material.opacity = 0;
+                    }
                 }
             }
             
