@@ -325,29 +325,159 @@ const ScrollHeaderManager = {
                 transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             `;
         } else {
-            // Remove flying buttons
-            document.querySelectorAll('.flying-button').forEach(btn => btn.remove());
+            // Animate buttons back to header (reverse animation)
+            const sidebarButtons = Array.from(this.sidebar.querySelectorAll('.header-sidebar-btn'));
             
-            // Restore header buttons
-            this.headerButtons.forEach((btn, index) => {
-                btn.style.cssText = '';
-                btn.style.cssText += `
-                    transform: translateX(0) rotateY(0deg) translateZ(0);
-                    opacity: 1;
-                    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s;
-                    pointer-events: auto;
+            sidebarButtons.forEach((sidebarBtn, index) => {
+                const btn = this.headerButtons[index];
+                if (!btn) return;
+                
+                // Get target position (original header button position)
+                const rect = btn.getBoundingClientRect();
+                const targetX = rect.left + rect.width / 2;
+                const targetY = rect.top + rect.height / 2;
+                
+                // Get current position
+                const sidebarRect = sidebarBtn.getBoundingClientRect();
+                const startX = sidebarRect.left + sidebarRect.width / 2;
+                const startY = sidebarRect.top + sidebarRect.height / 2;
+                
+                // Create flying clone for reverse animation
+                const clone = sidebarBtn.cloneNode(true);
+                clone.classList.add('flying-button');
+                clone.style.cssText = `
+                    position: fixed;
+                    left: ${startX}px;
+                    top: ${startY}px;
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 255, 255, 0.15);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    cursor: pointer;
+                    z-index: 10000;
+                    transform-style: preserve-3d;
+                    pointer-events: none;
                 `;
+                
+                document.body.appendChild(clone);
+                
+                // Hide original sidebar button
+                sidebarBtn.style.opacity = '0';
+                sidebarBtn.style.pointerEvents = 'none';
+                
+                // Calculate reverse flight path (opposite of forward)
+                const midX2 = window.innerWidth * 0.1;
+                const midX1 = window.innerWidth * 0.2;
+                const midY = 50;
+                
+                // Calculate timing based on scroll speed (reverse is slower - harder to climb up!)
+                const baseDelay = 50 * this.animationSpeed;
+                const phase1Duration = 100 * this.animationSpeed;
+                const phase2Duration = 150 * this.animationSpeed;
+                const phase3Duration = 200 * this.animationSpeed;
+                const phase4Duration = 250 * this.animationSpeed;
+                const phase5Duration = 300 * this.animationSpeed;
+                
+                // Reverse animation: start from sidebar, go back through phases
+                setTimeout(() => {
+                    // Phase 1: Lift off from sidebar (reverse of landing)
+                    clone.style.transition = `all ${phase1Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                    clone.style.left = `${targetX + 10}px`;
+                    clone.style.top = `${targetY - 10}px`;
+                    clone.style.transform = 'rotateZ(-20deg) scale(1.1)';
+                    
+                    // Phase 2: Bounce up (reverse of bounce down)
+                    setTimeout(() => {
+                        clone.style.transition = `all ${phase2Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`;
+                        clone.style.left = `${targetX + 10}px`;
+                        clone.style.top = `${targetY - 30}px`;
+                        clone.style.transform = 'rotateZ(-45deg) scale(1.3)';
+                        
+                        // Phase 3: Turn and fly up (reverse of dive)
+                        setTimeout(() => {
+                            clone.style.transition = `all ${phase3Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`;
+                            clone.style.left = `${midX2}px`;
+                            clone.style.top = `${midY}px`;
+                            clone.style.transform = 'rotateZ(-5deg) scale(1)';
+                            
+                            // Phase 4: Bounce down (reverse of bounce up)
+                            setTimeout(() => {
+                                clone.style.transition = `all ${phase4Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                                clone.style.top = `${midY - 15}px`;
+                                clone.style.transform = 'rotateZ(5deg) scale(1.1)';
+                                
+                                // Phase 5: Continue along top (reverse of first phase)
+                                setTimeout(() => {
+                                    clone.style.transition = `all ${phase5Duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+                                    clone.style.left = `${midX1}px`;
+                                    clone.style.top = `${midY}px`;
+                                    clone.style.transform = 'rotateZ(0deg) scale(1)';
+                                    
+                                    // Phase 6: Final approach to header position
+                                    setTimeout(() => {
+                                        clone.style.transition = `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                                        clone.style.left = `${targetX}px`;
+                                        clone.style.top = `${targetY}px`;
+                                        clone.style.transform = 'rotateZ(0deg) scale(1)';
+                                        clone.style.borderRadius = '8px';
+                                        clone.style.width = `${btn.offsetWidth}px`;
+                                        clone.style.height = `${btn.offsetHeight}px`;
+                                        
+                                        // HIDDEN NERD JOKE: Delay at top because it's harder to climb up! 🧗
+                                        setTimeout(() => {
+                                            // Pause at top position (the "climbing is hard" delay)
+                                            clone.style.transition = 'all 0.3s ease';
+                                            clone.style.transform = 'scale(1.1)';
+                                            
+                                            setTimeout(() => {
+                                                // Final landing back in header
+                                                clone.style.transition = `all ${phase1Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+                                                clone.style.transform = 'scale(1)';
+                                                
+                                                // Play sound
+                                                if (this.soundEnabled && this.sounds.pop) {
+                                                    setTimeout(() => {
+                                                        this.sounds.pop.play().catch(() => {});
+                                                    }, 50);
+                                                }
+                                                
+                                                // Restore original button
+                                                setTimeout(() => {
+                                                    btn.style.cssText = '';
+                                                    btn.style.cssText += `
+                                                        transform: translateX(0) rotateY(0deg) translateZ(0);
+                                                        opacity: 1;
+                                                        transition: all 0.3s ease;
+                                                        pointer-events: auto;
+                                                    `;
+                                                    clone.remove();
+                                                }, phase1Duration);
+                                            }, 300); // The "climbing delay" - hidden nerd joke! 🧗
+                                        }, phase5Duration);
+                                    }, phase4Duration);
+                                }, phase3Duration);
+                            }, phase2Duration);
+                        }, phase1Duration);
+                    }, phase1Duration);
+                }, index * baseDelay);
             });
             
-            // Hide sidebar
-            this.sidebar.style.opacity = '0';
-            this.sidebar.style.pointerEvents = 'none';
-            
-            // Clear sidebar
-            this.sidebar.innerHTML = '';
+            // Hide sidebar after delay
+            setTimeout(() => {
+                this.sidebar.style.opacity = '0';
+                this.sidebar.style.pointerEvents = 'none';
+                this.sidebar.innerHTML = '';
+            }, sidebarButtons.length * baseDelay + 2000);
             
             // Restore header
-            header.style.cssText = '';
+            setTimeout(() => {
+                header.style.cssText = '';
+            }, 100);
         }
     },
     
