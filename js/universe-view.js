@@ -642,12 +642,11 @@ const UniverseView = {
                 const lineHeight = fontSize * 1.2;
                 const maxLines = Math.floor(maxHeight / lineHeight);
                 
-                // First, try to wrap the full text
+                // First, check if full text fits when wrapped (without drawing)
                 let displayText = course.title;
-                let textLines = this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, 2) - 1) * lineHeight / 2), lineHeight);
-                
-                // Check if wrapped text fits (count lines by measuring)
                 const words = displayText.split(' ');
+                
+                // Estimate how many lines the wrapped text will take
                 let estimatedLines = 1;
                 let currentLine = '';
                 for (let i = 0; i < words.length; i++) {
@@ -664,13 +663,13 @@ const UniverseView = {
                 if (estimatedLines > maxLines) {
                     // Try to fit on maxLines by taking first N words that fit
                     let truncated = '';
-                    let lineCount = 0;
-                    for (let i = 0; i < words.length && lineCount < maxLines; i++) {
+                    let lineCount = 1;
+                    for (let i = 0; i < words.length && lineCount <= maxLines; i++) {
                         const testText = truncated ? truncated + ' ' + words[i] : words[i];
                         const testWidth = ctx.measureText(testText).width;
                         if (testWidth > maxTextWidth && truncated) {
                             lineCount++;
-                            if (lineCount < maxLines) {
+                            if (lineCount <= maxLines) {
                                 truncated = words[i];
                             } else {
                                 break;
@@ -680,13 +679,10 @@ const UniverseView = {
                         }
                     }
                     displayText = truncated + (truncated.length < course.title.length ? '...' : '');
-                    
-                    // Re-wrap the truncated text
-                    this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, 2) - 1) * lineHeight / 2), lineHeight);
-                } else {
-                    // Full text fits, just wrap it (already done above)
-                    // No need to do anything, wrapText was already called
                 }
+                
+                // Now wrap and draw the text (either full or truncated) - only once
+                this.wrapText(ctx, displayText, maxTextWidth, textX, textY - ((Math.min(maxLines, estimatedLines) - 1) * lineHeight / 2), lineHeight);
                 
                 // Reset shadow
                 ctx.shadowColor = 'transparent';
