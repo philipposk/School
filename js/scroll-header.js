@@ -10,6 +10,7 @@ const ScrollHeaderManager = {
     animationSpeed: 1.0, // Default animation speed multiplier
     lastScrollTime: null,
     lastScrollY: 0,
+    isAnimating: false, // Prevent multiple simultaneous animations
     
     init() {
         // Create sounds directory reference (sounds will be in /sounds/ folder)
@@ -142,6 +143,10 @@ const ScrollHeaderManager = {
         // Only proceed if state changed
         if (shouldBeScrolled === this.isScrolled) return;
         
+        // Prevent multiple simultaneous animations
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+        
         this.isScrolled = shouldBeScrolled;
         
         // Ensure buttons are found
@@ -151,6 +156,7 @@ const ScrollHeaderManager = {
         
         if (this.headerButtons.length === 0) {
             console.warn('ScrollHeaderManager: No header buttons found');
+            this.isAnimating = false;
             return;
         }
         
@@ -168,9 +174,12 @@ const ScrollHeaderManager = {
         // Fast scroll (>10px/ms) = 0.5x duration (faster), slow scroll (<1px/ms) = 2x duration (slower)
         this.animationSpeed = Math.max(0.5, Math.min(2.0, 1 / (scrollSpeed * 0.1 + 0.5)));
         
-        console.log('ScrollHeaderManager: handleScroll called, shouldBeScrolled:', shouldBeScrolled, 'buttons:', this.headerButtons.length);
-        
         this.animateHeader(shouldBeScrolled);
+        
+        // Reset animation flag after animation completes
+        setTimeout(() => {
+            this.isAnimating = false;
+        }, 2000);
         
         // Play sound effect (gracefully handle missing files)
         if (this.soundEnabled && this.sounds.pop) {
