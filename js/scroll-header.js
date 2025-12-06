@@ -357,11 +357,14 @@ const ScrollHeaderManager = {
                                             clone.style.setProperty('opacity', '1', 'important');
                                             clone.style.setProperty('visibility', 'visible', 'important');
                                             
-                                            // Move to sidebar (only if sidebar doesn't already have this button)
-                                            if (this.sidebar && !this.sidebar.querySelector(`[data-button-index="${index}"]`)) {
+                                            // Move to sidebar (replace existing if any)
+                                            if (this.sidebar) {
+                                                const existingButton = this.sidebar.querySelector(`[data-button-index="${index}"]`);
+                                                if (existingButton) {
+                                                    existingButton.remove();
+                                                }
                                                 clone.setAttribute('data-button-index', index);
                                                 this.sidebar.appendChild(clone);
-                                                console.log(`ScrollHeaderManager: Button ${index} moved to sidebar, sidebar children:`, this.sidebar.children.length);
                                                 
                                                 // Add hover effect
                                                 clone.addEventListener('mouseenter', () => {
@@ -376,8 +379,7 @@ const ScrollHeaderManager = {
                                                 // Copy onclick handler
                                                 clone.onclick = btn.onclick;
                                             } else {
-                                                console.warn(`ScrollHeaderManager: Button ${index} already exists in sidebar or sidebar is null`);
-                                                // Button already exists, remove clone
+                                                // Sidebar doesn't exist, remove clone
                                                 clone.remove();
                                             }
                                         }, 100);
