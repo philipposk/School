@@ -391,20 +391,6 @@ const ScrollHeaderManager = {
                 }, index * baseDelay);
             });
             
-            // Show sidebar IMMEDIATELY - before animation completes
-            if (this.sidebar) {
-                console.log('ScrollHeaderManager: Showing sidebar immediately');
-                this.sidebar.style.setProperty('position', 'fixed', 'important');
-                this.sidebar.style.setProperty('left', '0.5rem', 'important');
-                this.sidebar.style.setProperty('top', '1rem', 'important');
-                this.sidebar.style.setProperty('opacity', '1', 'important');
-                this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
-                this.sidebar.style.setProperty('visibility', 'visible', 'important');
-                this.sidebar.style.setProperty('display', 'flex', 'important');
-                this.sidebar.style.setProperty('z-index', '99999', 'important');
-                console.log('ScrollHeaderManager: Sidebar shown, children:', this.sidebar.children.length);
-            }
-            
             // Hide original header buttons with 3D animation
             this.headerButtons.forEach((btn, index) => {
                 btn.style.cssText += `
