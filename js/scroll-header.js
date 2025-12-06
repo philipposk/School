@@ -151,13 +151,45 @@ const ScrollHeaderManager = {
             
             // Show sidebar - make absolutely sure it's visible
             if (this.sidebar) {
+                console.log('ScrollHeaderManager: Showing sidebar, children:', this.sidebar.children.length);
+                
+                // Remove transition temporarily to ensure instant visibility
+                this.sidebar.style.setProperty('transition', 'none', 'important');
+                
+                // Set all visibility properties
                 this.sidebar.style.setProperty('opacity', '1', 'important');
                 this.sidebar.style.setProperty('pointer-events', 'auto', 'important');
                 this.sidebar.style.setProperty('visibility', 'visible', 'important');
                 this.sidebar.style.setProperty('display', 'flex', 'important');
+                this.sidebar.style.setProperty('z-index', '99999', 'important');
+                
                 // Force reflow
                 this.sidebar.offsetHeight;
-                console.log('Sidebar shown, children:', this.sidebar.children.length);
+                
+                // Restore transition
+                this.sidebar.style.setProperty('transition', 'opacity 0.3s ease, visibility 0.3s ease', 'important');
+                
+                // Double-check visibility after a moment
+                setTimeout(() => {
+                    if (this.sidebar) {
+                        const rect = this.sidebar.getBoundingClientRect();
+                        const computed = window.getComputedStyle(this.sidebar);
+                        console.log('ScrollHeaderManager: Sidebar state check:', {
+                            opacity: computed.opacity,
+                            visibility: computed.visibility,
+                            display: computed.display,
+                            zIndex: computed.zIndex,
+                            left: computed.left,
+                            top: computed.top,
+                            width: rect.width,
+                            height: rect.height,
+                            children: this.sidebar.children.length,
+                            inViewport: rect.top >= 0 && rect.left >= 0 && rect.width > 0 && rect.height > 0
+                        });
+                    }
+                }, 100);
+            } else {
+                console.error('ScrollHeaderManager: Sidebar is null when trying to show!');
             }
             
             // Hide header buttons
