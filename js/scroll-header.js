@@ -187,7 +187,7 @@ const ScrollHeaderManager = {
                     if (this.sidebar) {
                         const rect = this.sidebar.getBoundingClientRect();
                         const computed = window.getComputedStyle(this.sidebar);
-                        console.log('ScrollHeaderManager: Sidebar state check:', {
+                        const state = {
                             opacity: computed.opacity,
                             visibility: computed.visibility,
                             display: computed.display,
@@ -198,7 +198,16 @@ const ScrollHeaderManager = {
                             height: rect.height,
                             children: this.sidebar.children.length,
                             inViewport: rect.top >= 0 && rect.left >= 0 && rect.width > 0 && rect.height > 0
-                        });
+                        };
+                        console.log('ScrollHeaderManager: Sidebar state check:', state);
+                        
+                        // If sidebar has 0 size, force it to have size
+                        if (rect.width === 0 || rect.height === 0) {
+                            console.warn('ScrollHeaderManager: Sidebar has 0 size! Forcing size...');
+                            this.sidebar.style.setProperty('width', '60px', 'important');
+                            this.sidebar.style.setProperty('height', 'auto', 'important');
+                            this.sidebar.style.setProperty('min-height', '200px', 'important');
+                        }
                     }
                 }, 100);
             } else {
