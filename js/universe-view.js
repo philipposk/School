@@ -539,6 +539,41 @@ const UniverseView = {
         ctx.fillStyle = '#2a5a7a';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
+        // Draw "School" and "6x7.gr" label when viewed from far away
+        if (distance > 800) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${80 * scaleFactor}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Add text shadow for visibility
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 10 * scaleFactor;
+            ctx.shadowOffsetX = 3 * scaleFactor;
+            ctx.shadowOffsetY = 3 * scaleFactor;
+            
+            const centerX = canvasWidth / 2;
+            const centerY = canvasHeight / 2;
+            const lineHeight = 100 * scaleFactor;
+            
+            // Draw "School" on first line
+            ctx.fillText('School', centerX, centerY - lineHeight / 2);
+            
+            // Draw "6x7.gr" on second line
+            ctx.font = `bold ${60 * scaleFactor}px Arial`;
+            ctx.fillText('6x7.gr', centerX, centerY + lineHeight / 2);
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            this.mainPlanetLabelVisible = true;
+        } else {
+            this.mainPlanetLabelVisible = false;
+        }
+        
         // Draw continents/landmasses (scaled)
         ctx.fillStyle = '#3a6a4a';
         ctx.beginPath();
