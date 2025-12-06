@@ -388,6 +388,16 @@ const UniverseView = {
     loadCourses() {
         const courses = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
         
+        // Ensure we have courses to display
+        if (!courses || courses.length === 0) {
+            console.warn('No courses found for Universe view');
+            // Still update planet texture with base ocean color
+            if (this.planetTexture) {
+                this.planetTexture.needsUpdate = true;
+            }
+            return;
+        }
+        
         // Color scheme for courses
         const courseColors = [
             { active: '#48bb78', coming: '#718096', undefined: '#4a5568' }, // Green/Grey
