@@ -50,8 +50,40 @@ const ThreeDWorld = {
     
     setupScene() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0a0a);
-        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0015); // Reduced fog for better visibility
+        // Create gradient sky background instead of solid black
+        const skyGeometry = new THREE.SphereGeometry(2000, 32, 32);
+        const skyMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                topColor: { value: new THREE.Color(0x1a1a2e) },
+                bottomColor: { value: new THREE.Color(0x0a0a0a) },
+                offset: { value: 0.4 },
+                exponent: { value: 0.6 }
+            },
+            vertexShader: `
+                varying vec3 vWorldPosition;
+                void main() {
+                    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                    vWorldPosition = worldPosition.xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 topColor;
+                uniform vec3 bottomColor;
+                uniform float offset;
+                uniform float exponent;
+                varying vec3 vWorldPosition;
+                void main() {
+                    float h = normalize(vWorldPosition).y;
+                    gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h + offset, 0.0), exponent), 0.0)), 1.0);
+                }
+            `,
+            side: THREE.BackSide
+        });
+        const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+        this.scene.add(sky);
+        
+        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0008); // Lighter fog
     },
     
     setupCamera() {
@@ -132,27 +164,23 @@ const ThreeDWorld = {
     },
     
     createLandscape() {
-        // Create a curved globe-like terrain
-        const radius = 200; // Radius of the globe
+        // Create a curved globe-like terrain - larger and more visible
+        const radius = 300; // Larger radius for better globe effect
         const segments = 64; // More segments for smoother curve
         
         // Create sphere geometry for the globe
         const geometry = new THREE.SphereGeometry(radius, segments, segments);
         
-        // Modify vertices to create terrain variation while keeping globe shape
+        // Modify vertices to create subtle terrain variation while keeping globe shape
         const vertices = geometry.attributes.position.array;
         const vertex = new THREE.Vector3();
         
         for (let i = 0; i < vertices.length; i += 3) {
             vertex.set(vertices[i], vertices[i + 1], vertices[i + 2]);
             
-            // Get distance from center to determine terrain height variation
-            const distance = vertex.length();
-            const normalizedDistance = distance / radius;
-            
-            // Add terrain variation (only on upper hemisphere)
-            if (vertex.y > -radius * 0.3) { // Only modify upper part
-                const noise = Math.random() * 8 - 4; // Small height variation
+            // Add subtle terrain variation (only on upper hemisphere)
+            if (vertex.y > -radius * 0.2) { // Only modify upper part
+                const noise = Math.random() * 6 - 3; // Small height variation
                 const scale = 1 + (noise / radius);
                 vertex.multiplyScalar(scale);
             }
@@ -164,16 +192,19 @@ const ThreeDWorld = {
         
         geometry.computeVertexNormals();
         
+        // Better material with more detail
         const material = new THREE.MeshStandardMaterial({
-            color: 0x1a1a2e,
-            roughness: 0.8,
-            metalness: 0.2
+            color: 0x2a2a3e, // Slightly lighter color
+            roughness: 0.9,
+            metalness: 0.1,
+            flatShading: false
         });
         
         const terrain = new THREE.Mesh(geometry, material);
         terrain.receiveShadow = true;
-        // Position globe so ground is at y=0
-        terrain.position.y = -radius;
+        terrain.castShadow = true;
+        // Position globe so ground level is visible
+        terrain.position.y = -radius + 50; // Raise it up a bit
         this.scene.add(terrain);
         
         // Add some decorative elements
