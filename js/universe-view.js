@@ -336,19 +336,24 @@ const UniverseView = {
             const x = (lon / (Math.PI * 2)) * 2048;
             const y = ((lat + Math.PI / 2) / Math.PI) * 1024;
             
-            const width = 180;
-            const height = 120;
+            // Ensure consistent region sizes for all courses
+            const width = 200; // Slightly larger for better text fit
+            const height = 140; // Slightly taller for better text fit
+            
+            // Ensure regions don't go outside canvas bounds
+            const safeX = Math.max(width * 0.2, Math.min(x, 2048 - width * 0.8));
+            const safeY = Math.max(height * 0.2, Math.min(y, 1024 - height * 0.8));
             
             // Draw country-like shape with better visibility
             ctx.fillStyle = color;
             ctx.globalAlpha = 0.9;
             ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + width * 0.7, y - height * 0.2);
-            ctx.lineTo(x + width, y + height * 0.3);
-            ctx.lineTo(x + width * 0.8, y + height);
-            ctx.lineTo(x + width * 0.3, y + height * 0.9);
-            ctx.lineTo(x - width * 0.1, y + height * 0.5);
+            ctx.moveTo(safeX, safeY);
+            ctx.lineTo(safeX + width * 0.7, safeY - height * 0.2);
+            ctx.lineTo(safeX + width, safeY + height * 0.3);
+            ctx.lineTo(safeX + width * 0.8, safeY + height);
+            ctx.lineTo(safeX + width * 0.3, safeY + height * 0.9);
+            ctx.lineTo(safeX - width * 0.1, safeY + height * 0.5);
             ctx.closePath();
             ctx.fill();
             
