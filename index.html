@@ -1793,6 +1793,13 @@
         // Initialize
         function init() {
             initTheme();
+            // Initialize theme and layout managers
+            if (typeof ThemeManager !== 'undefined') {
+                ThemeManager.init();
+            }
+            if (typeof UILayoutManager !== 'undefined') {
+                UILayoutManager.init();
+            }
             if (user) {
                 // Initialize default friends if not already done
                 if (typeof UserProfileManager !== 'undefined' && UserProfileManager.initDefaultFriends) {
@@ -1812,6 +1819,27 @@
             const layout = UILayoutManager.currentLayout;
             const layoutHTML = UILayoutManager.renderCourses(layout);
             
+            // Use custom layout if available, otherwise use default
+            const coursesHTML = layoutHTML || `
+                <div class="modern-courses-grid" id="coursesSection">
+                    ${courses.map(course => `
+                        <div class="modern-course-card" onclick="loadCourse('${course.id}')">
+                            <div class="modern-course-icon">${course.icon}</div>
+                            <h2 class="modern-course-title">${course.title}</h2>
+                            <p class="modern-course-description">${course.description}</p>
+                            <div class="modern-course-meta">
+                                <span>📚 ${course.modules} modules</span>
+                                <span>⏱️ ${course.duration}</span>
+                                <span>📊 ${course.level}</span>
+                            </div>
+                            <div class="modern-course-arrow">
+                                Start Learning →
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
             // Always show 3D hero first, then courses
             app.innerHTML = `
                 <div class="hero-section">
@@ -1830,23 +1858,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modern-courses-grid" id="coursesSection">
-                    ${courses.map(course => `
-                        <div class="modern-course-card" onclick="loadCourse('${course.id}')">
-                            <div class="modern-course-icon">${course.icon}</div>
-                            <h2 class="modern-course-title">${course.title}</h2>
-                            <p class="modern-course-description">${course.description}</p>
-                            <div class="modern-course-meta">
-                                <span>📚 ${course.modules} modules</span>
-                                <span>⏱️ ${course.duration}</span>
-                                <span>📊 ${course.level}</span>
-                            </div>
-                            <div class="modern-course-arrow">
-                                Start Learning →
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+                ${coursesHTML}
             `;
             
             // Initialize 3D scene
