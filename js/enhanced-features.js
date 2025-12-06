@@ -668,9 +668,165 @@ window.executeSearchAction = function(idx) {
     }
 };
 
+// ========== 3D EFFECTS MANAGER ==========
+const ThreeDEffectsManager = {
+    enabled: true,
+    mouseTracking: true,
+    parallax: true,
+    scrollReveal: true,
+    
+    init() {
+        if (!this.enabled) return;
+        
+        this.initMouseTracking();
+        this.initParallax();
+        this.initScrollReveal();
+        this.initSmoothScroll();
+    },
+    
+    // Mouse tracking for 3D card tilting (like KASANÉ)
+    initMouseTracking() {
+        if (!this.mouseTracking) return;
+        
+        const cards = document.querySelectorAll('.course-card, .beauty-card, .modern-card, .feed-item, .certificate-card, .friend-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                if (!card.matches(':hover')) return;
+                
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) translateZ(20px)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    },
+    
+    // Parallax scrolling effects
+    initParallax() {
+        if (!this.parallax) return;
+        
+        let ticking = false;
+        
+        const updateParallax = () => {
+            const scrolled = window.pageYOffset;
+            const parallaxElements = document.querySelectorAll('.parallax-section, .page-header, header');
+            
+            parallaxElements.forEach((el, index) => {
+                const speed = 0.5 + (index * 0.1);
+                const yPos = -(scrolled * speed);
+                el.style.transform = `translate3d(0, ${yPos}px, 0)`;
+            });
+            
+            // Parallax for cards based on scroll position
+            const cards = document.querySelectorAll('.course-card, .beauty-card, .modern-card');
+            cards.forEach((card, index) => {
+                const rect = card.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                const cardTop = rect.top;
+                const cardCenter = cardTop + rect.height / 2;
+                const scrollProgress = (windowHeight - cardCenter) / windowHeight;
+                
+                if (scrollProgress > -0.5 && scrollProgress < 1.5) {
+                    const depth = Math.sin(scrollProgress * Math.PI) * 20;
+                    const rotation = (scrollProgress - 0.5) * 5;
+                    card.style.transform = `translateZ(${depth}px) rotateX(${rotation}deg)`;
+                }
+            });
+            
+            ticking = false;
+        };
+        
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(updateParallax);
+                ticking = true;
+            }
+        }, { passive: true });
+    },
+    
+    // Scroll reveal animations
+    initScrollReveal() {
+        if (!this.scrollReveal) return;
+        
+        const revealElements = document.querySelectorAll('.course-card, .beauty-card, .modern-card, .feed-item');
+        
+        // Add scroll-reveal class to elements
+        revealElements.forEach(el => {
+            el.classList.add('scroll-reveal-3d');
+        });
+        
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        revealElements.forEach(el => revealObserver.observe(el));
+    },
+    
+    // Smooth scroll behavior
+    initSmoothScroll() {
+        // Add smooth scroll to anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+                
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    },
+    
+    // Enable/disable 3D effects
+    toggle(enabled) {
+        this.enabled = enabled;
+        if (enabled) {
+            this.init();
+        } else {
+            // Remove all 3D transforms
+            document.querySelectorAll('.course-card, .beauty-card, .modern-card').forEach(card => {
+                card.style.transform = '';
+            });
+        }
+    }
+};
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
     UILayoutManager.init();
+    ThreeDEffectsManager.init();
+});
+
+// Re-initialize 3D effects when content changes
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        ThreeDEffectsManager.init();
+    }, 100);
 });
 
