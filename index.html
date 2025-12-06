@@ -6,6 +6,7 @@
     <meta name="description" content="A professional online learning platform offering master's-level courses in critical thinking, logic, finance, and software development.">
     <!-- Updated: 2025-01-06 -->
     <title>School - Enhanced Learning Platform</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <link rel="stylesheet" href="css/enhanced-styles.css">
     <link rel="stylesheet" href="css/messaging-assignments.css">
@@ -2948,6 +2949,11 @@
         }
         
         function openFriendsModal() {
+            // Ensure courses are shown first
+            if (typeof showCourses === 'function') {
+                showCourses();
+            }
+            
             const modal = document.getElementById('friendsModal');
             if (!modal) {
                 const modalHTML = `
@@ -2974,6 +2980,24 @@
                 friendsContent.innerHTML = '<p>Loading friends...</p>';
             }
             document.getElementById('friendsModal').classList.add('show');
+            
+            // Scroll window to center to ensure modal is visible
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                // Calculate center position
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                
+                // Only scroll if we're not already near the center
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ 
+                        top: centerPosition, 
+                        behavior: 'smooth' 
+                    });
+                }
+            }, 300);
             
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) {
@@ -3606,6 +3630,12 @@
             // Ensure courses are shown first
             if (typeof showCourses === 'function') {
                 showCourses();
+            }
+            
+            // Remove existing modal if present
+            const existingModal = document.getElementById('settingsModal');
+            if (existingModal) {
+                existingModal.remove();
             }
             
             const modal = document.createElement('div');

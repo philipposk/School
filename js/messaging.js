@@ -491,6 +491,11 @@ window.openMessaging = function(friendEmail = null) {
             return;
         }
         
+        // Ensure courses are shown first
+        if (typeof showCourses === 'function') {
+            showCourses();
+        }
+        
         let modal = document.getElementById('messagingModal');
         if (!modal) {
             const modalHTML = `
@@ -531,6 +536,24 @@ window.openMessaging = function(friendEmail = null) {
         
         if (modal) {
             modal.classList.add('show');
+            
+            // Scroll window to center to ensure modal is visible
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                // Calculate center position
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                
+                // Only scroll if we're not already near the center
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ 
+                        top: centerPosition, 
+                        behavior: 'smooth' 
+                    });
+                }
+            }, 300);
             
             // If friendEmail provided, open chat directly
             if (friendEmail) {
