@@ -180,9 +180,10 @@ const UILayoutManager = {
     
     renderFeedLayout() {
         // Social media feed style
+        const coursesList = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
         return `
             <div class="feed-container">
-                ${courses.map(course => `
+                ${coursesList.map(course => `
                     <div class="feed-item" onclick="loadCourse('${course.id}')">
                         <div class="feed-header">
                             <div class="feed-avatar">${course.icon}</div>
@@ -207,12 +208,13 @@ const UILayoutManager = {
     
     renderSidebarLayout() {
         // Sidebar navigation
+        const coursesList = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
         return `
             <div class="sidebar-layout-container">
                 <aside class="sidebar-nav">
                     <h3>Courses</h3>
                     <ul>
-                        ${courses.map(course => `
+                        ${coursesList.map(course => `
                             <li onclick="loadCourse('${course.id}')">
                                 <span class="nav-icon">${course.icon}</span>
                                 <span>${course.title}</span>
@@ -229,9 +231,10 @@ const UILayoutManager = {
     
     renderModernLayout() {
         // Modern minimalist
+        const coursesList = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
         return `
             <div class="modern-grid">
-                ${courses.map(course => `
+                ${coursesList.map(course => `
                     <div class="modern-card" onclick="loadCourse('${course.id}')">
                         <div class="modern-card-header">
                             <span class="modern-icon">${course.icon}</span>
@@ -263,7 +266,8 @@ const AISearchAssistant = {
         localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
         
         // Build course content context for AI
-        const courseContext = courses.map(c => ({
+        const coursesList = window.getTranslatedCourses ? window.getTranslatedCourses() : (window.courses || []);
+        const courseContext = coursesList.map(c => ({
             title: c.title,
             description: c.description,
             modules: c.modules_data.map(m => ({ title: m.title, subtitle: m.subtitle }))
