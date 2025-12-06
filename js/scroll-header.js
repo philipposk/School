@@ -151,13 +151,21 @@ const ScrollHeaderManager = {
         
         if (shouldBeScrolled !== this.isScrolled) {
             this.isScrolled = shouldBeScrolled;
-            this.animateHeader(shouldBeScrolled);
             
-            // Play sound effect (gracefully handle missing files)
-            if (this.soundEnabled && this.sounds.pop) {
-                this.sounds.pop.play().catch(() => {
-                    // Silently fail if sound file doesn't exist
-                });
+            // Ensure buttons are found before animating
+            if (this.headerButtons.length === 0) {
+                this.headerButtons = Array.from(document.querySelectorAll('.header-btn'));
+            }
+            
+            if (this.headerButtons.length > 0) {
+                this.animateHeader(shouldBeScrolled);
+                
+                // Play sound effect (gracefully handle missing files)
+                if (this.soundEnabled && this.sounds.pop) {
+                    this.sounds.pop.play().catch(() => {
+                        // Silently fail if sound file doesn't exist
+                    });
+                }
             }
         }
     },
