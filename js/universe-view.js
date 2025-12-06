@@ -461,6 +461,26 @@ const UniverseView = {
                     region.sprite.visible = false;
                 }
             }
+            
+            // Show/hide temples based on zoom level
+            if (region.temple) {
+                if (this.zoomLevel >= 3 && distance < 150) {
+                    region.temple.visible = true;
+                } else {
+                    region.temple.visible = false;
+                }
+            }
+            
+            // Show/hide module markers
+            if (region.modules) {
+                region.modules.forEach(moduleMarker => {
+                    if (this.zoomLevel >= 3 && distance < 120) {
+                        moduleMarker.visible = true;
+                    } else {
+                        moduleMarker.visible = false;
+                    }
+                });
+            }
         });
         
         // Increase planet emissive when zoomed in for better visibility
@@ -487,20 +507,36 @@ const UniverseView = {
         this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        const intersects = this.raycaster.intersectObjects(
+        
+        // Check for temple intersections first (when zoomed in)
+        const templeIntersects = this.raycaster.intersectObjects(
+            this.courseRegions.filter(r => r.temple).map(r => r.temple)
+        );
+        
+        if (templeIntersects.length > 0) {
+            const temple = templeIntersects[0].object;
+            this.showTempleInfo(temple.userData, event);
+            return;
+        }
+        
+        // Check for sprite/emoji intersections
+        const spriteIntersects = this.raycaster.intersectObjects(
             this.courseRegions.filter(r => r.sprite).map(r => r.sprite)
         );
         
-        if (intersects.length > 0) {
-            const hoveredSprite = intersects[0].object;
+        if (spriteIntersects.length > 0) {
+            const hoveredSprite = spriteIntersects[0].object;
             hoveredSprite.scale.multiplyScalar(1.2);
             this.showCourseInfo(hoveredSprite.userData.course, event);
         } else {
             this.hideCourseInfo();
+            this.hideTempleInfo();
             // Reset scales
             this.courseRegions.forEach(region => {
                 if (region.sprite) {
-                    region.sprite.scale.set(30, 30, 1);
+                    const distance = this.camera.position.length();
+                    const scale = Math.max(30, 80 - (distance / 15));
+                    region.sprite.scale.set(scale, scale, 1);
                 }
             });
         }
@@ -508,19 +544,80 @@ const UniverseView = {
     
     onMouseClick(event) {
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        const intersects = this.raycaster.intersectObjects(
+        const distance = this.camera.position.length();
+        
+        // Check for temple click first (when zoomed in very close)
+        const templeIntersects = this.raycaster.intersectObjects(
+            this.courseRegions.filter(r => r.temple).map(r => r.temple)
+        );
+        
+        if (templeIntersects.length > 0) {
+            const temple = templeIntersects[0].object;
+            this.openTempleContent(temple.userData);
+            return;
+        }
+        
+        // Check for sprite/emoji click
+        const spriteIntersects = this.raycaster.intersectObjects(
             this.courseRegions.filter(r => r.sprite).map(r => r.sprite)
         );
         
-        if (intersects.length > 0) {
-            const course = intersects[0].object.userData.course;
-            this.zoomToCourse(course, intersects[0].object);
+        if (spriteIntersects.length > 0) {
+            const course = spriteIntersects[0].object.userData.course;
+            this.zoomToCourse(course, spriteIntersects[0].object);
+            return;
+        }
+        
+        // Check for planet/region click (only if zoomed in enough to see regions)
+        if (distance < 200) {
+            const planetIntersects = this.raycaster.intersectObject(this.planet);
+            if (planetIntersects.length > 0) {
+                // Find which course region was clicked based on texture coordinates
+                const point = planetIntersects[0].point;
+                const region = this.findRegionAtPoint(point);
+                if (region && distance < 120) {
+                    // Zoomed in enough - open that specific region/module
+                    this.openRegionContent(region);
+                } else if (region) {
+                    // Not zoomed in enough - zoom to course
+                    const sprite = region.sprite;
+                    if (sprite) {
+                        this.zoomToCourse(region.course, sprite);
+                    }
+                }
+            }
         }
     },
     
+    findRegionAtPoint(point) {
+        // Convert 3D point to spherical coordinates, then find matching region
+        const radius = 100;
+        const normalized = point.clone().normalize();
+        const lat = Math.asin(normalized.y);
+        const lon = Math.atan2(normalized.z, normalized.x);
+        
+        // Find closest region
+        let closestRegion = null;
+        let minDistance = Infinity;
+        
+        this.courseRegions.forEach(region => {
+            if (region.lat !== undefined && region.lon !== undefined) {
+                const latDiff = Math.abs(lat - region.lat);
+                const lonDiff = Math.abs(lon - region.lon);
+                const distance = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestRegion = region;
+                }
+            }
+        });
+        
+        return closestRegion;
+    },
+    
     zoomToCourse(course, sprite) {
-        // Smoothly zoom to the course
-        const targetPosition = sprite.position.clone().multiplyScalar(1.5);
+        // Smoothly zoom to the course - but don't open it yet
+        const targetPosition = sprite.position.clone().multiplyScalar(1.3);
         const startPosition = this.camera.position.clone();
         const duration = 2000;
         const startTime = Date.now();
@@ -536,16 +633,167 @@ const UniverseView = {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Show course details
-                setTimeout(() => {
-                    if (window.loadCourse) {
-                        window.loadCourse(course.id);
-                    }
-                }, 500);
+                // Create temple and modules when landed
+                const region = this.courseRegions.find(r => r.course.id === course.id);
+                if (region && !region.temple) {
+                    this.createTempleAndModules(region);
+                }
             }
         };
         
         animate();
+    },
+    
+    createTempleAndModules(region) {
+        // Create a temple at the center of the region
+        const templeGroup = new THREE.Group();
+        
+        // Temple base
+        const baseGeometry = new THREE.CylinderGeometry(8, 10, 6, 8);
+        const baseMaterial = new THREE.MeshStandardMaterial({
+            color: 0xd4af37, // Gold color
+            roughness: 0.3,
+            metalness: 0.7
+        });
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        base.position.y = 3;
+        templeGroup.add(base);
+        
+        // Temple pillars
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2;
+            const pillarGeometry = new THREE.CylinderGeometry(1, 1.2, 12, 8);
+            const pillar = new THREE.Mesh(pillarGeometry, baseMaterial);
+            pillar.position.set(
+                Math.cos(angle) * 6,
+                6,
+                Math.sin(angle) * 6
+            );
+            templeGroup.add(pillar);
+        }
+        
+        // Temple roof
+        const roofGeometry = new THREE.ConeGeometry(12, 8, 8);
+        const roof = new THREE.Mesh(roofGeometry, baseMaterial);
+        roof.position.y = 12;
+        roof.rotation.y = Math.PI / 8;
+        templeGroup.add(roof);
+        
+        // Position temple at region center
+        const radius = 100;
+        const x = Math.cos(region.lat) * Math.cos(region.lon) * radius;
+        const y = Math.sin(region.lat) * radius;
+        const z = Math.cos(region.lat) * Math.sin(region.lon) * radius;
+        templeGroup.position.set(x, y, z);
+        
+        templeGroup.userData = {
+            course: region.course,
+            region: region
+        };
+        
+        this.scene.add(templeGroup);
+        region.temple = templeGroup;
+        
+        // Create module regions around the temple
+        if (region.course.modules_data && region.course.modules_data.length > 0) {
+            region.course.modules_data.forEach((module, index) => {
+                this.createModuleRegion(region, module, index);
+            });
+        }
+    },
+    
+    createModuleRegion(region, module, index) {
+        // Create a small region marker for each module
+        const moduleGeometry = new THREE.CylinderGeometry(2, 2, 1, 8);
+        const moduleMaterial = new THREE.MeshStandardMaterial({
+            color: 0x667eea,
+            emissive: 0x667eea,
+            emissiveIntensity: 0.3
+        });
+        const moduleMarker = new THREE.Mesh(moduleGeometry, moduleMaterial);
+        
+        // Position modules in a circle around the temple
+        const angle = (index / (region.course.modules_data.length || 8)) * Math.PI * 2;
+        const radius = 100;
+        const x = Math.cos(region.lat) * Math.cos(region.lon) * radius;
+        const y = Math.sin(region.lat) * radius;
+        const z = Math.cos(region.lat) * Math.sin(region.lon) * radius;
+        
+        const offsetRadius = 15;
+        moduleMarker.position.set(
+            x + Math.cos(angle) * offsetRadius,
+            y,
+            z + Math.sin(angle) * offsetRadius
+        );
+        
+        moduleMarker.userData = {
+            module: module,
+            course: region.course,
+            region: region
+        };
+        
+        this.scene.add(moduleMarker);
+        
+        if (!region.modules) {
+            region.modules = [];
+        }
+        region.modules.push(moduleMarker);
+    },
+    
+    openTempleContent(templeData) {
+        // Open the course when temple is clicked
+        if (window.loadCourse && templeData.course) {
+            window.loadCourse(templeData.course.id);
+        }
+    },
+    
+    openRegionContent(region) {
+        // Open specific module/region content
+        // For now, just open the course - can be extended to show module details
+        if (window.loadCourse && region.course) {
+            window.loadCourse(region.course.id);
+        }
+    },
+    
+    showTempleInfo(templeData, event) {
+        let popup = document.getElementById('temple-info-popup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'temple-info-popup';
+            popup.style.cssText = `
+                position: fixed;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 12px;
+                pointer-events: none;
+                z-index: 10000;
+                max-width: 300px;
+                backdrop-filter: blur(10px);
+                border: 2px solid #d4af37;
+            `;
+            document.body.appendChild(popup);
+        }
+        
+        popup.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+            <div style="font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem;">${templeData.course.title}</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;">Click to enter course</div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">
+                ${templeData.course.modules} modules available
+            </div>
+        `;
+        
+        popup.style.left = event.clientX + 'px';
+        popup.style.top = event.clientY + 'px';
+        popup.style.display = 'block';
+    },
+    
+    hideTempleInfo() {
+        const popup = document.getElementById('temple-info-popup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
     },
     
     showCourseInfo(course, event) {
