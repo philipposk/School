@@ -1854,7 +1854,11 @@
                         <p class="hero-subtitle">Transform your knowledge with our comprehensive courses</p>
                         <div class="hero-cta">
                             <button class="hero-btn hero-btn-primary" onclick="scrollToCourses()">Explore Courses</button>
-                            <button class="hero-btn" onclick="openLoginModal()">Get Started</button>
+                            ${user ? `
+                                <button class="hero-btn" onclick="scrollToCourses()">Continue Learning</button>
+                            ` : `
+                                <button class="hero-btn" onclick="openLoginModal()">Get Started</button>
+                            `}
                         </div>
                     </div>
                 </div>
@@ -3075,4 +3079,5 @@
         init();
     </script>
 </body>
+</html>
 </html>
