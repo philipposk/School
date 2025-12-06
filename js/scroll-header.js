@@ -269,39 +269,39 @@ const ScrollHeaderManager = {
                     
                     // Phase 2: Bounce up
                     setTimeout(() => {
-                        clone.style.transition = `all ${phase2Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
-                        clone.style.top = `${midY - 15}px`;
-                        clone.style.transform = 'rotateZ(5deg) scale(1.1)';
+                        clone.style.setProperty('transition', `all ${phase2Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`, 'important');
+                        clone.style.setProperty('top', `${midY - 15}px`, 'important');
+                        clone.style.setProperty('transform', 'rotateZ(5deg) scale(1.1)', 'important');
                         
                         // Phase 3: Bounce down and continue
                         setTimeout(() => {
-                            clone.style.transition = `all ${phase3Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`;
-                            clone.style.left = `${midX2}px`;
-                            clone.style.top = `${midY}px`;
-                            clone.style.transform = 'rotateZ(-5deg) scale(1)';
+                            clone.style.setProperty('transition', `all ${phase3Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`, 'important');
+                            clone.style.setProperty('left', `${midX2}px`, 'important');
+                            clone.style.setProperty('top', `${midY}px`, 'important');
+                            clone.style.setProperty('transform', 'rotateZ(-5deg) scale(1)', 'important');
                             
                             // Phase 4: Sharp turn and dive with bounce
                             setTimeout(() => {
-                                clone.style.transition = `all ${phase4Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`;
-                                clone.style.left = `${targetX + 10}px`;
-                                clone.style.top = `${targetY - 30}px`;
-                                clone.style.transform = 'rotateZ(-45deg) scale(1.3)';
+                                clone.style.setProperty('transition', `all ${phase4Duration}ms cubic-bezier(0.55, 0.06, 0.68, 0.19)`, 'important');
+                                clone.style.setProperty('left', `${targetX + 10}px`, 'important');
+                                clone.style.setProperty('top', `${targetY - 30}px`, 'important');
+                                clone.style.setProperty('transform', 'rotateZ(-45deg) scale(1.3)', 'important');
                                 
                                 // Phase 5: Bounce up before landing
                                 setTimeout(() => {
-                                    clone.style.transition = `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
-                                    clone.style.top = `${targetY - 10}px`;
-                                    clone.style.transform = 'rotateZ(-20deg) scale(1.1)';
+                                    clone.style.setProperty('transition', `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`, 'important');
+                                    clone.style.setProperty('top', `${targetY - 10}px`, 'important');
+                                    clone.style.setProperty('transform', 'rotateZ(-20deg) scale(1.1)', 'important');
                                     
                                     // Phase 6: Final landing with splash/bang
                                     setTimeout(() => {
-                                        clone.style.transition = `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
-                                        clone.style.left = `${targetX}px`;
-                                        clone.style.top = `${targetY}px`;
-                                        clone.style.transform = 'rotateZ(0deg) scale(1)';
-                                        clone.style.borderRadius = '50%';
-                                        clone.style.width = '48px';
-                                        clone.style.height = '48px';
+                                        clone.style.setProperty('transition', `all ${phase5Duration}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`, 'important');
+                                        clone.style.setProperty('left', `${targetX}px`, 'important');
+                                        clone.style.setProperty('top', `${targetY}px`, 'important');
+                                        clone.style.setProperty('transform', 'rotateZ(0deg) scale(1)', 'important');
+                                        clone.style.setProperty('border-radius', '50%', 'important');
+                                        clone.style.setProperty('width', '48px', 'important');
+                                        clone.style.setProperty('height', '48px', 'important');
                                         
                                         // Create splash/bang effect
                                         this.createSplashEffect(targetX, targetY, index);
