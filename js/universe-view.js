@@ -1331,6 +1331,11 @@ const UniverseView = {
     animate() {
         requestAnimationFrame(() => this.animate());
         
+        // Ensure renderer and camera exist before rendering
+        if (!this.renderer || !this.camera || !this.scene) {
+            return;
+        }
+        
         if (this.controls) {
             this.controls.update();
         }
