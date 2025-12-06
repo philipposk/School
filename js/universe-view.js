@@ -2181,11 +2181,14 @@ const UniverseView = {
 // Initialize when universe view mode is selected
 window.initUniverseView = function() {
     if (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode() === 'universe') {
-        setTimeout(() => {
-            if (typeof UniverseView !== 'undefined') {
-                UniverseView.init();
-            }
-        }, 500);
+        // Use requestAnimationFrame to break up initialization work
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (typeof UniverseView !== 'undefined') {
+                    UniverseView.init();
+                }
+            });
+        });
     }
 };
 
