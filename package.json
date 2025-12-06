@@ -1,18 +1,19 @@
 {
   "name": "school-backend-proxy",
   "version": "1.0.0",
-  "description": "Backend proxy for AI API keys - allows all users to use AI without individual keys",
+  "description": "Complete backend server for School Platform - AI proxy, email notifications, SMS, Supabase integration",
   "main": "backend-proxy-example.js",
   "scripts": {
     "start": "node backend-proxy-example.js",
     "dev": "nodemon backend-proxy-example.js"
   },
-  "keywords": ["ai", "proxy", "groq", "openai"],
+  "keywords": ["ai", "proxy", "groq", "openai", "email", "sms", "supabase"],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

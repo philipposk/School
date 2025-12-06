@@ -1,0 +1,70 @@
+{
+  "module": "Module 8: Integration & Transformation",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Integration means:",
+      "options": ["Forgetting everything", "Bringing all concepts together into a cohesive whole", "Only focusing on one thing", "Being perfect"],
+      "correct_answer": 1,
+      "explanation": "Integration involves bringing all the course concepts together into a cohesive understanding and practice."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Growth is:",
+      "options": ["A one-time event", "An ongoing, lifelong journey", "Only for some people", "Always easy"],
+      "correct_answer": 1,
+      "explanation": "Personal growth is an ongoing, lifelong journey rather than a one-time achievement."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "A personal growth plan should be:",
+      "options": ["Vague and general", "Specific and actionable", "Only about others", "Perfect from the start"],
+      "correct_answer": 1,
+      "explanation": "An effective growth plan should be specific and actionable, providing clear steps forward."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Understanding human minds, theology, and narcissism:",
+      "options": ["Is only academic", "Provides practical wisdom for daily life", "Doesn't help relationships", "Is unnecessary"],
+      "correct_answer": 1,
+      "explanation": "This understanding provides practical wisdom that can be applied to daily life and relationships."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Supporting others' growth:",
+      "options": ["Means fixing them", "Involves modeling healthy patterns while maintaining boundaries", "Requires losing yourself", "Is impossible"],
+      "correct_answer": 1,
+      "explanation": "You can support others by modeling healthy patterns while maintaining your own boundaries and growth."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "The optimistic conclusion recognizes:",
+      "options": ["Everything is perfect", "Growth, understanding, and transformation are possible", "Nothing changes", "Only some people can grow"],
+      "correct_answer": 1,
+      "explanation": "The optimistic conclusion recognizes that growth, understanding, and transformation are possible for everyone."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one way you'll integrate course concepts into your daily life:",
+      "acceptable_answers": ["Regular self-reflection", "Spiritual practices", "Setting boundaries", "Maintaining optimism", "Applying understanding to relationships", "Continuing to learn"],
+      "explanation": "Integration can happen through many means including self-reflection, practices, boundaries, optimism, and applying understanding to relationships."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is it important to have a personal growth plan?",
+      "acceptable_answers": ["Provides direction", "Makes growth intentional", "Helps maintain progress", "Integrates learning", "Creates accountability", "Supports long-term transformation"],
+      "explanation": "A growth plan provides direction, makes growth intentional, helps maintain progress, and supports long-term transformation."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

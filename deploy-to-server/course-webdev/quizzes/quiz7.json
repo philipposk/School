@@ -1,0 +1,84 @@
+{
+  "module": "Module 7: Version Control & Tools",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is Git?",
+      "options": ["A code editor", "Version control system", "A programming language", "A website"],
+      "correct_answer": 1,
+      "explanation": "Git is a distributed version control system for tracking changes in code."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does git add do?",
+      "options": ["Commits changes", "Stages files for commit", "Creates repository", "Pushes to GitHub"],
+      "correct_answer": 1,
+      "explanation": "git add stages files, preparing them to be committed to the repository."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is GitHub?",
+      "options": ["Version control system", "Hosting service for Git repositories", "Code editor", "Programming language"],
+      "correct_answer": 1,
+      "explanation": "GitHub is a web-based hosting service for Git repositories, providing collaboration features."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What does git commit do?",
+      "options": ["Saves changes to repository", "Pushes to GitHub", "Creates branch", "Clones repository"],
+      "correct_answer": 0,
+      "explanation": "git commit saves staged changes to the local repository with a descriptive message."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What is a branch?",
+      "options": ["A file", "Separate line of development", "A commit", "A repository"],
+      "correct_answer": 1,
+      "explanation": "A branch is a separate line of development, allowing you to work on features without affecting the main code."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What does git push do?",
+      "options": ["Downloads code", "Uploads commits to remote repository", "Creates branch", "Stages files"],
+      "correct_answer": 1,
+      "explanation": "git push uploads local commits to a remote repository (like GitHub)."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What are the three areas in Git workflow?",
+      "acceptable_answers": [
+        "working directory",
+        "staging area",
+        "repository",
+        "working directory staging repository",
+        "workspace staging repo"
+      ],
+      "explanation": "The three areas are: Working Directory (your files), Staging Area (files ready to commit), and Repository (committed changes)."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is version control important for developers?",
+      "acceptable_answers": [
+        "track changes",
+        "collaboration",
+        "backup",
+        "history",
+        "revert changes",
+        "team work",
+        "code management"
+      ],
+      "explanation": "Version control is essential for tracking changes, enabling collaboration, backing up code, viewing history, and reverting to previous versions."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

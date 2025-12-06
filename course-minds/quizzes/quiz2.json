@@ -1,0 +1,70 @@
+{
+  "module": "Module 2: Theology & Human Nature",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Theology offers insights into:",
+      "options": ["Only religious people", "Human nature, purpose, and meaning", "Just ancient texts", "Only one correct way"],
+      "correct_answer": 1,
+      "explanation": "Theology offers profound insights into human nature, purpose, meaning, and the human condition."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "The 'Image of the Divine' concept suggests:",
+      "options": ["Humans are perfect", "Humans have inherent worth and dignity", "Only some people matter", "Humans are separate from everything"],
+      "correct_answer": 1,
+      "explanation": "The concept of being created in the image of the divine suggests humans have inherent worth and dignity."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "A common theme across traditions is:",
+      "options": ["Humans can't change", "Transformation and growth are possible", "Only one path exists", "Humans are fundamentally bad"],
+      "correct_answer": 1,
+      "explanation": "Most theological traditions recognize the possibility of transformation and growth."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Buddhist perspectives emphasize:",
+      "options": ["Suffering is permanent", "Suffering can be understood and transcended", "Nothing matters", "Only meditation helps"],
+      "correct_answer": 1,
+      "explanation": "Buddhism teaches that suffering can be understood and transcended through awareness and practice."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "The optimistic application of theology suggests:",
+      "options": ["Everything is predetermined", "Growth, love, and transformation are possible", "Only perfect people matter", "Theology is irrelevant"],
+      "correct_answer": 1,
+      "explanation": "Theological perspectives suggest that growth, love, and transformation are possible."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Integrating theological insights means:",
+      "options": ["Choosing one tradition only", "Finding wisdom across traditions", "Ignoring differences", "Converting others"],
+      "correct_answer": 1,
+      "explanation": "Integration involves finding wisdom across multiple traditions while respecting differences."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one way theological perspectives can help us understand human minds:",
+      "acceptable_answers": ["Provide frameworks for meaning", "Offer insights into human nature", "Suggest paths for transformation", "Emphasize inherent worth", "Recognize capacity for growth"],
+      "explanation": "Theological perspectives provide frameworks for understanding meaning, human nature, transformation, and human worth."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is it important to approach theology with openness and respect for multiple traditions?",
+      "acceptable_answers": ["Multiple traditions offer wisdom", "Respects diversity", "Allows for learning", "Prevents judgment", "Enables integration"],
+      "explanation": "Approaching theology with openness allows us to learn from multiple traditions and find wisdom across different perspectives."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

@@ -1,0 +1,70 @@
+{
+  "module": "Module 7: Spiritual Practices & Mindfulness",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Spiritual practices:",
+      "options": ["Are only for religious people", "Can support growth regardless of beliefs", "Must be done perfectly", "Take hours daily"],
+      "correct_answer": 1,
+      "explanation": "Spiritual practices can support growth and understanding regardless of your specific beliefs or background."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Mindfulness means:",
+      "options": ["Emptying your mind completely", "Paying attention to the present moment without judgment", "Never thinking", "Only for experts"],
+      "correct_answer": 1,
+      "explanation": "Mindfulness is paying attention to the present moment with awareness and without judgment."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Meditation benefits include:",
+      "options": ["Only for monks", "Reduced stress and increased self-awareness", "Immediate perfection", "No real benefits"],
+      "correct_answer": 1,
+      "explanation": "Research shows meditation provides benefits like reduced stress, increased self-awareness, and better emotional regulation."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Spiritual practices support understanding by:",
+      "options": ["Replacing learning", "Deepening awareness and compassion", "Avoiding problems", "Only for some people"],
+      "correct_answer": 1,
+      "explanation": "Spiritual practices deepen awareness and compassion, supporting the understanding gained through learning."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Common obstacles to practice:",
+      "options": ["Mean you can't do it", "Are normal and can be overcome", "Prove it doesn't work", "Only affect beginners"],
+      "correct_answer": 1,
+      "explanation": "Obstacles like lack of time or wandering mind are normal and can be overcome with patience and practice."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Your practice should:",
+      "options": ["Be exactly like others", "Fit your life, beliefs, and needs", "Be perfect from the start", "Take hours daily"],
+      "correct_answer": 1,
+      "explanation": "Your spiritual practice should fit your unique life, beliefs, and needs—there's no one right way."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one benefit of regular spiritual practice:",
+      "acceptable_answers": ["Reduced stress", "Increased self-awareness", "Greater peace", "Better emotional regulation", "Deeper understanding", "Improved relationships"],
+      "explanation": "Regular spiritual practice provides many benefits including reduced stress, increased awareness, peace, and better emotional regulation."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How can you overcome the obstacle of 'not having time'?",
+      "acceptable_answers": ["Start with 5 minutes", "Integrate into daily activities", "Make it a priority", "Quality over quantity", "Find practices that fit your schedule"],
+      "explanation": "You can overcome time obstacles by starting small, integrating practices into daily activities, and making them a priority."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

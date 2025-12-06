@@ -1,0 +1,88 @@
+{
+  "module": "Module 2: CSS Styling & Layout",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What does CSS stand for?",
+      "options": ["Computer Style Sheets", "Cascading Style Sheets", "Creative Style System", "Color Style Syntax"],
+      "correct_answer": 1,
+      "explanation": "CSS stands for Cascading Style Sheets, used to style HTML elements."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Which selector targets an element with class 'intro'?",
+      "options": ["#intro", ".intro", "intro", "<intro>"],
+      "correct_answer": 1,
+      "explanation": "Class selectors use a dot (.) prefix, so .intro targets elements with class='intro'."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "In the box model, what is padding?",
+      "options": ["Space outside the box", "Space inside the box", "The border", "The content"],
+      "correct_answer": 1,
+      "explanation": "Padding is the space inside the box, between the content and the border."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What does display: flex do?",
+      "options": ["Hides the element", "Creates a flexible layout", "Makes text bold", "Changes color"],
+      "correct_answer": 1,
+      "explanation": "display: flex creates a flexible container that enables flexbox layout."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Which property centers content horizontally in Flexbox?",
+      "options": ["align-items", "justify-content", "flex-direction", "text-align"],
+      "correct_answer": 1,
+      "explanation": "justify-content controls alignment along the main axis (horizontal in row direction)."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What is the default value of box-sizing?",
+      "options": ["border-box", "content-box", "padding-box", "margin-box"],
+      "correct_answer": 1,
+      "explanation": "The default box-sizing is content-box, where width only includes content, not padding/border."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Name three ways to specify colors in CSS.",
+      "acceptable_answers": [
+        "named colors",
+        "hex",
+        "rgb",
+        "rgba",
+        "hsl",
+        "hsla",
+        "color names",
+        "hexadecimal",
+        "rgb values",
+        "rgba values"
+      ],
+      "explanation": "CSS colors can be specified using named colors (red, blue), hex (#FF5733), RGB (rgb(255,87,51)), RGBA (with transparency), HSL, and HSLA."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "What is the difference between margin and padding?",
+      "acceptable_answers": [
+        "margin is outside",
+        "padding is inside",
+        "margin space outside border",
+        "padding space inside border",
+        "margin external spacing",
+        "padding internal spacing"
+      ],
+      "explanation": "Margin is space outside the border (between elements), while padding is space inside the border (between content and border)."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

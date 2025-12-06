@@ -1,0 +1,85 @@
+{
+  "module": "Module 5: JavaScript Intermediate",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Which array method creates a new array?",
+      "options": ["forEach", "map", "push", "pop"],
+      "correct_answer": 1,
+      "explanation": "map() creates a new array by transforming each element, while forEach just iterates without creating a new array."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does destructuring do?",
+      "options": ["Deletes variables", "Extracts values from arrays/objects", "Combines arrays", "Sorts data"],
+      "correct_answer": 1,
+      "explanation": "Destructuring extracts values from arrays or properties from objects into distinct variables."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Template literals use:",
+      "options": ["Single quotes", "Double quotes", "Backticks", "Parentheses"],
+      "correct_answer": 2,
+      "explanation": "Template literals use backticks (`) and allow embedded expressions with ${}."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What does localStorage.setItem() do?",
+      "options": ["Gets data", "Saves data", "Deletes data", "Updates data"],
+      "correct_answer": 1,
+      "explanation": "localStorage.setItem() saves data to the browser's local storage with a key-value pair."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Event delegation means:",
+      "options": ["Listening on parent for child events", "Multiple events", "Event cancellation", "Event timing"],
+      "correct_answer": 0,
+      "explanation": "Event delegation attaches an event listener to a parent element to handle events from child elements."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "The spread operator is:",
+      "options": ["...", "*", "++", "&&"],
+      "correct_answer": 0,
+      "explanation": "The spread operator (...) expands arrays or objects into individual elements or properties."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between map() and forEach()?",
+      "acceptable_answers": [
+        "map returns new array",
+        "forEach doesn't return",
+        "map creates array",
+        "forEach modifies original",
+        "map transforms",
+        "forEach iterates"
+      ],
+      "explanation": "map() creates and returns a new array with transformed elements, while forEach() just iterates and doesn't return a new array."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Name three ES6+ features you learned.",
+      "acceptable_answers": [
+        "arrow functions",
+        "template literals",
+        "destructuring",
+        "spread operator",
+        "const and let",
+        "async await",
+        "promises"
+      ],
+      "explanation": "ES6+ features include arrow functions, template literals, destructuring, spread operator, const/let, async/await, and Promises."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

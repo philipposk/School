@@ -1,0 +1,70 @@
+{
+  "module": "Module 3: Narcissism: Understanding the Spectrum",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Narcissism exists on:",
+      "options": ["A fixed point", "A spectrum from healthy to pathological", "Only in bad people", "Only in celebrities"],
+      "correct_answer": 1,
+      "explanation": "Narcissism exists on a spectrum from healthy self-esteem to pathological narcissistic personality disorder."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Understanding causes of narcissism helps us:",
+      "options": ["Excuse all behavior", "Respond with compassion and boundaries", "Judge people harshly", "Avoid everyone"],
+      "correct_answer": 1,
+      "explanation": "Understanding causes helps us respond with both compassion and appropriate boundaries."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Narcissistic patterns often develop from:",
+      "options": ["Being born bad", "Childhood trauma or attachment wounds", "Only genetics", "Modern society only"],
+      "correct_answer": 1,
+      "explanation": "Narcissistic patterns often develop from childhood trauma, attachment wounds, or inconsistent parenting."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "The optimistic approach recognizes:",
+      "options": ["Change is impossible", "Growth is possible with self-awareness and help", "Only therapy works", "Nothing helps"],
+      "correct_answer": 1,
+      "explanation": "While change is difficult, growth is possible with self-awareness and professional help."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Boundaries are:",
+      "options": ["Punishment", "Protection that can be done with love", "Always harsh", "Unnecessary"],
+      "correct_answer": 1,
+      "explanation": "Boundaries are protection that can be set with love and compassion."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Self-reflection on narcissistic patterns:",
+      "options": ["Means you're a bad person", "Is the first step to growth", "Should be avoided", "Only for others"],
+      "correct_answer": 1,
+      "explanation": "Recognizing patterns in ourselves is the first step to growth and is normal."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Why is it important to understand narcissism with compassion?",
+      "acceptable_answers": ["Behavior often comes from pain", "Helps us respond wisely", "Maintains hope for growth", "Reduces judgment", "Enables boundaries with love"],
+      "explanation": "Understanding with compassion helps us see that behavior often comes from pain, enabling wiser responses while maintaining hope."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How can you set boundaries while maintaining compassion?",
+      "acceptable_answers": ["Set clear limits with love", "Understand their pain while protecting yourself", "Communicate kindly but firmly", "Protect yourself without judgment", "Boundaries are protection, not punishment"],
+      "explanation": "You can set boundaries with compassion by understanding their pain while clearly protecting yourself, communicating kindly but firmly."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

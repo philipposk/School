@@ -1,0 +1,78 @@
+{
+  "module": "Module 6: Networking & APIs",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is URLSession used for?",
+      "options": ["Displaying data", "Making network requests", "Parsing JSON", "Storing data"],
+      "correct_answer": 1,
+      "explanation": "URLSession is used for making HTTP/HTTPS network requests to fetch data from APIs."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does async/await do?",
+      "options": ["Makes code synchronous", "Handles asynchronous operations", "Parses JSON", "Creates URLs"],
+      "correct_answer": 1,
+      "explanation": "async/await is Swift's modern way to handle asynchronous operations like network requests."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What protocol is used for JSON parsing?",
+      "options": ["Identifiable", "Codable", "Hashable", "Equatable"],
+      "correct_answer": 1,
+      "explanation": "Codable protocol (which combines Encodable and Decodable) is used for JSON encoding and decoding."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "How do you start a URLSession task?",
+      "options": [".start()", ".resume()", ".begin()", ".execute()"],
+      "correct_answer": 1,
+      "explanation": "Call .resume() on a URLSession data task to start the network request."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What does Task do in SwiftUI?",
+      "options": ["Creates a view", "Runs async code", "Parses JSON", "Makes requests"],
+      "correct_answer": 1,
+      "explanation": "Task is used in SwiftUI views to run asynchronous code, like fetching data from APIs."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What is the modern way to handle async code?",
+      "options": ["Completion handlers", "async/await", "Closures", "Delegates"],
+      "correct_answer": 1,
+      "explanation": "async/await is the modern Swift concurrency approach, replacing completion handlers and callbacks."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What's the difference between async/await and completion handlers?",
+      "acceptable_answers": [
+        "async/await is cleaner and more readable",
+        "async/await avoids callback hell",
+        "async/await is Swift's modern concurrency model"
+      ],
+      "explanation": "async/await provides cleaner, more readable code compared to completion handlers, avoiding nested callbacks."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How do you handle errors in async functions?",
+      "acceptable_answers": [
+        "Use do-catch blocks with try await",
+        "Wrap async calls in do-catch",
+        "Use try await and catch errors"
+      ],
+      "explanation": "Use do-catch blocks around try await calls to handle errors from async functions."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

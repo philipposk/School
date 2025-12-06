@@ -1,0 +1,70 @@
+{
+  "module": "Module 6: Relationships & Boundaries",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Boundaries are:",
+      "options": ["Walls that keep everyone out", "Limits that protect your well-being", "Selfishness", "Punishment"],
+      "correct_answer": 1,
+      "explanation": "Boundaries are limits that protect your well-being and can be set with love and compassion."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Healthy relationships include:",
+      "options": ["No conflict ever", "Mutual respect and clear communication", "Losing yourself completely", "Always agreeing"],
+      "correct_answer": 1,
+      "explanation": "Healthy relationships involve mutual respect, clear communication, and the ability to handle conflict constructively."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Setting boundaries with narcissistic patterns:",
+      "options": ["Means you're mean", "Protects you while maintaining compassion", "Is unnecessary", "Will always change them"],
+      "correct_answer": 1,
+      "explanation": "You can set boundaries with compassion while protecting yourself from harmful patterns."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Healthy conflict:",
+      "options": ["Never happens", "Can strengthen relationships when handled well", "Means the relationship is bad", "Should be avoided"],
+      "correct_answer": 1,
+      "explanation": "When handled constructively, conflict can actually strengthen relationships by improving understanding."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Codependency involves:",
+      "options": ["Healthy interdependence", "Losing yourself in relationships", "Good boundaries", "Self-worth from within"],
+      "correct_answer": 1,
+      "explanation": "Codependency involves losing yourself in relationships and taking responsibility for others' emotions."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Red flags are:",
+      "options": ["Always wrong", "Early warning signs to pay attention to", "Not important", "Only in bad people"],
+      "correct_answer": 1,
+      "explanation": "Red flags are early warning signs that help you make informed choices about relationships."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one characteristic of a healthy relationship:",
+      "acceptable_answers": ["Mutual respect", "Clear communication", "Appropriate boundaries", "Support for growth", "Ability to resolve conflict", "Trust"],
+      "explanation": "Healthy relationships include mutual respect, clear communication, boundaries, support, conflict resolution, and trust."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why are boundaries important in relationships?",
+      "acceptable_answers": ["Protect well-being", "Create safety and respect", "Allow for healthy connection", "Prevent exploitation", "Maintain self-respect"],
+      "explanation": "Boundaries protect your well-being, create safety and respect, and allow for healthier connections in relationships."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

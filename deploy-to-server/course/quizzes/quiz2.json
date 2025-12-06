@@ -1,0 +1,91 @@
+{
+  "module": "Module 2: Deduction - Propositional Logic & Syllogisms",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Modus Ponens form is:",
+      "options": [
+        "A → B; B ⇒ A",
+        "A → B; A ⇒ B",
+        "A → B; ¬A ⇒ ¬B",
+        "A → B; ¬B ⇒ ¬A"
+      ],
+      "correct_answer": 1,
+      "explanation": "Modus Ponens: If A then B, and A is true, therefore B is true."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Which is an invalid form?",
+      "options": [
+        "Modus Ponens",
+        "Modus Tollens",
+        "Affirming the consequent",
+        "Syllogism"
+      ],
+      "correct_answer": 2,
+      "explanation": "Affirming the consequent: If A then B, and B is true, therefore A is true - this is invalid."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "A syllogism has how many premises?",
+      "options": ["1", "2", "3", "4"],
+      "correct_answer": 1,
+      "explanation": "A standard syllogism has two premises that lead to a conclusion."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Truth tables test:",
+      "options": [
+        "truth of premises",
+        "validity",
+        "soundness",
+        "rhetoric"
+      ],
+      "correct_answer": 1,
+      "explanation": "Truth tables are used to test the validity of logical arguments."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "'If A then B; Not B; Therefore not A' is:",
+      "options": [
+        "Modus Ponens",
+        "Modus Tollens",
+        "Affirming consequent",
+        "Denying antecedent"
+      ],
+      "correct_answer": 1,
+      "explanation": "This is Modus Tollens: If A then B, and not B, therefore not A."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Give an example of a conditional statement:",
+      "acceptable_answers": [
+        "if it rains, then the ground gets wet",
+        "if you study, you will pass",
+        "if the temperature drops, water freezes",
+        "if the switch is on, the light turns on"
+      ],
+      "explanation": "Conditional statements have the form 'if [antecedent] then [consequent]'."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Why are invalid forms persuasive despite being wrong?",
+      "acceptable_answers": [
+        "they often seem intuitively correct",
+        "people focus on content rather than structure",
+        "emotional appeal overrides logic",
+        "they mimic valid patterns superficially"
+      ],
+      "explanation": "Invalid forms can be persuasive because they often resemble valid patterns and appeal to intuition rather than rigorous logic."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 12
+}

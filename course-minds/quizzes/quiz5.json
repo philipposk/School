@@ -1,0 +1,70 @@
+{
+  "module": "Module 5: Self-Awareness & Growth",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Self-awareness is:",
+      "options": ["Self-criticism", "Observing your thoughts, feelings, and behaviors objectively", "Comparing yourself to others", "Avoiding difficult truths"],
+      "correct_answer": 1,
+      "explanation": "Self-awareness involves observing your thoughts, feelings, and behaviors objectively without immediate judgment."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Emotional intelligence can be:",
+      "options": ["Only inherited", "Developed with practice", "Only for some people", "Impossible to change"],
+      "correct_answer": 1,
+      "explanation": "Emotional intelligence can be developed through practice and is not fixed."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "The shadow self refers to:",
+      "options": ["Only bad parts", "Unintegrated parts of ourselves", "Things to avoid", "Only negative qualities"],
+      "correct_answer": 1,
+      "explanation": "The shadow refers to unintegrated parts of ourselves that we reject or deny, not necessarily bad parts."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Self-compassion means:",
+      "options": ["Making excuses", "Treating yourself with kindness while taking responsibility", "Never improving", "Ignoring problems"],
+      "correct_answer": 1,
+      "explanation": "Self-compassion involves treating yourself with kindness while still taking responsibility for growth."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Recognizing patterns helps you:",
+      "options": ["Stay stuck", "Create choice and change", "Blame others", "Avoid growth"],
+      "correct_answer": 1,
+      "explanation": "Recognizing patterns creates awareness, which creates choice and the possibility for change."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Self-awareness improves relationships because:",
+      "options": ["You can blame others less", "You understand your contributions and communicate better", "You become perfect", "Others have to change"],
+      "correct_answer": 1,
+      "explanation": "Self-awareness helps you understand your contributions to relationship dynamics and communicate more effectively."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one benefit of developing self-awareness:",
+      "acceptable_answers": ["Recognize patterns", "Understand triggers", "Improve relationships", "Make better choices", "Grow personally", "Regulate emotions"],
+      "explanation": "Self-awareness provides many benefits including recognizing patterns, understanding triggers, improving relationships, and making better choices."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is self-compassion important for growth?",
+      "acceptable_answers": ["Creates safety for change", "More effective than harsh judgment", "Allows honest self-reflection", "Reduces defensiveness", "Supports learning from mistakes"],
+      "explanation": "Self-compassion creates psychological safety that allows for honest self-reflection and growth, which is more effective than harsh self-criticism."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

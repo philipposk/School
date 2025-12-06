@@ -1,0 +1,78 @@
+{
+  "module": "Module 5: User Input & Forms",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is TextField used for?",
+      "options": ["Displaying text", "Single-line text input", "Multi-line text", "Password input"],
+      "correct_answer": 1,
+      "explanation": "TextField is used for single-line text input from the user."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What keyboard type should you use for email?",
+      "options": [".default", ".emailAddress", ".numberPad", ".URL"],
+      "correct_answer": 1,
+      "explanation": "Use .emailAddress keyboard type for email input fields to show the @ symbol and email-friendly keyboard."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is SecureField used for?",
+      "options": ["Regular text", "Passwords", "Multi-line text", "Numbers"],
+      "correct_answer": 1,
+      "explanation": "SecureField hides the text as the user types, making it suitable for password input."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "How do you create a dropdown picker?",
+      "options": [".pickerStyle(.menu)", ".pickerStyle(.wheel)", ".pickerStyle(.segmented)", "Picker()"],
+      "correct_answer": 0,
+      "explanation": "Use .pickerStyle(.menu) to create a dropdown menu-style picker."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What does DatePicker return?",
+      "options": ["String", "Date", "Int", "Bool"],
+      "correct_answer": 1,
+      "explanation": "DatePicker binds to a Date value, allowing users to select dates and times."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "How do you validate form input?",
+      "options": ["Computed properties", "Functions", "Variables", "Constants"],
+      "correct_answer": 0,
+      "explanation": "Use computed properties to validate form input and determine if the form is valid."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What's the difference between TextField and TextEditor?",
+      "acceptable_answers": [
+        "TextField is single-line, TextEditor is multi-line",
+        "TextField for short text, TextEditor for longer text",
+        "Different input controls for different text lengths"
+      ],
+      "explanation": "TextField is for single-line text input, while TextEditor is for multi-line text input."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How do you disable a button until form is valid?",
+      "acceptable_answers": [
+        "Use .disabled() modifier with validation computed property",
+        "Set disabled state based on isValid property",
+        "Combine validation with button disabled state"
+      ],
+      "explanation": "Use the .disabled() modifier on the button with a computed property that checks if the form is valid."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

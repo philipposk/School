@@ -1,0 +1,86 @@
+{
+  "module": "Module 2: Understanding Debt & Credit",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "The largest factor in credit score calculation is:",
+      "options": [
+        "credit utilization",
+        "payment history",
+        "length of credit history",
+        "credit mix"
+      ],
+      "correct_answer": 1,
+      "explanation": "Payment history accounts for 35% of your credit score, making it the most important factor."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Credit utilization should ideally be below:",
+      "options": ["50%", "30%", "70%", "100%"],
+      "correct_answer": 1,
+      "explanation": "Credit utilization should be kept below 30% for optimal credit scores."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "The debt avalanche method prioritizes:",
+      "options": [
+        "smallest balance",
+        "highest interest rate",
+        "longest term",
+        "newest debt"
+      ],
+      "correct_answer": 1,
+      "explanation": "The debt avalanche method focuses on paying off debts with the highest interest rates first to save the most money."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "APR stands for:",
+      "options": [
+        "Annual Payment Rate",
+        "Annual Percentage Rate",
+        "Average Payment Rate",
+        "Adjusted Percentage Rate"
+      ],
+      "correct_answer": 1,
+      "explanation": "APR stands for Annual Percentage Rate, which represents the yearly cost of borrowing."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "A credit score of 720 would be considered:",
+      "options": ["poor", "fair", "good", "excellent"],
+      "correct_answer": 2,
+      "explanation": "A credit score of 720 falls in the 'good' range (700-749)."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Name one advantage of the debt snowball method:",
+      "acceptable_answers": [
+        "provides quick wins and motivation",
+        "psychological boost from paying off debts",
+        "easier to stick with",
+        "creates momentum"
+      ],
+      "explanation": "The debt snowball method provides psychological motivation through quick wins, making it easier to maintain momentum."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between APR and APY?",
+      "acceptable_answers": [
+        "APR doesn't include compounding, APY includes compounding",
+        "APR is the stated rate, APY accounts for compound interest",
+        "APY is higher than APR due to compounding"
+      ],
+      "explanation": "APR is the annual percentage rate without compounding, while APY (Annual Percentage Yield) includes the effect of compounding interest."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

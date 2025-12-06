@@ -1,0 +1,88 @@
+{
+  "module": "Module 8: Deployment & Portfolio",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Which platform is best for beginners to deploy static sites?",
+      "options": ["AWS", "Netlify", "Traditional hosting", "VPS"],
+      "correct_answer": 1,
+      "explanation": "Netlify is beginner-friendly with easy drag-and-drop deployment and free hosting for static sites."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does SSL provide?",
+      "options": ["Faster loading", "Secure connection (HTTPS)", "Better design", "More storage"],
+      "correct_answer": 1,
+      "explanation": "SSL (Secure Sockets Layer) provides encrypted HTTPS connections, securing data transmission."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is lazy loading?",
+      "options": ["Loading images immediately", "Loading images when needed", "Not loading images", "Slow loading"],
+      "correct_answer": 1,
+      "explanation": "Lazy loading defers loading of images until they're needed (when user scrolls near them), improving performance."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What should you remove before deploying?",
+      "options": ["HTML comments", "console.log statements", "CSS", "JavaScript"],
+      "correct_answer": 1,
+      "explanation": "console.log statements should be removed in production as they can expose debugging information and slow down execution."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What is a portfolio?",
+      "options": ["A single project", "Collection showcasing your work", "A resume", "A blog"],
+      "correct_answer": 1,
+      "explanation": "A portfolio is a collection of your work that showcases your skills and projects to potential employers or clients."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What does CDN stand for?",
+      "options": ["Content Delivery Network", "Code Development Network", "Central Data Network", "Content Data Network"],
+      "correct_answer": 0,
+      "explanation": "CDN stands for Content Delivery Network, a network of servers that deliver content quickly to users worldwide."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What are three things to check before deploying a website?",
+      "acceptable_answers": [
+        "test browsers",
+        "test mobile",
+        "check links",
+        "optimize images",
+        "remove console.logs",
+        "test forms",
+        "check performance",
+        "validate html",
+        "test responsiveness"
+      ],
+      "explanation": "Before deploying, check: browser compatibility, mobile responsiveness, all links work, images optimized, console.logs removed, forms work, performance is good, and HTML/CSS is valid."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is performance optimization important?",
+      "acceptable_answers": [
+        "user experience",
+        "faster loading",
+        "better seo",
+        "lower bounce rate",
+        "mobile users",
+        "bandwidth",
+        "conversion rates"
+      ],
+      "explanation": "Performance optimization improves user experience, reduces bounce rates, improves SEO rankings, saves bandwidth for mobile users, and can increase conversion rates."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+
