@@ -737,9 +737,18 @@ window.openPrediction = function() {
         if (modal) {
             modal.classList.add('show');
             
-            // Scroll to modal smoothly to ensure it's fully visible
+            // Scroll to modal content smoothly to ensure it's fully visible
             setTimeout(() => {
-                modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    // Fallback: scroll window to center
+                    window.scrollTo({ 
+                        top: window.scrollY + (window.innerHeight / 2), 
+                        behavior: 'smooth' 
+                    });
+                }
             }, 100);
         }
     } catch (error) {
