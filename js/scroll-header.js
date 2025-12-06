@@ -129,6 +129,20 @@ const ScrollHeaderManager = {
         const scrollY = window.scrollY;
         const shouldBeScrolled = scrollY > 100; // Threshold for animation
         
+        // Calculate scroll speed for animation timing
+        const now = Date.now();
+        const timeSinceLastScroll = now - (this.lastScrollTime || now);
+        this.lastScrollTime = now;
+        
+        // Calculate scroll velocity (pixels per millisecond)
+        const scrollDelta = Math.abs(scrollY - (this.lastScrollY || scrollY));
+        this.lastScrollY = scrollY;
+        const scrollSpeed = scrollDelta / Math.max(timeSinceLastScroll, 1); // pixels per ms
+        
+        // Normalize speed (0.5 to 2.0 multiplier)
+        // Fast scroll (>10px/ms) = 0.5x duration (faster), slow scroll (<1px/ms) = 2x duration (slower)
+        this.animationSpeed = Math.max(0.5, Math.min(2.0, 1 / (scrollSpeed * 0.1 + 0.5)));
+        
         if (shouldBeScrolled !== this.isScrolled) {
             this.isScrolled = shouldBeScrolled;
             this.animateHeader(shouldBeScrolled);
@@ -155,9 +169,9 @@ const ScrollHeaderManager = {
                 const startX = rect.left + rect.width / 2;
                 const startY = rect.top + rect.height / 2;
                 
-                // Target position on sidebar
+                // Target position on sidebar (top-left)
                 const targetX = 24; // Center of sidebar button
-                const targetY = window.innerHeight / 2 + (index - this.headerButtons.length / 2) * 56;
+                const targetY = 80 + index * 56; // Top-left, stacked vertically
                 
                 // Create flying button clone
                 const clone = btn.cloneNode(true);
