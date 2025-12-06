@@ -606,10 +606,12 @@ const UniverseView = {
         // Add sprite as child of planet so it rotates with the planet
         this.planet.add(sprite);
         
-        // Store sprite reference
-        const regionIndex = this.courseRegions.findIndex(r => r.course.id === course.id);
+        // Store sprite reference - ensure courseRegions is populated
+        const regionIndex = this.courseRegions.findIndex(r => r.course && r.course.id === course.id);
         if (regionIndex >= 0) {
             this.courseRegions[regionIndex].sprite = sprite;
+        } else {
+            console.warn(`Could not find course region for course ${course.id}`);
         }
     },
     
@@ -1600,6 +1602,13 @@ const UniverseView = {
         
         // Ensure renderer and camera exist before rendering
         if (!this.renderer || !this.camera || !this.scene) {
+            console.warn('Universe view: Missing renderer, camera, or scene');
+            return;
+        }
+        
+        // Ensure planet exists
+        if (!this.planet) {
+            console.warn('Universe view: Planet not created');
             return;
         }
         
