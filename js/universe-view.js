@@ -27,6 +27,18 @@ const UniverseView = {
     travelingStarsMaterial: null,
     isTravelingAway: false,
     travelSpeed: 0,
+    // Sound system
+    sounds: {
+        wind: null,
+        walking: null,
+        ambient: null,
+        landing: null
+    },
+    soundEnabled: true,
+    isWalking: false,
+    walkingSpeed: 0,
+    groundLevel: 100, // Planet radius
+    moduleRegions: [], // Module regions within course countries
     
     init() {
         // Add roundRect polyfill if not available
@@ -67,6 +79,7 @@ const UniverseView = {
         this.setupCamera();
         this.setupRenderer(canvasContainer);
         this.setupControls();
+        this.initSounds();
         this.setupLights();
         this.createUniverse();
         this.createPlanet();
@@ -122,13 +135,14 @@ const UniverseView = {
             this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
             this.controls.enableDamping = true;
             this.controls.dampingFactor = 0.05;
-            this.controls.minDistance = 10; // Allow very close zoom for module details
+            this.controls.minDistance = this.groundLevel + 5; // Cannot zoom past ground level
             this.controls.maxDistance = Infinity; // Allow infinite zoom out
             this.controls.target.set(0, 0, 0); // Look at planet
-            this.controls.zoomSpeed = 1.0; // Consistent zoom speed
+            this.controls.zoomSpeed = 1.0; // Will be adjusted dynamically
             this.controls.addEventListener('change', () => {
                 this.onZoomChange();
                 this.handleZoomSpeed();
+                this.checkGroundCollision();
             });
         } else {
             const script = document.createElement('script');
@@ -162,8 +176,102 @@ const UniverseView = {
         return { r, g, b };
     },
     
+    initSounds() {
+        // Initialize sound system
+        if (!this.soundEnabled) return;
+        
+        // Create audio context
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+            
+            // Load sounds (using placeholder paths - will need actual audio files)
+            // Wind sound for flying
+            this.sounds.wind = new Audio();
+            this.sounds.wind.loop = true;
+            this.sounds.wind.volume = 0.3;
+            
+            // Walking sound
+            this.sounds.walking = new Audio();
+            this.sounds.walking.loop = true;
+            this.sounds.walking.volume = 0.4;
+            
+            // Ambient music
+            this.sounds.ambient = new Audio();
+            this.sounds.ambient.loop = true;
+            this.sounds.ambient.volume = 0.2;
+            
+            // Landing sound
+            this.sounds.landing = new Audio();
+            this.sounds.landing.volume = 0.5;
+        } catch (e) {
+            console.warn('Audio not supported:', e);
+            this.soundEnabled = false;
+        }
+    },
+    
+    checkGroundCollision() {
+        const distance = this.camera.position.length();
+        
+        // If we're at or below ground level, switch to walking mode
+        if (distance <= this.groundLevel + 2 && !this.isWalking) {
+            this.enterWalkingMode();
+        } else if (distance > this.groundLevel + 5 && this.isWalking) {
+            this.exitWalkingMode();
+        }
+        
+        // Prevent camera from going below ground
+        if (distance < this.groundLevel) {
+            const direction = this.camera.position.clone().normalize();
+            this.camera.position.copy(direction.multiplyScalar(this.groundLevel));
+            if (this.controls) {
+                this.controls.target.copy(this.camera.position.clone().add(direction.multiplyScalar(-10)));
+            }
+        }
+    },
+    
+    enterWalkingMode() {
+        this.isWalking = true;
+        this.isLanded = true;
+        
+        // Disable orbit controls, enable walking controls
+        if (this.controls) {
+            this.controls.enableRotate = false;
+            this.controls.enableZoom = false;
+        }
+        
+        // Play walking sound
+        if (this.soundEnabled && this.sounds.walking) {
+            this.sounds.walking.play().catch(e => console.warn('Walking sound failed:', e));
+        }
+        
+        // Stop wind sound
+        if (this.sounds.wind) {
+            this.sounds.wind.pause();
+        }
+    },
+    
+    exitWalkingMode() {
+        this.isWalking = false;
+        this.isLanded = false;
+        
+        // Re-enable orbit controls
+        if (this.controls) {
+            this.controls.enableRotate = true;
+            this.controls.enableZoom = true;
+        }
+        
+        // Stop walking sound, start wind sound
+        if (this.sounds.walking) {
+            this.sounds.walking.pause();
+        }
+        if (this.soundEnabled && this.sounds.wind && this.camera.position.length() > 200) {
+            this.sounds.wind.play().catch(e => console.warn('Wind sound failed:', e));
+        }
+    },
+    
     handleZoomSpeed() {
-        // Accelerate zoom when approaching planet (fast zoom in)
+        // Slow down as approaching planet surface (like Google Earth)
         // But only if not hovering over something (to prevent unwanted zoom)
         if (this.isHovering) {
             // Keep normal speed when hovering to prevent accidental zoom
@@ -172,8 +280,17 @@ const UniverseView = {
         }
         
         const distance = this.camera.position.length();
-        if (distance < 600 && distance > 150) {
-            // Fast zoom in when approaching planet
+        
+        // Progressive speed reduction as we approach ground
+        if (distance < this.groundLevel + 50) {
+            // Very close to ground - slow down significantly
+            const proximity = (distance - this.groundLevel) / 50;
+            this.controls.zoomSpeed = Math.max(0.1, proximity * 0.5);
+        } else if (distance < 200) {
+            // Close to planet - moderate speed
+            this.controls.zoomSpeed = 0.5;
+        } else if (distance < 600 && distance > 150) {
+            // Medium distance - fast zoom in when approaching planet
             this.controls.zoomSpeed = 2.5;
         } else {
             // Normal consistent speed for zoom out
@@ -675,16 +792,29 @@ const UniverseView = {
         
         const distance = this.camera.position.length();
         
-        // Use higher resolution when zoomed in close for better detail
+        // Progressive detail based on zoom level (like Google Earth)
+        // More detail as you zoom in
         let canvasWidth = 2048;
         let canvasHeight = 1024;
         let scaleFactor = 1;
         
-        if (distance < 200) {
+        if (distance < 120) {
+            // Very close - maximum detail, show module regions
+            canvasWidth = 8192;
+            canvasHeight = 4096;
+            scaleFactor = 4;
+        } else if (distance < 200) {
+            // Close - high detail
+            canvasWidth = 6144;
+            canvasHeight = 3072;
+            scaleFactor = 3;
+        } else if (distance < 400) {
+            // Medium-close - moderate detail
             canvasWidth = 4096;
             canvasHeight = 2048;
             scaleFactor = 2;
-        } else if (distance < 400) {
+        } else if (distance < 600) {
+            // Medium distance - basic detail
             canvasWidth = 3072;
             canvasHeight = 1536;
             scaleFactor = 1.5;
@@ -825,8 +955,13 @@ const UniverseView = {
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
             
-            // Add bright, thick border for visibility
-            ctx.strokeStyle = '#ffffff';
+            // Add bright, thick border for visibility - ensure it contrasts with region color
+            // Use a contrasting color that's different from the text
+            const rgb = this.hexToRgb(color);
+            const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+            // Use dark border on light regions, light border on dark regions - opposite of text
+            const borderColor = brightness > 128 ? '#000000' : '#ffffff';
+            ctx.strokeStyle = borderColor;
             ctx.lineWidth = borderWidth;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
@@ -834,17 +969,15 @@ const UniverseView = {
             
             // Add inner border for extra definition when zoomed in
             if (distance < 300) {
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.strokeStyle = brightness > 128 ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
                 ctx.lineWidth = borderWidth * 0.5;
                 ctx.stroke();
             }
             
-            // Draw course name - show full name with proper contrast and gradual visibility
+            // Draw course name - show abbreviated name with proper contrast
             if (showText && course.title && textOpacity > 0) {
-                // Calculate text color based on region color brightness for contrast
-                const rgb = this.hexToRgb(color);
-                const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
-                const textColor = brightness > 128 ? '#000000' : '#ffffff'; // Dark text on light bg, light text on dark bg
+                // Calculate text color - opposite of border for maximum contrast
+                const textColor = brightness > 128 ? '#ffffff' : '#000000'; // Opposite of border
                 
                 // Apply opacity to text (gradual fade-in as you approach)
                 ctx.save();
@@ -854,8 +987,8 @@ const UniverseView = {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                // Add contrasting text shadow for readability (also with opacity)
-                const shadowColor = brightness > 128 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)';
+                // Add contrasting text shadow for readability
+                const shadowColor = brightness > 128 ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)';
                 ctx.shadowColor = shadowColor;
                 ctx.shadowBlur = 4 * scaleFactor;
                 ctx.shadowOffsetX = 2 * scaleFactor;
@@ -863,13 +996,18 @@ const UniverseView = {
                 
                 const textX = safeScaledX + scaledWidth / 2;
                 const textY = safeScaledY + scaledHeight / 2;
-                const maxTextWidth = scaledWidth * 0.9; // More space for text
-                const maxHeight = scaledHeight * 0.8; // More vertical space
-                const lineHeight = fontSize * 1.2;
-                const maxLines = Math.max(3, Math.floor(maxHeight / lineHeight)); // Allow up to 3 lines
+                const maxTextWidth = scaledWidth * 0.9;
                 
-                // Always show full course name, wrap to multiple lines
-                this.wrapText(ctx, course.title, maxTextWidth, textX, textY - ((Math.min(maxLines, 3) - 1) * lineHeight / 2), lineHeight);
+                // Show abbreviated name (first 2-3 words or up to 20 chars)
+                let displayText = course.title;
+                const words = course.title.split(' ');
+                if (words.length > 2) {
+                    displayText = words.slice(0, 2).join(' ') + '...';
+                } else if (displayText.length > 20) {
+                    displayText = displayText.substring(0, 17) + '...';
+                }
+                
+                ctx.fillText(displayText, textX, textY);
                 
                 // Reset shadow and restore context
                 ctx.shadowColor = 'transparent';
@@ -1563,6 +1701,67 @@ const UniverseView = {
         this.scene.add(templeGroup);
         region.temple = templeGroup;
         
+        // Create module monuments within the course region
+        const modules = region.course.modules_data || [];
+        if (modules.length > 0) {
+            region.modules = [];
+            modules.forEach((module, moduleIndex) => {
+                // Create smaller monuments for each module
+                const moduleGroup = new THREE.Group();
+                
+                // Smaller monument base
+                const moduleBaseGeometry = new THREE.CylinderGeometry(4, 5, 3, 6);
+                const moduleBaseMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xc0c0c0, // Silver color for modules
+                    roughness: 0.3,
+                    metalness: 0.7,
+                    emissive: 0xc0c0c0,
+                    emissiveIntensity: 0.2
+                });
+                const moduleBase = new THREE.Mesh(moduleBaseGeometry, moduleBaseMaterial);
+                moduleBase.position.y = 1.5;
+                moduleGroup.add(moduleBase);
+                
+                // Module pillar
+                const modulePillarGeometry = new THREE.CylinderGeometry(0.8, 1, 6, 6);
+                const modulePillar = new THREE.Mesh(modulePillarGeometry, moduleBaseMaterial);
+                modulePillar.position.y = 4.5;
+                moduleGroup.add(modulePillar);
+                
+                // Module top
+                const moduleTopGeometry = new THREE.ConeGeometry(3, 4, 6);
+                const moduleTop = new THREE.Mesh(moduleTopGeometry, moduleBaseMaterial);
+                moduleTop.position.y = 8;
+                moduleGroup.add(moduleTop);
+                
+                // Position module monuments in a circle around the temple
+                const moduleAngle = (moduleIndex / modules.length) * Math.PI * 2;
+                const moduleRadius = 15 + (moduleIndex % 3) * 5; // Vary distance
+                const moduleX = x + Math.cos(moduleAngle) * moduleRadius;
+                const moduleY = y;
+                const moduleZ = z + Math.sin(moduleAngle) * moduleRadius;
+                
+                // Project onto sphere surface
+                const modulePos = new THREE.Vector3(moduleX, moduleY, moduleZ);
+                modulePos.normalize().multiplyScalar(100);
+                moduleGroup.position.copy(modulePos);
+                
+                // Rotate to face outward from planet
+                moduleGroup.lookAt(0, 0, 0);
+                moduleGroup.rotateX(Math.PI / 2);
+                
+                moduleGroup.userData = {
+                    module: module,
+                    course: region.course,
+                    region: region
+                };
+                
+                moduleGroup.visible = false; // Hidden until zoomed in
+                this.scene.add(moduleGroup);
+                region.modules.push(moduleGroup);
+            });
+        }
+        
         // Create module regions around the temple
         if (region.course.modules_data && region.course.modules_data.length > 0) {
             region.course.modules_data.forEach((module, index) => {
@@ -1728,8 +1927,22 @@ const UniverseView = {
             <div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
                 Zoom in to see course details
             </div>
+            <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 0.5rem;">
+                <button id="sound-toggle" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    🔊 Sound On
+                </button>
+            </div>
         `;
         this.container.appendChild(ui);
+        
+        // Add sound toggle functionality
+        const soundToggle = document.getElementById('sound-toggle');
+        if (soundToggle) {
+            soundToggle.addEventListener('click', () => {
+                this.toggleSound();
+                soundToggle.textContent = this.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off';
+            });
+        }
     },
     
     // Track camera movement to detect when user stops moving towards other planets
@@ -1896,6 +2109,11 @@ const UniverseView = {
         // Update walking/flying movement if landed
         if (this.isLanded && this.walkingControls) {
             this.updateWalkingMovement();
+        }
+        
+        // Update sounds based on camera state (if function exists)
+        if (typeof this.updateSounds === 'function') {
+            this.updateSounds();
         }
         
         // Update zoom level check
