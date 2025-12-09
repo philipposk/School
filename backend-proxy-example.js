@@ -60,7 +60,7 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Proxy endpoint for Groq API
+// Proxy endpoint for Groq API with automatic model fallback
 app.post('/api/ai/groq', async (req, res) => {
     try {
         if (!GROQ_API_KEY) {
@@ -73,28 +73,70 @@ app.post('/api/ai/groq', async (req, res) => {
             return res.status(400).json({ error: 'Invalid messages format' });
         }
 
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${GROQ_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: options.model || 'llama-3.3-70b-versatile',
-                messages: messages,
-                temperature: options.temperature || 0.7,
-                max_tokens: options.max_tokens || 1000,
-                stream: false
-            })
-        });
+        // Model fallback list (try primary first, then fallbacks)
+        const groqModels = options.model 
+            ? [options.model] 
+            : [
+                'llama-3.3-70b-versatile', // Primary
+                'llama-3.1-8b-instant',    // Fallback 1
+                'mixtral-8x7b-32768',      // Fallback 2
+                'gemma2-9b-it'              // Fallback 3
+            ];
 
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.error?.message || 'API error' });
+        let lastError = null;
+
+        // Try each model until one works
+        for (const model of groqModels) {
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GROQ_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: messages,
+                        temperature: options.temperature || 0.7,
+                        max_tokens: options.max_tokens || 1000,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+                    const errorMsg = error.error?.message || '';
+
+                    // If model is deprecated or unavailable, try next model
+                    if (errorMsg.includes('decommissioned') || errorMsg.includes('not available') || response.status === 400) {
+                        console.warn(`Groq model ${model} failed, trying next model...`);
+                        lastError = new Error(errorMsg);
+                        continue; // Try next model
+                    }
+
+                    return res.status(response.status).json({ error: errorMsg || 'API error' });
+                }
+
+                const data = await response.json();
+                console.log(`✅ Groq API success with model: ${model}`);
+                return res.json(data);
+            } catch (error) {
+                lastError = error;
+                // If it's a model-specific error, try next model
+                if (error.message && (error.message.includes('decommissioned') || error.message.includes('not available'))) {
+                    console.warn(`Groq model ${model} failed: ${error.message}, trying next model...`);
+                    continue;
+                }
+                // Other errors: return immediately
+                console.error('Groq API error:', error);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
         }
 
-        const data = await response.json();
-        res.json(data);
+        // All models failed
+        return res.status(500).json({ 
+            error: lastError?.message || 'All Groq models failed. Please check API configuration.' 
+        });
     } catch (error) {
         console.error('Groq API error:', error);
         res.status(500).json({ error: 'Internal server error' });
