@@ -158,6 +158,24 @@ CREATE POLICY "Users can manage own friends" ON public.friends
 CREATE POLICY "Users can manage own assignments" ON public.assignments
   FOR ALL USING (auth.uid() = user_id);
 
+-- Course Reviews Policies: Anyone can view, authenticated users can create/update own
+DROP POLICY IF EXISTS "Anyone can view course reviews" ON public.course_reviews;
+DROP POLICY IF EXISTS "Users can create own reviews" ON public.course_reviews;
+DROP POLICY IF EXISTS "Users can update own reviews" ON public.course_reviews;
+DROP POLICY IF EXISTS "Users can delete own reviews" ON public.course_reviews;
+
+CREATE POLICY "Anyone can view course reviews" ON public.course_reviews
+  FOR SELECT USING (is_visible = TRUE);
+
+CREATE POLICY "Users can create own reviews" ON public.course_reviews
+  FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own reviews" ON public.course_reviews
+  FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own reviews" ON public.course_reviews
+  FOR DELETE USING (auth.uid()::text = user_id);
+
 -- Function to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
