@@ -286,10 +286,13 @@ function renderReviewForm(courseId, existingReview = null) {
                         <label>Your Rating</label>
                         <div class="star-rating" id="starRating">
                             ${[1, 2, 3, 4, 5].map(star => `
-                                <span class="star" data-rating="${star}" onclick="setRating(${star})">
+                                <span class="star" data-rating="${star}" style="font-size: 2rem; color: ${star <= (existingReview?.rating || 0) ? '#ffc107' : '#ccc'}; cursor: pointer; transition: all 0.2s ease;">
                                     ${star <= (existingReview?.rating || 0) ? '★' : '☆'}
                                 </span>
                             `).join('')}
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);" id="ratingText">
+                            ${existingReview?.rating ? `${existingReview.rating} out of 5 stars` : 'Click to rate'}
                         </div>
                         <input type="hidden" id="reviewRating" name="rating" value="${existingReview?.rating || 0}" required>
                     </div>
@@ -353,36 +356,60 @@ function renderReviewForm(courseId, existingReview = null) {
 }
 
 function setupStarRating() {
-    const stars = document.querySelectorAll('.star');
+    const starContainer = document.getElementById('starRating');
+    if (!starContainer) return;
+    
+    const stars = starContainer.querySelectorAll('.star');
     const ratingInput = document.getElementById('reviewRating');
     
-    stars.forEach(star => {
-        star.addEventListener('mouseenter', (e) => {
-            const rating = parseInt(e.target.dataset.rating);
+    // Initialize with current rating
+    const currentRating = parseInt(ratingInput?.value || 0);
+    highlightStars(currentRating);
+    
+    stars.forEach((star, index) => {
+        const rating = index + 1;
+        
+        // Hover effect
+        star.addEventListener('mouseenter', () => {
             highlightStars(rating);
         });
         
+        // Click to set rating
         star.addEventListener('click', (e) => {
-            const rating = parseInt(e.target.dataset.rating);
+            e.preventDefault();
+            e.stopPropagation();
             setRating(rating);
         });
     });
     
-    document.getElementById('starRating')?.addEventListener('mouseleave', () => {
+    // Reset to selected rating on mouse leave
+    starContainer.addEventListener('mouseleave', () => {
         const currentRating = parseInt(ratingInput?.value || 0);
         highlightStars(currentRating);
     });
 }
 
 function highlightStars(rating) {
-    const stars = document.querySelectorAll('.star');
+    const starContainer = document.getElementById('starRating');
+    if (!starContainer) return;
+    
+    const stars = starContainer.querySelectorAll('.star');
     stars.forEach((star, index) => {
-        if (index < rating) {
+        const starRating = index + 1;
+        if (starRating <= rating) {
             star.textContent = '★';
             star.style.color = '#ffc107';
+            star.style.fontSize = '2rem';
+            star.style.cursor = 'pointer';
+            star.classList.add('filled');
+            star.classList.remove('empty');
         } else {
             star.textContent = '☆';
             star.style.color = '#ccc';
+            star.style.fontSize = '2rem';
+            star.style.cursor = 'pointer';
+            star.classList.add('empty');
+            star.classList.remove('filled');
         }
     });
 }
@@ -392,6 +419,22 @@ function setRating(rating) {
     if (ratingInput) {
         ratingInput.value = rating;
         highlightStars(rating);
+        
+        // Update rating text
+        const ratingText = document.getElementById('ratingText');
+        if (ratingText) {
+            ratingText.textContent = `${rating} out of 5 stars`;
+            ratingText.style.color = 'var(--text)';
+        }
+        
+        // Visual feedback
+        const starContainer = document.getElementById('starRating');
+        if (starContainer) {
+            starContainer.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                starContainer.style.transform = 'scale(1)';
+            }, 200);
+        }
     }
 }
 

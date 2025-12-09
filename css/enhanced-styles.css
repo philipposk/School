@@ -1460,6 +1460,8 @@ header {
     display: flex;
     gap: 0.5rem;
     margin: 1rem 0;
+    align-items: center;
+    transition: transform 0.2s ease;
 }
 
 .star-rating .star {
@@ -1468,14 +1470,29 @@ header {
     cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
+    display: inline-block;
+    line-height: 1;
 }
 
 .star-rating .star:hover {
-    transform: scale(1.1);
+    transform: scale(1.2);
 }
 
 .star-rating .star.filled {
-    color: #ffc107;
+    color: #ffc107 !important;
+}
+
+.star-rating .star.empty {
+    color: #ccc !important;
+}
+
+.star-rating:hover .star {
+    opacity: 0.7;
+}
+
+.star-rating:hover .star.filled,
+.star-rating:hover .star:hover {
+    opacity: 1;
 }
 
 .char-count {
