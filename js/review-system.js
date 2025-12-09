@@ -318,6 +318,27 @@ function renderReviewForm(courseId, existingReview = null) {
     
     document.body.appendChild(modal);
     
+    // Auto-scroll to modal (like search and messaging do)
+    setTimeout(() => {
+        const scrollPosition = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate center position
+        const centerPosition = (documentHeight - viewportHeight) / 2;
+        
+        // Only scroll if we're not already near the center
+        if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+            window.scrollTo({ 
+                top: centerPosition, 
+                behavior: 'smooth' 
+            });
+        } else {
+            // If already near center, scroll modal into view
+            modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
+    
     // Character counter
     const commentField = document.getElementById('reviewComment');
     const charCount = document.getElementById('charCount');

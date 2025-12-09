@@ -541,7 +541,29 @@ window.openAssignmentSubmission = function(assignmentId) {
     }
     
     document.getElementById('assignmentSubmissionContent').innerHTML = AssignmentManager.renderSubmissionForm(assignmentId);
-    document.getElementById('assignmentSubmissionModal').classList.add('show');
+    const submissionModal = document.getElementById('assignmentSubmissionModal');
+    submissionModal.classList.add('show');
+    
+    // Auto-scroll window to modal (like other modals)
+    setTimeout(() => {
+        const scrollPosition = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate center position
+        const centerPosition = (documentHeight - viewportHeight) / 2;
+        
+        // Only scroll if we're not already near the center
+        if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+            window.scrollTo({ 
+                top: centerPosition, 
+                behavior: 'smooth' 
+            });
+        } else {
+            // If already near center, scroll modal into view
+            submissionModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 };
 
 window.closeAssignmentSubmission = function() {

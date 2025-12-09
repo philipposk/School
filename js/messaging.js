@@ -438,15 +438,37 @@ window.openChat = function(conversationId) {
     }
     
     document.getElementById('chatContent').innerHTML = MessagingManager.renderChatView(conversationId);
-    document.getElementById('chatModal').classList.add('show');
+    const chatModal = document.getElementById('chatModal');
+    chatModal.classList.add('show');
     
-    // Scroll to bottom
+    // Auto-scroll window to modal (like other modals)
+    setTimeout(() => {
+        const scrollPosition = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate center position
+        const centerPosition = (documentHeight - viewportHeight) / 2;
+        
+        // Only scroll if we're not already near the center
+        if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+            window.scrollTo({ 
+                top: centerPosition, 
+                behavior: 'smooth' 
+            });
+        } else {
+            // If already near center, scroll modal into view
+            chatModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
+    
+    // Scroll to bottom of messages
     setTimeout(() => {
         const messagesContainer = document.getElementById(`chatMessages_${conversationId}`);
         if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-    }, 100);
+    }, 200);
     
     // Mark as read
     MessagingManager.markAsRead(conversationId);
