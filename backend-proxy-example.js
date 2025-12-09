@@ -60,6 +60,16 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Supabase configuration endpoint (returns public config for frontend)
+app.get('/api/config/supabase', (req, res) => {
+    res.json({
+        url: SUPABASE_URL || 'https://jmjezmfhygvazfunuujt.supabase.co',
+        // Note: Anon key should be set as environment variable SUPABASE_ANON_KEY
+        // If not set, frontend will need to configure it manually
+        anonKey: process.env.SUPABASE_ANON_KEY || null
+    });
+});
+
 // Proxy endpoint for Groq API with automatic model fallback
 app.post('/api/ai/groq', async (req, res) => {
     try {

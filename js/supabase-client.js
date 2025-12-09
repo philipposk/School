@@ -153,10 +153,37 @@ async function initSupabase() {
     if (supabaseClient) return supabaseClient;
     
     // Get credentials dynamically each time
-    const credentials = getSupabaseCredentials();
+    let credentials = getSupabaseCredentials();
+    
+    // If credentials not set, try to fetch from backend
+    if (!credentials.url || !credentials.key) {
+        const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
+        try {
+            const configResponse = await fetch(`${backendUrl}/api/config/supabase`);
+            if (configResponse.ok) {
+                const config = await configResponse.json();
+                if (config.url && config.anonKey) {
+                    // Auto-configure from backend
+                    localStorage.setItem('supabase_url', config.url);
+                    localStorage.setItem('supabase_anon_key', config.anonKey);
+                    credentials = {
+                        url: config.url,
+                        key: config.anonKey
+                    };
+                    console.log('✅ Supabase credentials auto-configured from backend');
+                }
+            }
+        } catch (error) {
+            // Backend not available or endpoint doesn't exist yet - that's OK
+        }
+    }
     
     if (!credentials.url || !credentials.key) {
-        console.warn('Supabase credentials not configured. Set supabase_url and supabase_anon_key in localStorage or Settings.');
+        // Only warn once, not every time
+        if (!window._supabaseWarningShown) {
+            console.warn('ℹ️ Supabase credentials not configured. Some features may be limited. Set supabase_url and supabase_anon_key in Settings if you need full Supabase features.');
+            window._supabaseWarningShown = true;
+        }
         return null;
     }
     
