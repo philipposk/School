@@ -14,7 +14,7 @@ const AIConfig = {
     openaiEndpoint: 'https://api.openai.com/v1/chat/completions',
     
     // Default model preferences
-    groqModel: 'llama-3.1-70b-versatile', // Fast and free
+    groqModel: 'llama-3.3-70b-versatile', // Fast and free (updated from deprecated model)
     openaiModel: 'gpt-4o-mini', // Cost-effective
     
     // Check if backend is configured
@@ -152,4 +152,3 @@ const AIConfig = {
 
 // Export
 window.AIConfig = AIConfig;
-

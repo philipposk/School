@@ -10,7 +10,7 @@ let supabaseLibPromise = null;
 // Helper function to get credentials dynamically (not at file load time)
 function getSupabaseCredentials() {
     return {
-        url: localStorage.getItem('supabase_url') || '',
+        url: localStorage.getItem('supabase_url') || 'https://jmjezmfhygvazfunuujt.supabase.co',
         key: localStorage.getItem('supabase_anon_key') || ''
     };
 }
