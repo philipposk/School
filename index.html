@@ -1765,6 +1765,8 @@
     <script src="js/reminder-system.js"></script>
     <script src="js/auth-enhanced.js"></script>
     <script src="js/review-system.js"></script>
+    <script src="js/video-player.js"></script>
+    <script src="js/forum-system.js"></script>
     <script src="js/payment-system.js"></script>
     <script>
         // Configure marked
@@ -1824,14 +1826,14 @@
                 duration: '8 weeks',
                 level: 'Intermediate',
                 modules_data: [
-                    { id: 1, title: 'Foundations of Critical Thinking', subtitle: 'What Is an Argument? Validity, Soundness, and Structure' },
-                    { id: 2, title: 'Deduction: Propositional Logic & Syllogisms', subtitle: 'Guaranteed Truth Through Structure' },
-                    { id: 3, title: 'Induction, Evidence & Strength', subtitle: 'From Specific to General' },
-                    { id: 4, title: 'Probabilistic Thinking & Bayes', subtitle: 'Navigating Uncertainty' },
-                    { id: 5, title: 'Cognitive Biases & Debiasing', subtitle: 'Overcoming Mental Shortcuts' },
-                    { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning' },
-                    { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning' },
-                    { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking' }
+                    { id: 1, title: 'Foundations of Critical Thinking', subtitle: 'What Is an Argument? Validity, Soundness, and Structure', videoId: null },
+                    { id: 2, title: 'Deduction: Propositional Logic & Syllogisms', subtitle: 'Guaranteed Truth Through Structure', videoId: null },
+                    { id: 3, title: 'Induction, Evidence & Strength', subtitle: 'From Specific to General', videoId: null },
+                    { id: 4, title: 'Probabilistic Thinking & Bayes', subtitle: 'Navigating Uncertainty', videoId: null },
+                    { id: 5, title: 'Cognitive Biases & Debiasing', subtitle: 'Overcoming Mental Shortcuts', videoId: null },
+                    { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning', videoId: null },
+                    { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning', videoId: null },
+                    { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking', videoId: null }
                 ],
                 // Translations for course content
                 translations: {
@@ -2528,6 +2530,12 @@
                 // Process markdown to hide answers and make resources clickable
                 html = processModuleContent(html, moduleId);
 
+                // Check if module has video
+                const moduleVideoId = module.videoId || null;
+                const videoSection = moduleVideoId && typeof VideoPlayer !== 'undefined' 
+                    ? renderVideoInModule(moduleVideoId, moduleId)
+                    : '';
+                
                 contentArea.innerHTML = `
                     <div class="module-header">
                         <h1 class="module-title">${module.title}</h1>
@@ -2537,13 +2545,34 @@
                             <button class="btn btn-secondary" onclick="downloadModule(${moduleId})">Download PDF</button>
                         </div>
                     </div>
+                    ${videoSection}
                     <div class="module-content">${html}</div>
+                    <div id="forumContainer-${moduleId}" class="module-forum"></div>
                     ${moduleId === 1 ? `<div id="reviewsContainer"></div>` : ''}
                     <div class="nav-buttons">
                         ${moduleId > 1 ? `<button class="btn btn-secondary" onclick="loadModule(${moduleId - 1})">← Previous Module</button>` : '<div></div>'}
                         ${moduleId < state.totalModules ? `<button class="btn btn-primary" onclick="loadModule(${moduleId + 1})">Next Module →</button>` : '<button class="btn btn-success" onclick="completeCourse()">Complete Course ✓</button>'}
                     </div>
                 `;
+                
+                // Load video if module has one
+                if (moduleVideoId && typeof VideoPlayer !== 'undefined') {
+                    setTimeout(() => {
+                        VideoPlayer.embedYouTube(moduleVideoId, `video-container-${moduleId}`, {
+                            autoplay: false,
+                            controls: true,
+                            modestbranding: true,
+                            showRelated: false
+                        });
+                    }, 100);
+                }
+                
+                // Load forum for this module
+                if (typeof ForumManager !== 'undefined') {
+                    setTimeout(() => {
+                        renderForum(state.currentCourseId, moduleId, `forumContainer-${moduleId}`);
+                    }, 100);
+                }
                 
                 // Load and render reviews if on first module
                 if (moduleId === 1 && typeof ReviewManager !== 'undefined') {

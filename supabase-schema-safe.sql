@@ -99,6 +99,37 @@ CREATE TABLE IF NOT EXISTS public.course_reviews (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Forum Threads
+CREATE TABLE IF NOT EXISTS public.forum_threads (
+  id TEXT PRIMARY KEY,
+  course_id TEXT NOT NULL,
+  module_id TEXT,
+  title TEXT NOT NULL,
+  author_id TEXT NOT NULL,
+  author_name TEXT,
+  post_count INTEGER DEFAULT 1,
+  view_count INTEGER DEFAULT 0,
+  upvotes INTEGER DEFAULT 0,
+  is_pinned BOOLEAN DEFAULT FALSE,
+  is_locked BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Forum Posts
+CREATE TABLE IF NOT EXISTS public.forum_posts (
+  id TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL,
+  author_id TEXT NOT NULL,
+  author_name TEXT,
+  content TEXT NOT NULL,
+  upvotes INTEGER DEFAULT 0,
+  is_answer BOOLEAN DEFAULT FALSE,
+  parent_post_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Enable Row Level Security (idempotent - safe to run multiple times)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_progress ENABLE ROW LEVEL SECURITY;
@@ -108,6 +139,8 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.friends ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.course_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.forum_threads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.forum_posts ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist (for idempotency)
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
@@ -175,6 +208,42 @@ CREATE POLICY "Users can update own reviews" ON public.course_reviews
 
 CREATE POLICY "Users can delete own reviews" ON public.course_reviews
   FOR DELETE USING (auth.uid()::text = user_id);
+
+-- Forum Threads Policies: Anyone can view, authenticated users can create/update own
+DROP POLICY IF EXISTS "Anyone can view forum threads" ON public.forum_threads;
+DROP POLICY IF EXISTS "Users can create threads" ON public.forum_threads;
+DROP POLICY IF EXISTS "Users can update own threads" ON public.forum_threads;
+DROP POLICY IF EXISTS "Users can delete own threads" ON public.forum_threads;
+
+CREATE POLICY "Anyone can view forum threads" ON public.forum_threads
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can create threads" ON public.forum_threads
+  FOR INSERT WITH CHECK (auth.uid()::text = author_id);
+
+CREATE POLICY "Users can update own threads" ON public.forum_threads
+  FOR UPDATE USING (auth.uid()::text = author_id);
+
+CREATE POLICY "Users can delete own threads" ON public.forum_threads
+  FOR DELETE USING (auth.uid()::text = author_id);
+
+-- Forum Posts Policies: Anyone can view, authenticated users can create/update own
+DROP POLICY IF EXISTS "Anyone can view forum posts" ON public.forum_posts;
+DROP POLICY IF EXISTS "Users can create posts" ON public.forum_posts;
+DROP POLICY IF EXISTS "Users can update own posts" ON public.forum_posts;
+DROP POLICY IF EXISTS "Users can delete own posts" ON public.forum_posts;
+
+CREATE POLICY "Anyone can view forum posts" ON public.forum_posts
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can create posts" ON public.forum_posts
+  FOR INSERT WITH CHECK (auth.uid()::text = author_id);
+
+CREATE POLICY "Users can update own posts" ON public.forum_posts
+  FOR UPDATE USING (auth.uid()::text = author_id);
+
+CREATE POLICY "Users can delete own posts" ON public.forum_posts
+  FOR DELETE USING (auth.uid()::text = author_id);
 
 -- Function to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
