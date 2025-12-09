@@ -2955,10 +2955,16 @@
         }
 
         function openProfileModal() {
-            document.getElementById('profileModal').classList.add('show');
+            const modal = document.getElementById('profileModal');
+            modal.classList.add('show');
             document.getElementById('profileName').value = user.name;
             document.getElementById('profileEmail').value = user.email;
             document.getElementById('profileDropdown').classList.remove('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         }
 
         function closeProfileModal() {
@@ -2999,7 +3005,21 @@
             }
             
             document.getElementById('certificatesContent').innerHTML = CertificateManager.renderCertificatesModal();
-            document.getElementById('certificatesModal').classList.add('show');
+            const certificatesModal = document.getElementById('certificatesModal');
+            certificatesModal.classList.add('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                } else {
+                    certificatesModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
             
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) {
@@ -3029,7 +3049,21 @@
             }
             
             document.getElementById('profileEditContent').innerHTML = UserProfileManager.renderEditProfileModal();
-            document.getElementById('profileEditModal').classList.add('show');
+            const profileEditModal = document.getElementById('profileEditModal');
+            profileEditModal.classList.add('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                } else {
+                    profileEditModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
             
             // Add character counter for bio
             setTimeout(() => {
@@ -3428,7 +3462,21 @@
         });
 
         function openLoginModal() {
-            document.getElementById('loginModal').classList.add('show');
+            const loginModal = document.getElementById('loginModal');
+            loginModal.classList.add('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                } else {
+                    loginModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         }
 
         // Simple password-based authentication (client-side only)

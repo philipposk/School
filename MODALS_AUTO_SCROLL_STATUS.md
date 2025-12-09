@@ -39,15 +39,39 @@
    - **File:** `js/gdpr-compliance.js`
    - **Status:** Already working - scrolls to center
 
+8. ✅ **Friends Modal** (`openFriendsModal`)
+   - **File:** `index.html`
+   - **Status:** Already working - scrolls to center
+
+---
+
+## ✅ ALSO FIXED - Additional Modals
+
+8. ✅ **Login Modal** (`openLoginModal`)
+   - **File:** `index.html`
+   - **Status:** FIXED - Now scrolls to center
+
+9. ✅ **Profile Modal** (`openProfileModal`)
+   - **File:** `index.html`
+   - **Status:** FIXED - Now scrolls to center
+
+10. ✅ **Certificates Modal** (`viewCertificates`)
+    - **File:** `index.html`
+    - **Status:** FIXED - Now scrolls to center
+
+11. ✅ **Profile Edit Modal** (`openProfileEditModal`)
+    - **File:** `index.html`
+    - **Status:** FIXED - Now scrolls to center
+
 ---
 
 ## 📋 Summary
 
-**Total Modals:** 7  
-**Fixed:** 3 (Review, Chat, Assignment Submission)  
-**Already Working:** 4 (Search, Messaging, Assignments, GDPR)
+**Total Modals:** 11  
+**Fixed:** 7 (Review, Chat, Assignment Submission, Login, Profile, Certificates, Profile Edit)  
+**Already Working:** 4 (Search, Messaging, Assignments, GDPR, Friends)
 
-**All modals now auto-scroll when opened!** ✅
+**ALL modals now auto-scroll when opened!** ✅
 
 ---
 
