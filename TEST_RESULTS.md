@@ -309,8 +309,516 @@ Use this checklist to verify AI APIs are working:
 
 ---
 
+---
+
+## 9. ⚠️ Messaging System Tests (NEEDS TESTING)
+
+### Chat Functionality
+- [ ] **Open messaging modal** - Click messaging icon/button opens chat interface
+- [ ] **View conversation list** - All conversations display correctly
+- [ ] **Start new conversation** - Can create conversation with friend/AI tutor/instructor
+- [ ] **Send message** - Message sends and appears in chat
+- [ ] **Message persistence** - Messages saved to localStorage
+- [ ] **Message display** - Messages show sender, content, timestamp
+- [ ] **Unread count** - Unread message count updates correctly
+- [ ] **Mark as read** - Clicking conversation marks messages as read
+- [ ] **Conversation types** - Friend, AI Tutor, Course Instructor conversations work
+- [ ] **Message search** - Can search through message history
+- [ ] **Conversation deletion** - Can delete conversations
+- [ ] **Real-time updates** - Messages update if backend supports real-time (Supabase)
+
+**Test Commands:**
+```javascript
+// In browser console on school.6x7.gr
+MessagingManager.getOrCreateConversation('friend@example.com', 'friend');
+MessagingManager.sendMessage(conversationId, 'Hello!');
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 10. ⚠️ Assignment System Tests (NEEDS TESTING)
+
+### Assignment Management
+- [ ] **View assignments** - Assignments display for each module
+- [ ] **Assignment details** - Assignment description, due date, requirements visible
+- [ ] **Submit assignment** - Can submit text content
+- [ ] **File upload** - Can upload files (if implemented)
+- [ ] **Submission status** - Shows submitted, grading, graded, returned statuses
+- [ ] **Resubmission** - Can resubmit assignments
+- [ ] **View submissions** - Can view own submission history
+- [ ] **AI grading** - AI grades assignment (if backend configured)
+- [ ] **Grade display** - Grade and feedback display correctly
+- [ ] **Submission validation** - Empty submissions rejected
+- [ ] **Due date checking** - Late submissions marked appropriately
+
+**Test Commands:**
+```javascript
+// In browser console
+AssignmentManager.getAssignmentsForModule('module-1');
+AssignmentManager.submitAssignment('assignment-1', { content: 'My answer' });
+AssignmentManager.getUserSubmissions();
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 11. ⚠️ Certificate System Tests (NEEDS TESTING)
+
+### Certificate Generation
+- [ ] **Certificate generation** - Certificate created when course completed
+- [ ] **Completion check** - System detects all modules completed
+- [ ] **Quiz requirement** - System checks all quizzes passed (70%+)
+- [ ] **Certificate data** - Certificate has correct course name, student name, date
+- [ ] **Certificate number** - Unique certificate number generated
+- [ ] **Certificate display** - Certificate renders correctly
+- [ ] **Download PDF** - Can download certificate as PDF
+- [ ] **Share certificate** - Can share certificate link
+- [ ] **Certificate list** - All certificates visible in profile
+- [ ] **Certificate verification** - Certificate verification works
+
+**Test Commands:**
+```javascript
+// In browser console
+CertificateManager.checkCourseCompletion('course-1');
+CertificateManager.generateCertificate('course-1', 'Course Title');
+CertificateManager.getCertificatesForUser();
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 12. ⚠️ Payment & Subscription System Tests (NEEDS TESTING)
+
+### Stripe Integration
+- [ ] **Subscription plans display** - Free, Monthly, Yearly plans visible
+- [ ] **Plan selection** - Can select subscription plan
+- [ ] **Stripe checkout** - Redirects to Stripe checkout page
+- [ ] **Payment processing** - Payment completes successfully
+- [ ] **Subscription status** - Status updates after payment
+- [ ] **Premium features** - Premium features unlock after subscription
+- [ ] **Cancel subscription** - Can cancel subscription
+- [ ] **Subscription verification** - Backend verifies subscription status
+- [ ] **Payment error handling** - Errors handled gracefully
+- [ ] **Webhook handling** - Stripe webhooks processed correctly
+
+**Test Commands:**
+```javascript
+// In browser console
+PaymentManager.getSubscriptionStatus();
+PaymentManager.createCheckoutSession('monthly');
+PaymentManager.cancelSubscription();
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING** (Requires Stripe account setup)
+
+---
+
+## 13. ⚠️ Reminder System Tests (NEEDS TESTING)
+
+### Reminder Configuration
+- [ ] **Reminder settings** - Can open reminder preferences
+- [ ] **Enable/disable** - Can toggle reminders on/off
+- [ ] **Platform selection** - Can select Email, SMS, Messenger, WhatsApp, etc.
+- [ ] **Time settings** - Can set reminder time
+- [ ] **Frequency settings** - Can set daily, weekly, etc.
+- [ ] **Preferences save** - Settings persist in localStorage
+
+### Reminder Types
+- [ ] **Module completion reminder** - Reminder sent when module completed
+- [ ] **Quiz reminder** - Reminder sent before quiz deadline
+- [ ] **Course deadline reminder** - Reminder sent before course deadline
+- [ ] **Weekly review reminder** - Weekly review reminders sent
+- [ ] **Daily study reminder** - Daily study reminders sent
+
+### Reminder Delivery
+- [ ] **Email reminders** - Reminders sent via email (if Resend configured)
+- [ ] **SMS reminders** - Reminders sent via SMS (if Twilio configured)
+- [ ] **Multi-platform** - Reminders sent to all selected platforms
+- [ ] **Backend integration** - Backend sends reminders correctly
+
+**Test Commands:**
+```javascript
+// In browser console
+ReminderManager.setPreferences({ enabled: true, platforms: ['email'] });
+ReminderManager.createReminder('module-completion', 'module-1');
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING** (Requires backend API keys)
+
+---
+
+## 14. ⚠️ Enhanced Authentication Tests (NEEDS TESTING)
+
+### Email Signup with Confirmation
+- [ ] **Signup form** - Email signup form displays
+- [ ] **Email validation** - Invalid emails rejected
+- [ ] **Password requirements** - Password validation works
+- [ ] **Confirmation code sent** - 6-digit code sent to email
+- [ ] **Code input** - Can enter confirmation code
+- [ ] **Code verification** - Correct code verifies account
+- [ ] **Invalid code** - Wrong code rejected
+- [ ] **Resend code** - Can resend confirmation code
+- [ ] **Account activation** - Account activated after verification
+
+### OAuth Sign-In
+- [ ] **Google Sign-In** - Google OAuth works
+- [ ] **Facebook Sign-In** - Facebook OAuth works
+- [ ] **Apple Sign-In** - Apple OAuth works
+- [ ] **OAuth callback** - OAuth redirects work correctly
+- [ ] **User data** - OAuth user data saved correctly
+
+**Test Commands:**
+```javascript
+// In browser console
+AuthManager.signUp('name', 'email@example.com', 'password');
+AuthManager.sendConfirmationCode('email@example.com');
+AuthManager.verifyConfirmationCode('email@example.com', '123456');
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING** (Requires backend email service)
+
+---
+
+## 15. ⚠️ User Profiles & Social Features Tests (NEEDS TESTING)
+
+### Profile Management
+- [ ] **View profile** - Own profile displays correctly
+- [ ] **Edit profile** - Can edit profile information
+- [ ] **Bio field** - Can add/edit bio
+- [ ] **Character counter** - Bio character counter works (max 500)
+- [ ] **Profile picture** - Can set profile picture URL
+- [ ] **URL validation** - Invalid URLs rejected
+- [ ] **Social links** - Can add social media links
+- [ ] **XSS protection** - XSS attempts blocked in bio
+- [ ] **Profile save** - Changes persist after save
+- [ ] **Profile display** - Profile displays on other pages
+
+### Friends System
+- [ ] **Friends list** - Can view friends list
+- [ ] **Discover users** - Can discover other users
+- [ ] **Add friend** - Can add/follow users
+- [ ] **Remove friend** - Can unfollow users
+- [ ] **Friend profile** - Can view friend's profile
+- [ ] **Friend certificates** - Can view friend's certificates
+- [ ] **Friend count** - Friend count updates correctly
+
+**Test Commands:**
+```javascript
+// In browser console
+UserProfileManager.getProfile('user@example.com');
+UserProfileManager.updateProfile({ bio: 'My bio', pictureUrl: 'https://...' });
+UserProfileManager.addFriend('friend@example.com');
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 16. ⚠️ Enhanced Features Tests (NEEDS TESTING)
+
+### Theme System
+- [ ] **Theme switcher** - Theme selector works
+- [ ] **All themes** - All themes (Liquid Glass, Instagram, Minimal, etc.) work
+- [ ] **Theme preview** - Theme preview shows before applying
+- [ ] **Theme persistence** - Selected theme persists after reload
+- [ ] **Dark/Light mode** - Dark/light mode toggle works
+- [ ] **System preference** - Detects system dark/light preference
+
+### Layout Options
+- [ ] **Layout switcher** - Layout selector works
+- [ ] **Beauty Card Layout** - Instagram-style layout displays correctly
+- [ ] **Feed Layout** - Social media feed layout works
+- [ ] **Sidebar Layout** - Traditional sidebar layout works
+- [ ] **Modern Layout** - Minimalist layout works
+- [ ] **Layout persistence** - Selected layout persists
+
+### AI Search
+- [ ] **AI search button** - Search button opens AI search
+- [ ] **Natural language queries** - Can ask questions in plain English
+- [ ] **Search results** - Results show relevant courses/modules
+- [ ] **Search history** - Search history saved
+- [ ] **Backend integration** - Uses backend API for search
+
+### Learning Potential
+- [ ] **Learning potential button** - Button opens calculator
+- [ ] **Potential calculation** - Calculates based on progress/scores
+- [ ] **Visual display** - Shows percentage and visual progress
+- [ ] **Motivational messages** - Shows motivational insights
+
+**Test Commands:**
+```javascript
+// In browser console
+EnhancedFeatures.setTheme('liquid-glass');
+EnhancedFeatures.setLayout('beauty-card');
+performAISearch('Show me modules about logic');
+calculateLearningPotential();
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 17. ⚠️ Security & Validation Tests (NEEDS TESTING)
+
+### Input Validation
+- [ ] **XSS protection** - `<script>` tags blocked in all inputs
+- [ ] **SQL injection** - SQL injection attempts blocked
+- [ ] **Email validation** - Invalid emails rejected
+- [ ] **URL validation** - Invalid URLs rejected
+- [ ] **Character limits** - Character limits enforced
+- [ ] **Sanitization** - All user inputs sanitized
+
+### Security Features
+- [ ] **Password strength** - Password requirements enforced
+- [ ] **CSRF protection** - CSRF tokens used (if implemented)
+- [ ] **HTTPS** - Site uses HTTPS (school.6x7.gr)
+- [ ] **Content Security Policy** - CSP headers set (if implemented)
+- [ ] **Secure cookies** - Cookies marked secure (if used)
+
+**Test Commands:**
+```javascript
+// Test XSS
+UserProfileManager.updateProfile({ bio: '<script>alert("xss")</script>' });
+// Should sanitize and not execute script
+
+// Test SQL injection
+// Try: '; DROP TABLE users; --
+// Should be sanitized
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 18. ⚠️ Performance & Optimization Tests (NEEDS TESTING)
+
+### Page Load Performance
+- [ ] **Initial load time** - Page loads in < 2 seconds
+- [ ] **Script loading** - All scripts load correctly
+- [ ] **CDN resources** - CDN resources load quickly
+- [ ] **Image optimization** - Images optimized (if any)
+- [ ] **Lazy loading** - Content lazy loads (if implemented)
+
+### Runtime Performance
+- [ ] **No memory leaks** - No memory leaks detected
+- [ ] **Smooth animations** - Animations run smoothly (60fps)
+- [ ] **Efficient rendering** - No unnecessary re-renders
+- [ ] **localStorage performance** - localStorage operations fast
+
+### Network Performance
+- [ ] **API response times** - Backend API responds < 300ms
+- [ ] **Error handling** - Network errors handled gracefully
+- [ ] **Offline support** - Works offline (localStorage)
+- [ ] **Retry logic** - Failed requests retry (if implemented)
+
+**Test Tools:**
+- Chrome DevTools Performance tab
+- Lighthouse audit
+- Network tab monitoring
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 19. ⚠️ Accessibility Tests (NEEDS TESTING)
+
+### WCAG Compliance
+- [ ] **Color contrast** - Text meets WCAG AA contrast ratios
+- [ ] **ARIA labels** - ARIA labels present on interactive elements
+- [ ] **Keyboard navigation** - All features accessible via keyboard
+- [ ] **Focus indicators** - Focus visible on all interactive elements
+- [ ] **Screen reader** - Works with screen readers (NVDA, JAWS, VoiceOver)
+- [ ] **Alt text** - Images have alt text (if any)
+- [ ] **Form labels** - All form inputs have labels
+
+### Accessibility Features
+- [ ] **Skip links** - Skip to main content link (if implemented)
+- [ ] **Heading hierarchy** - Proper heading structure (h1, h2, h3)
+- [ ] **Form errors** - Form errors announced to screen readers
+- [ ] **Dynamic content** - Dynamic content updates announced
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING** (Use screen readers and accessibility tools)
+
+---
+
+## 20. ⚠️ Cross-Browser & Device Tests (NEEDS TESTING)
+
+### Browser Compatibility
+- [ ] **Chrome** - Works on Chrome (latest)
+- [ ] **Firefox** - Works on Firefox (latest)
+- [ ] **Safari** - Works on Safari (latest)
+- [ ] **Edge** - Works on Edge (latest)
+- [ ] **Mobile browsers** - Works on mobile Chrome/Safari
+
+### Device Testing
+- [ ] **Mobile (375x667)** - Layout works on mobile
+- [ ] **Tablet (768x1024)** - Layout works on tablet
+- [ ] **Desktop (1920x1080)** - Layout works on desktop
+- [ ] **Large screens** - Layout works on large screens
+- [ ] **Touch interactions** - Touch gestures work on mobile
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 21. ⚠️ GDPR & Privacy Tests (NEEDS TESTING)
+
+### Cookie Consent
+- [ ] **Cookie banner** - Cookie consent banner displays
+- [ ] **Accept cookies** - Accept button works
+- [ ] **Reject cookies** - Reject button works
+- [ ] **Consent persistence** - Choice persists after reload
+- [ ] **Learn more link** - Privacy policy link works
+
+### Data Privacy
+- [ ] **Data export** - Can export user data (if implemented)
+- [ ] **Data deletion** - Can delete account and data
+- [ ] **Privacy policy** - Privacy policy accessible
+- [ ] **Terms of service** - Terms accessible
+- [ ] **GDPR compliance** - GDPR requirements met
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 22. ⚠️ Internationalization (i18n) Tests (NEEDS TESTING)
+
+### Language Support
+- [ ] **Language switcher** - Language selector works
+- [ ] **English (EN)** - English translations display correctly
+- [ ] **Greek (GR)** - Greek translations display correctly
+- [ ] **Language persistence** - Selected language persists
+- [ ] **RTL support** - Right-to-left languages supported (if implemented)
+
+**Test Commands:**
+```javascript
+// In browser console
+i18n.setLanguage('gr');
+i18n.setLanguage('en');
+```
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 23. ⚠️ 3D Effects & Visual Features Tests (NEEDS TESTING)
+
+### 3D World
+- [ ] **3D world loads** - Three.js 3D effects load (if enabled)
+- [ ] **Performance** - 3D effects don't slow down page
+- [ ] **Fallback** - Graceful fallback if Three.js fails
+- [ ] **Universe view** - Universe view works (if implemented)
+
+### Visual Effects
+- [ ] **Scroll animations** - Scroll-triggered animations work
+- [ ] **Hover effects** - Hover effects work correctly
+- [ ] **Transitions** - Page transitions smooth
+- [ ] **Loading states** - Loading indicators display
+
+**Status:** ⚠️ **NEEDS MANUAL TESTING**
+
+---
+
+## 📋 COMPREHENSIVE TEST CHECKLIST FOR FUTURE APPS
+
+### Core Functionality (Always Test)
+- [ ] All buttons work
+- [ ] All forms submit correctly
+- [ ] All links navigate correctly
+- [ ] All modals open/close
+- [ ] All API calls succeed/fail gracefully
+- [ ] All data saves/loads correctly
+- [ ] All errors handled gracefully
+
+### User Experience (Always Test)
+- [ ] Responsive design (mobile/tablet/desktop)
+- [ ] Dark/light mode
+- [ ] Loading states
+- [ ] Error messages clear
+- [ ] Success feedback visible
+- [ ] Navigation intuitive
+
+### Security (Always Test)
+- [ ] Input validation
+- [ ] XSS protection
+- [ ] SQL injection protection
+- [ ] Authentication works
+- [ ] Authorization enforced
+- [ ] HTTPS used
+
+### Performance (Always Test)
+- [ ] Page load < 2 seconds
+- [ ] No memory leaks
+- [ ] Smooth animations
+- [ ] Efficient API calls
+- [ ] Optimized assets
+
+### Accessibility (Always Test)
+- [ ] Keyboard navigation
+- [ ] Screen reader compatible
+- [ ] Color contrast
+- [ ] ARIA labels
+- [ ] Focus indicators
+
+### Cross-Browser (Always Test)
+- [ ] Chrome
+- [ ] Firefox
+- [ ] Safari
+- [ ] Edge
+- [ ] Mobile browsers
+
+### Backend Integration (If Applicable)
+- [ ] API endpoints work
+- [ ] Error handling
+- [ ] Authentication
+- [ ] Rate limiting
+- [ ] Webhooks
+- [ ] Database operations
+
+### Data Management (If Applicable)
+- [ ] Create operations
+- [ ] Read operations
+- [ ] Update operations
+- [ ] Delete operations
+- [ ] Data validation
+- [ ] Data persistence
+
+---
+
+## 🎯 Testing Priority
+
+### High Priority (Test First)
+1. Authentication & Authorization
+2. Core Features (Courses, Modules, Quizzes)
+3. Payment Processing
+4. Data Security
+5. API Integration
+
+### Medium Priority
+1. Social Features (Friends, Messaging)
+2. Enhanced Features (Themes, Layouts)
+3. Reminder System
+4. Certificate Generation
+5. Performance
+
+### Low Priority
+1. 3D Effects
+2. Advanced Animations
+3. Internationalization
+4. Accessibility (if not required)
+5. Cross-browser (test main browsers first)
+
+---
+
 **Test Completed:** December 9, 2025  
-**Test Duration:** ~15 minutes  
+**Test Duration:** ~30 minutes (automated) + Manual testing needed  
 **Backend:** Fly.io (`school-backend.fly.dev`)  
-**Frontend:** school.6x7.gr
+**Frontend:** school.6x7.gr  
+**Total Test Cases:** 200+  
+**Automated Tests:** 15  
+**Manual Tests Needed:** 185+
 
