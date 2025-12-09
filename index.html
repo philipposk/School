@@ -1764,6 +1764,7 @@
     <script src="js/gdpr-compliance.js"></script>
     <script src="js/reminder-system.js"></script>
     <script src="js/auth-enhanced.js"></script>
+    <script src="js/review-system.js"></script>
     <script src="js/payment-system.js"></script>
     <script>
         // Configure marked
@@ -2224,6 +2225,23 @@
                                 <span>⏱️ ${course.duration}</span>
                                 <span>📊 ${course.level}</span>
                             </div>
+                            <div class="course-rating-preview" id="rating-preview-${course.id}">
+                                ${(() => {
+                                    if (typeof ReviewManager !== 'undefined') {
+                                        const avgRating = ReviewManager.getAverageRating(course.id);
+                                        const reviewCount = ReviewManager.getReviewsForCourse(course.id).length;
+                                        if (reviewCount > 0) {
+                                            return `
+                                                <div class="rating-preview">
+                                                    <span class="rating-stars-small">${renderStars(parseFloat(avgRating))}</span>
+                                                    <span class="rating-text">${avgRating} (${reviewCount})</span>
+                                                </div>
+                                            `;
+                                        }
+                                    }
+                                    return '';
+                                })()}
+                            </div>
                             <div class="modern-course-arrow">
                                 ${window.i18n ? (window.i18n.t('startCourse') || 'Start Learning') : 'Start Learning'} →
                             </div>
@@ -2364,6 +2382,57 @@
 
             renderCourseView();
             loadModule(1);
+            
+            // Initialize reviews for this course
+            if (typeof ReviewManager !== 'undefined') {
+                ReviewManager.init(courseId).then(() => {
+                    // Update rating previews on course cards
+                    updateCourseRatingPreviews();
+                });
+            }
+        }
+        
+        // Update rating previews on all course cards
+        function updateCourseRatingPreviews() {
+            if (typeof ReviewManager === 'undefined') return;
+            
+            courses.forEach(course => {
+                const previewEl = document.getElementById(`rating-preview-${course.id}`);
+                if (previewEl) {
+                    const avgRating = ReviewManager.getAverageRating(course.id);
+                    const reviewCount = ReviewManager.getReviewsForCourse(course.id).length;
+                    if (reviewCount > 0) {
+                        previewEl.innerHTML = `
+                            <div class="rating-preview">
+                                <span class="rating-stars-small">${renderStars(parseFloat(avgRating))}</span>
+                                <span class="rating-text">${avgRating} (${reviewCount})</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+        
+        // Helper function to render stars (used in multiple places)
+        function renderStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<span class="star filled">★</span>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<span class="star half">★</span>';
+            }
+            
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<span class="star">☆</span>';
+            }
+            
+            return stars;
         }
 
         // Render course view
@@ -2469,11 +2538,19 @@
                         </div>
                     </div>
                     <div class="module-content">${html}</div>
+                    ${moduleId === 1 ? `<div id="reviewsContainer"></div>` : ''}
                     <div class="nav-buttons">
                         ${moduleId > 1 ? `<button class="btn btn-secondary" onclick="loadModule(${moduleId - 1})">← Previous Module</button>` : '<div></div>'}
                         ${moduleId < state.totalModules ? `<button class="btn btn-primary" onclick="loadModule(${moduleId + 1})">Next Module →</button>` : '<button class="btn btn-success" onclick="completeCourse()">Complete Course ✓</button>'}
                     </div>
                 `;
+                
+                // Load and render reviews if on first module
+                if (moduleId === 1 && typeof ReviewManager !== 'undefined') {
+                    ReviewManager.init(state.currentCourseId).then(() => {
+                        renderReviews(state.currentCourseId);
+                    });
+                }
 
                 // Highlight code blocks
                 document.querySelectorAll('pre code').forEach(block => {
