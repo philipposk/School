@@ -55,6 +55,36 @@ try {
     console.warn('Stripe module not installed. Run: npm install stripe');
 }
 
+// Root endpoint - API information
+app.get('/', (req, res) => {
+    res.json({
+        name: 'School Platform Backend API',
+        version: '1.0.0',
+        status: 'running',
+        endpoints: {
+            health: '/health',
+            ai: {
+                groq: '/api/ai/groq',
+                openai: '/api/ai/openai'
+            },
+            notifications: {
+                email: '/api/notifications/email',
+                sms: '/api/notifications/sms',
+                send: '/api/notifications/send'
+            },
+            payments: {
+                createCheckout: '/api/payments/create-checkout',
+                verifyPayment: '/api/payments/verify-payment',
+                cancelSubscription: '/api/payments/cancel-subscription'
+            },
+            config: {
+                supabase: '/api/config/supabase'
+            }
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
