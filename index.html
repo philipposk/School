@@ -1750,18 +1750,21 @@
     <script src="js/i18n.js"></script>
     <script src="js/security.js"></script>
     <script src="js/ai-config.js"></script>
-    <script src="js/supabase-client.js"></script>
+    <script src="js/supabase-client.js?v=2.2"></script>
     <script src="js/migration-to-supabase.js"></script>
     <script src="js/enhanced-features.js"></script>
     <script src="js/3d-world.js"></script>
     <script src="js/universe-view.js"></script>
     <script src="js/certificates.js"></script>
     <script src="js/user-profiles.js"></script>
-    <script src="js/scroll-header.js"></script>
+    <script src="js/scroll-header.js?v=2.0"></script>
     <script src="js/resizable-panels.js"></script>
     <script src="js/messaging.js"></script>
     <script src="js/assignments.js"></script>
     <script src="js/gdpr-compliance.js"></script>
+    <script src="js/reminder-system.js"></script>
+    <script src="js/auth-enhanced.js"></script>
+    <script src="js/payment-system.js"></script>
     <script>
         // Configure marked
         marked.setOptions({
@@ -2423,6 +2426,10 @@
             renderCourseView();
             
             const contentArea = document.getElementById('content');
+            if (!contentArea) {
+                console.error('Content area not found');
+                return;
+            }
             contentArea.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading module...</p></div>';
 
             try {
@@ -2592,33 +2599,66 @@
             const moduleKey = `${state.currentCourseId}-${moduleId}`;
             
             currentQuiz.questions.forEach((q, idx) => {
+                // Show explanation for this question
                 const explanation = document.getElementById(`explanation_${idx}`);
-                explanation.classList.add('show');
+                if (explanation) {
+                    explanation.classList.add('show');
+                } else {
+                    console.warn(`Explanation element not found for question ${idx + 1}`);
+                }
                 
                 if (q.type === 'multiple_choice') {
                     const selected = quizAnswers[idx];
                     const correct = q.correct_answer;
-                    const optionEl = document.getElementById(`q${idx}_opt${selected}`);
                     
-                    if (selected === correct) {
-                        score++;
-                        if (optionEl) {
-                            optionEl.classList.add('correct');
-                        }
-                    } else {
-                        if (optionEl) {
-                            optionEl.classList.add('incorrect');
-                        }
-                        const correctEl = document.getElementById(`q${idx}_opt${correct}`);
-                        if (correctEl) {
-                            correctEl.classList.add('correct');
+                    if (selected !== undefined) {
+                        const optionEl = document.getElementById(`q${idx}_opt${selected}`);
+                        
+                        if (selected === correct) {
+                            score++;
+                            if (optionEl) {
+                                optionEl.classList.add('correct');
+                            }
+                        } else {
+                            if (optionEl) {
+                                optionEl.classList.add('incorrect');
+                            }
+                            const correctEl = document.getElementById(`q${idx}_opt${correct}`);
+                            if (correctEl) {
+                                correctEl.classList.add('correct');
+                            }
                         }
                     }
                 } else {
-                    const answer = document.getElementById(`answer_${idx}`).value.toLowerCase().trim();
-                    const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
-                    if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
-                        score++;
+                    const answerInput = document.getElementById(`answer_${idx}`);
+                    if (answerInput) {
+                        const answer = answerInput.value.toLowerCase().trim();
+                        // Disable input after submission to preserve answer
+                        answerInput.disabled = true;
+                        answerInput.style.backgroundColor = 'var(--hover-bg)';
+                        answerInput.style.cursor = 'not-allowed';
+                        
+                        // Add visual indicator showing submitted answer
+                        const submittedAnswer = answerInput.value;
+                        if (submittedAnswer) {
+                            const answerDisplay = document.createElement('div');
+                            answerDisplay.className = 'submitted-answer';
+                            answerDisplay.style.cssText = 'margin-top: 0.5rem; padding: 0.5rem; background: var(--card); border-radius: 4px; font-style: italic; color: var(--text-light);';
+                            answerDisplay.textContent = `Your answer: ${submittedAnswer}`;
+                            answerInput.parentNode.insertBefore(answerDisplay, answerInput.nextSibling);
+                        }
+                        
+                        const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
+                        if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
+                            score++;
+                            if (answerInput) {
+                                answerInput.style.borderColor = 'var(--success)';
+                            }
+                        } else {
+                            if (answerInput) {
+                                answerInput.style.borderColor = 'var(--error)';
+                            }
+                        }
                     }
                 }
             });
@@ -3350,7 +3390,7 @@
                 </div>
             `;
             
-            form.onsubmit = (e) => {
+            form.onsubmit = async (e) => {
                 e.preventDefault();
                 const name = document.getElementById('signupName').value.trim();
                 const email = document.getElementById('signupEmail').value.trim().toLowerCase();
@@ -3367,6 +3407,27 @@
                     return;
                 }
                 
+                // Use AuthManager for email confirmation (if available)
+                if (typeof AuthManager !== 'undefined') {
+                    try {
+                        const result = await AuthManager.signUpWithEmail(email, password, name);
+                        
+                        if (result.requiresVerification) {
+                            // Show confirmation code input
+                            showEmailConfirmationForm(email);
+                        } else {
+                            // No verification needed (shouldn't happen for email signup)
+                            alert('Account created! Please sign in.');
+                            showLoginForm();
+                        }
+                    } catch (error) {
+                        console.error('Signup error:', error);
+                        alert(error.message || 'Sign up failed. Please try again.');
+                    }
+                    return;
+                }
+                
+                // Fallback: Old method if AuthManager not available
                 // Check if user already exists
                 const users = JSON.parse(localStorage.getItem('users') || '{}');
                 if (users[email]) {
@@ -3450,6 +3511,27 @@
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">Sign In</button>
                 </div>
+                
+                <!-- OAuth Buttons -->
+                <div style="margin: 1.5rem 0; text-align: center;">
+                    <div style="display: flex; align-items: center; margin: 1rem 0;">
+                        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                        <span style="padding: 0 1rem; color: var(--text-light); font-size: 0.875rem;">or</span>
+                        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button type="button" class="btn" onclick="handleGoogleSignIn()" style="background: white; color: #333; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>🔵</span> Sign in with Google
+                        </button>
+                        <button type="button" class="btn" onclick="handleFacebookSignIn()" style="background: #1877F2; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>👥</span> Sign in with Facebook
+                        </button>
+                        <button type="button" class="btn" onclick="handleAppleSignIn()" style="background: #000; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>🍎</span> Sign in with Apple
+                        </button>
+                    </div>
+                </div>
+                
                 <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
                     Don't have an account? <a href="#" onclick="event.preventDefault(); showSignUpForm();" style="color: var(--theme-primary);">Sign up</a>
                 </p>
@@ -3541,9 +3623,144 @@
             };
         }
 
+        // Email Confirmation Functions
+        function showEmailConfirmationForm(email) {
+            const form = document.getElementById('loginForm');
+            form.innerHTML = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem;">📧 Check Your Email</h3>
+                    <p style="color: var(--text-light); font-size: 0.875rem;">
+                        We sent a 6-digit confirmation code to<br>
+                        <strong>${email}</strong>
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmation Code</label>
+                    <input type="text" class="form-input" id="confirmationCode" placeholder="Enter 6-digit code" required maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: bold;">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="showSignUpForm()">Back</button>
+                    <button type="button" class="btn btn-primary" onclick="verifyEmailCode('${email}')">Verify Email</button>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                    Didn't receive code? <a href="#" onclick="event.preventDefault(); resendConfirmationCode('${email}');" style="color: var(--theme-primary);">Resend</a>
+                </p>
+            `;
+        }
+
+        async function verifyEmailCode(email) {
+            const code = document.getElementById('confirmationCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                alert('Please enter the 6-digit confirmation code');
+                return;
+            }
+            
+            if (typeof AuthManager === 'undefined') {
+                alert('Authentication system not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const result = await AuthManager.verifyEmail(email, code);
+                
+                if (result.success) {
+                    // Account created and verified
+                    user = result.user;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                        UserProfileManager.initDefaultFriends();
+                    }
+                    
+                    document.getElementById('loginModal').classList.remove('show');
+                    updateUserDisplay();
+                    
+                    if (state.currentCourseId) {
+                        renderCourseView();
+                    }
+                    
+                    alert('✅ Email verified! Account created successfully.');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                alert(error.message || 'Verification failed. Please try again.');
+            }
+        }
+
+        async function resendConfirmationCode(email) {
+            if (typeof AuthManager === 'undefined') {
+                alert('Authentication system not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const result = await AuthManager.resendConfirmationCode(email);
+                alert('✅ Confirmation code resent! Please check your email.');
+            } catch (error) {
+                console.error('Resend error:', error);
+                alert(error.message || 'Failed to resend code. Please try again.');
+            }
+        }
+
+        // OAuth Sign In Handlers
+        async function handleGoogleSignIn() {
+            try {
+                if (typeof AuthManager === 'undefined') {
+                    alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await AuthManager.signInWithGoogle();
+                // OAuth redirects, so this may not execute
+                console.log('Google sign in initiated');
+            } catch (error) {
+                console.error('Google sign in error:', error);
+                alert(error.message || 'Google sign in failed. Please try again.');
+            }
+        }
+
+        async function handleFacebookSignIn() {
+            try {
+                if (typeof AuthManager === 'undefined') {
+                    alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await AuthManager.signInWithFacebook();
+                // OAuth redirects, so this may not execute
+                console.log('Facebook sign in initiated');
+            } catch (error) {
+                console.error('Facebook sign in error:', error);
+                alert(error.message || 'Facebook sign in failed. Please try again.');
+            }
+        }
+
+        async function handleAppleSignIn() {
+            try {
+                if (typeof AuthManager === 'undefined') {
+                    alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await AuthManager.signInWithApple();
+                // OAuth redirects, so this may not execute
+                console.log('Apple sign in initiated');
+            } catch (error) {
+                console.error('Apple sign in error:', error);
+                alert(error.message || 'Apple sign in failed. Please try again.');
+            }
+        }
+
         // Make functions globally accessible
         window.showSignUpForm = showSignUpForm;
         window.showLoginForm = showLoginForm;
+        window.showEmailConfirmationForm = showEmailConfirmationForm;
+        window.verifyEmailCode = verifyEmailCode;
+        window.resendConfirmationCode = resendConfirmationCode;
+        window.handleGoogleSignIn = handleGoogleSignIn;
+        window.handleFacebookSignIn = handleFacebookSignIn;
+        window.handleAppleSignIn = handleAppleSignIn;
         
         // Initialize test account (for development/testing)
         function initTestAccount() {

@@ -1,36 +1,199 @@
 // Supabase Client Configuration
 // This file initializes Supabase and provides helper functions
-
-// Initialize Supabase client
-// Replace these with your actual Supabase credentials
-const SUPABASE_URL = localStorage.getItem('supabase_url') || '';
-const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+// Version: 2.2 - Fixed library loading and ReferenceError issues
+console.log('🔧 Supabase Client v2.2 loaded');
 
 // Load Supabase JS library dynamically
 let supabaseClient = null;
+let supabaseLibPromise = null;
+
+// Helper function to get credentials dynamically (not at file load time)
+function getSupabaseCredentials() {
+    return {
+        url: localStorage.getItem('supabase_url') || '',
+        key: localStorage.getItem('supabase_anon_key') || ''
+    };
+}
+
+// Helper to get Supabase library from window object only (safe - NO direct supabase reference)
+function getSupabaseLib() {
+    try {
+        if (typeof window === 'undefined') return null;
+        
+        // Check window.supabase first (most common) - SAFE: only checks window property
+        if (window.supabase && typeof window.supabase === 'object' && typeof window.supabase.createClient === 'function') {
+            return window.supabase;
+        }
+        
+        // Check alternative names - SAFE: only window properties
+        if (window.supabaseJs && typeof window.supabaseJs === 'object' && typeof window.supabaseJs.createClient === 'function') {
+            return window.supabaseJs;
+        }
+        
+        if (window.Supabase && typeof window.Supabase === 'object' && typeof window.Supabase.createClient === 'function') {
+            return window.Supabase;
+        }
+        
+        // NEVER check global 'supabase' directly - causes ReferenceError if not defined
+        return null;
+    } catch (e) {
+        console.error('Error checking for Supabase library:', e);
+        return null;
+    }
+}
+
+// Load Supabase library - returns a promise that resolves to the library
+function loadSupabaseLibrary() {
+    // Return existing promise if already loading
+    if (supabaseLibPromise) {
+        return supabaseLibPromise;
+    }
+    
+    // Check if already loaded
+    const existingLib = getSupabaseLib();
+    if (existingLib) {
+        supabaseLibPromise = Promise.resolve(existingLib);
+        return supabaseLibPromise;
+    }
+    
+    // Check if script already exists
+    const existingScript = document.querySelector('script[data-supabase-loader="true"]');
+    if (existingScript) {
+        // Script already loading/loaded, wait for it
+        supabaseLibPromise = new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 50; // 5 seconds total
+            
+            const checkSupabase = () => {
+                attempts++;
+                const lib = getSupabaseLib();
+                
+                if (lib) {
+                    resolve(lib);
+                } else if (attempts < maxAttempts) {
+                    setTimeout(checkSupabase, 100);
+                } else {
+                    console.error('❌ Supabase library not available after waiting');
+                    resolve(null);
+                }
+            };
+            
+            checkSupabase();
+        });
+        return supabaseLibPromise;
+    }
+    
+    // Load the library
+    supabaseLibPromise = new Promise((resolve) => {
+        // Try ES module import first (more reliable and modern)
+        if (typeof window !== 'undefined' && window.dynamicImportSupported !== false) {
+            // Use dynamic import for ES modules
+            import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/+esm')
+                .then((module) => {
+                    // Store module on window for compatibility
+                    if (typeof window !== 'undefined') {
+                        window.__supabaseModule = module;
+                    }
+                    resolve(module);
+                })
+                .catch((error) => {
+                    console.warn('ES module import failed, trying UMD:', error);
+                    loadUMD(resolve);
+                });
+        } else {
+            // No import support, use UMD
+            loadUMD(resolve);
+        }
+        
+        function loadUMD(resolveFn) {
+            const script = document.createElement('script');
+            script.setAttribute('data-supabase-loader', 'true');
+            // Use specific version for stability
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
+            script.async = true;
+            script.type = 'text/javascript';
+            
+            script.onload = () => {
+                // Wait for library to initialize - check multiple times
+                let attempts = 0;
+                const maxAttempts = 50;
+                
+                const checkSupabase = () => {
+                    attempts++;
+                    const lib = getSupabaseLib();
+                    
+                    if (lib) {
+                        resolveFn(lib);
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(checkSupabase, 100);
+                    } else {
+                        console.error('❌ Supabase library loaded but createClient not found after', maxAttempts, 'attempts');
+                        console.log('Available window properties:', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')));
+                        resolveFn(null);
+                    }
+                };
+                
+                // Start checking after a short delay
+                setTimeout(checkSupabase, 100);
+            };
+            
+            script.onerror = () => {
+                console.error('❌ Failed to load Supabase library from CDN');
+                resolveFn(null);
+            };
+            
+            document.head.appendChild(script);
+        }
+    });
+    
+    return supabaseLibPromise;
+}
 
 async function initSupabase() {
     if (supabaseClient) return supabaseClient;
     
-    // Check if Supabase is already loaded
-    if (typeof supabase !== 'undefined') {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        return supabaseClient;
+    // Get credentials dynamically each time
+    const credentials = getSupabaseCredentials();
+    
+    if (!credentials.url || !credentials.key) {
+        console.warn('Supabase credentials not configured. Set supabase_url and supabase_anon_key in localStorage or Settings.');
+        return null;
     }
     
-    // Load Supabase JS library
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    script.type = 'module';
-    document.head.appendChild(script);
-    
-    // Wait for Supabase to load
-    return new Promise((resolve) => {
-        script.onload = () => {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            resolve(supabaseClient);
-        };
-    });
+    try {
+        // Load the Supabase library
+        const lib = await loadSupabaseLibrary();
+        
+        if (!lib) {
+            console.error('❌ Failed to load Supabase library');
+            return null;
+        }
+        
+        // Handle ES module vs UMD
+        let createClient;
+        if (lib.createClient) {
+            // ES module
+            createClient = lib.createClient;
+        } else if (typeof lib === 'object' && lib.default && lib.default.createClient) {
+            // ES module with default export
+            createClient = lib.default.createClient;
+        } else if (typeof lib === 'function') {
+            // UMD - lib is the createClient function
+            createClient = lib;
+        } else {
+            console.error('❌ Unable to find createClient in Supabase library');
+            return null;
+        }
+        
+        // Create the client
+        supabaseClient = createClient(credentials.url, credentials.key);
+        console.log('✅ Supabase client created successfully');
+        return supabaseClient;
+        
+    } catch (error) {
+        console.error('❌ Error initializing Supabase:', error);
+        return null;
+    }
 }
 
 // Supabase Manager - handles all database operations
@@ -358,10 +521,21 @@ const SupabaseManager = {
 // Export
 window.SupabaseManager = SupabaseManager;
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => SupabaseManager.init());
-} else {
-    SupabaseManager.init();
-}
+// Auto-initialize when DOM is ready (with error handling)
+(function() {
+    const safeInit = async () => {
+        try {
+            await SupabaseManager.init();
+        } catch (error) {
+            console.warn('Supabase auto-initialization failed (this is OK if credentials are not set):', error.message);
+        }
+    };
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', safeInit);
+    } else {
+        // Small delay to ensure all scripts are loaded
+        setTimeout(safeInit, 100);
+    }
+})();
 

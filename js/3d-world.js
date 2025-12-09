@@ -12,6 +12,18 @@ const ThreeDWorld = {
     selectedCourse: null,
     isAnimating: false,
     container: null,
+    torchLight: null,
+    torchPointLight: null,
+    groundLevel: 0,
+    isWalking: false,
+    wasFlying: false,
+    sounds: {
+        wind: null,
+        walking: null,
+        music: null,
+        muted: false
+    },
+    audioContext: null,
     
     init() {
         // Check if Three.js is available
@@ -41,8 +53,10 @@ const ThreeDWorld = {
         this.createLandscape();
         this.loadCourses();
         this.setupInteraction();
+        this.setupAudio();
         this.animate();
         this.addUI();
+        this.addSoundControls();
         
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize());
@@ -77,10 +91,17 @@ const ThreeDWorld = {
             this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
             this.controls.enableDamping = true;
             this.controls.dampingFactor = 0.05;
-            this.controls.minDistance = 20;
+            this.controls.minDistance = 2; // Can get closer to ground
             this.controls.maxDistance = 500;
             this.controls.maxPolarAngle = Math.PI / 2.2;
             this.controls.enablePan = true;
+            
+            // Custom update function to handle ground collision and walking
+            const originalUpdate = this.controls.update.bind(this.controls);
+            this.controls.update = () => {
+                originalUpdate();
+                this.handleCameraMovement();
+            };
         } else {
             // Fallback: load OrbitControls from CDN
             const script = document.createElement('script');
@@ -89,22 +110,101 @@ const ThreeDWorld = {
                 this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
                 this.controls.enableDamping = true;
                 this.controls.dampingFactor = 0.05;
-                this.controls.minDistance = 20;
+                this.controls.minDistance = 2;
                 this.controls.maxDistance = 500;
                 this.controls.maxPolarAngle = Math.PI / 2.2;
                 this.controls.enablePan = true;
+                
+                const originalUpdate = this.controls.update.bind(this.controls);
+                this.controls.update = () => {
+                    originalUpdate();
+                    this.handleCameraMovement();
+                };
             };
             document.head.appendChild(script);
         }
     },
     
+    handleCameraMovement() {
+        const cameraHeight = this.camera.position.y;
+        const distanceToGround = cameraHeight - this.groundLevel;
+        
+        // Slow down as approaching ground
+        if (distanceToGround < 30 && distanceToGround > 2) {
+            const slowdownFactor = Math.max(0.3, distanceToGround / 30);
+            this.controls.dampingFactor = 0.05 * slowdownFactor;
+        } else {
+            this.controls.dampingFactor = 0.05;
+        }
+        
+        // Prevent going below ground - land and start walking
+        if (cameraHeight < this.groundLevel + 2) {
+            this.camera.position.y = this.groundLevel + 2; // Eye level when walking
+            if (!this.isWalking) {
+                this.isWalking = true;
+                this.wasFlying = cameraHeight > this.groundLevel + 10;
+                this.onLand();
+            }
+        } else if (cameraHeight > this.groundLevel + 5) {
+            if (this.isWalking) {
+                this.isWalking = false;
+                this.onTakeoff();
+            }
+        }
+        
+        // Update sounds based on movement state
+        this.updateMovementSounds();
+    },
+    
+    onLand() {
+        // Stop wind sound, start walking sound
+        if (this.sounds.wind) {
+            this.sounds.wind.pause();
+        }
+        if (this.sounds.walking && !this.sounds.muted) {
+            this.sounds.walking.loop = true;
+            this.sounds.walking.play().catch(e => console.log('Walking sound play failed:', e));
+        }
+    },
+    
+    onTakeoff() {
+        // Start wind sound, stop walking sound
+        if (this.sounds.walking) {
+            this.sounds.walking.pause();
+        }
+        if (this.sounds.wind && !this.sounds.muted) {
+            this.sounds.wind.loop = true;
+            this.sounds.wind.play().catch(e => console.log('Wind sound play failed:', e));
+        }
+    },
+    
+    updateMovementSounds() {
+        if (this.sounds.muted) return;
+        
+        const cameraHeight = this.camera.position.y;
+        const distanceToGround = cameraHeight - this.groundLevel;
+        
+        // Adjust wind volume based on height
+        if (this.sounds.wind && !this.isWalking) {
+            const windVolume = Math.min(1, Math.max(0, (distanceToGround - 5) / 50));
+            this.sounds.wind.volume = windVolume * 0.3; // Not annoying
+        }
+        
+        // Adjust walking sound based on movement speed
+        if (this.sounds.walking && this.isWalking) {
+            const movementSpeed = Math.abs(this.camera.position.x) + Math.abs(this.camera.position.z);
+            const walkVolume = Math.min(1, movementSpeed / 10) * 0.4;
+            this.sounds.walking.volume = walkVolume;
+        }
+    },
+    
     setupLights() {
-        // Ambient light - brighter for better card visibility
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        // Ambient light - dimmer to allow torch effect
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         this.scene.add(ambientLight);
         
-        // Directional light (sun) - brighter
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        // Directional light (sun) - dimmer
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         directionalLight.position.set(50, 100, 50);
         directionalLight.castShadow = true;
         directionalLight.shadow.mapSize.width = 2048;
@@ -117,10 +217,10 @@ const ThreeDWorld = {
         directionalLight.shadow.camera.bottom = -100;
         this.scene.add(directionalLight);
         
-        // Point lights for atmosphere - brighter and more colorful
+        // Point lights for atmosphere - dimmer
         const colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0xf9ca24, 0x667eea, 0x764ba2];
         colors.forEach((color, i) => {
-            const light = new THREE.PointLight(color, 1.0, 150);
+            const light = new THREE.PointLight(color, 0.4, 150);
             const angle = (i / colors.length) * Math.PI * 2;
             light.position.set(
                 Math.cos(angle) * 80,
@@ -129,6 +229,20 @@ const ThreeDWorld = {
             );
             this.scene.add(light);
         });
+        
+        // Torch light - follows camera (user holding torch)
+        // Use SpotLight for more realistic torch beam effect
+        this.torchLight = new THREE.SpotLight(0xffaa66, 3.0, 100, Math.PI / 6, 0.3, 2);
+        this.torchLight.position.copy(this.camera.position);
+        this.torchLight.castShadow = true;
+        this.torchLight.shadow.mapSize.width = 1024;
+        this.torchLight.shadow.mapSize.height = 1024;
+        this.scene.add(this.torchLight);
+        
+        // Add a helper point light for additional illumination
+        this.torchPointLight = new THREE.PointLight(0xffaa66, 1.5, 60);
+        this.torchPointLight.position.copy(this.camera.position);
+        this.scene.add(this.torchPointLight);
     },
     
     createLandscape() {
@@ -245,13 +359,17 @@ const ThreeDWorld = {
         ctx.strokeText(course.icon, 512, 220);
         ctx.fillText(course.icon, 512, 220);
         
-        // Add title - larger and with shadow
+        // Add title - shortened if too long, with different border color
+        let displayTitle = course.title;
+        if (displayTitle.length > 20) {
+            displayTitle = displayTitle.substring(0, 17) + '...';
+        }
         ctx.font = 'bold 48px Arial';
         ctx.fillStyle = '#ffffff';
-        const titleLines = this.wrapText(ctx, course.title, 800);
+        const titleLines = this.wrapText(ctx, displayTitle, 800);
         titleLines.forEach((line, i) => {
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.lineWidth = 6;
+            ctx.strokeStyle = 'rgba(100, 150, 255, 0.9)'; // Blue border, different from text
+            ctx.lineWidth = 8;
             ctx.strokeText(line, 512, 380 + i * 60);
             ctx.fillText(line, 512, 380 + i * 60);
         });
@@ -618,6 +736,30 @@ const ThreeDWorld = {
             this.controls.update();
         }
         
+        // Update torch light to follow camera (user holding torch)
+        if (this.torchLight && this.camera) {
+            // Position torch slightly in front and below camera
+            const direction = new THREE.Vector3();
+            this.camera.getWorldDirection(direction);
+            
+            // Update spotlight position and target
+            this.torchLight.position.copy(this.camera.position);
+            this.torchLight.position.add(direction.multiplyScalar(3));
+            this.torchLight.position.y -= 1.5; // Slightly below camera
+            
+            // Point spotlight in camera direction
+            const target = new THREE.Vector3();
+            target.copy(this.camera.position);
+            target.add(direction.multiplyScalar(50));
+            this.torchLight.target.position.copy(target);
+            this.torchLight.target.updateMatrixWorld();
+            
+            // Update point light position
+            if (this.torchPointLight) {
+                this.torchPointLight.position.copy(this.torchLight.position);
+            }
+        }
+        
         // Animate course cards (gentle floating) - ensure they stay above ground
         this.courseObjects.forEach((obj, i) => {
             const time = Date.now() * 0.001;
@@ -638,7 +780,164 @@ const ThreeDWorld = {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     },
     
+    setupAudio() {
+        // Initialize audio context
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.warn('Web Audio API not supported');
+        }
+        
+        // Base path for audio files - adjust based on your file structure
+        const audioBasePath = '../../Sonniss.com - GDC 2024 - Game Audio Bundle/';
+        
+        // Create audio elements with fallback handling
+        const createAudio = (src, volume, loop = true) => {
+            const audio = new Audio();
+            audio.volume = volume;
+            audio.loop = loop;
+            audio.preload = 'auto';
+            
+            // Try to load the audio file
+            audio.src = audioBasePath + src;
+            
+            // Handle errors gracefully - create silent fallback
+            audio.addEventListener('error', () => {
+                console.warn('Audio file not found:', src, '- using silent fallback');
+                // Create a very short silent audio as fallback
+                audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OSdTgwOUKzn8LZjGwY4kdfyzHksBSR3x/DdkEAKFF606euoVRQKRp/g8r5sIQUqgc7y2Yk2CBtpvfDknU4MDlCs5/C2YxsGOJHX8sx5LAUkd8fw3ZBAC';
+            });
+            
+            return audio;
+        };
+        
+        // Wind sound - subtle wind loop
+        this.sounds.wind = createAudio(
+            'Pole Position - Wind In Trees/Wind - Oak - Calm - Close - Inside Canopy - XY - MKH8060.wav',
+            0.2
+        );
+        
+        // Walking sound - forest ambience for walking
+        this.sounds.walking = createAudio(
+            'InMotionAudio - The Forest/AMBForst_Forest04_InMotionAudio_TheForestSamples.wav',
+            0.3
+        );
+        
+        // Background music - light ambient music
+        this.sounds.music = createAudio(
+            'InMotionAudio - The Forest/AMBForst_Forest08_InMotionAudio_TheForestSamples.wav',
+            0.15
+        );
+        
+        // Start background music if not muted (after user interaction)
+        // Music will start when user first interacts with the page
+        document.addEventListener('click', () => {
+            if (!this.sounds.muted && this.sounds.music && this.sounds.music.paused) {
+                this.sounds.music.play().catch(e => console.log('Music play failed:', e));
+            }
+        }, { once: true });
+    },
+    
+    addSoundControls() {
+        // Create sound control UI
+        const soundControls = document.createElement('div');
+        soundControls.id = '3d-sound-controls';
+        soundControls.style.cssText = `
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        `;
+        
+        // Volume slider
+        const volumeSlider = document.createElement('input');
+        volumeSlider.type = 'range';
+        volumeSlider.min = '0';
+        volumeSlider.max = '100';
+        volumeSlider.value = '50';
+        volumeSlider.style.cssText = 'width: 100px; cursor: pointer;';
+        volumeSlider.oninput = (e) => {
+            const volume = e.target.value / 100;
+            if (this.sounds.wind) this.sounds.wind.volume = volume * 0.3;
+            if (this.sounds.walking) this.sounds.walking.volume = volume * 0.4;
+            if (this.sounds.music) this.sounds.music.volume = volume * 0.15;
+        };
+        
+        // Mute button
+        const muteButton = document.createElement('button');
+        muteButton.innerHTML = '🔊';
+        muteButton.style.cssText = `
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        muteButton.onclick = () => {
+            this.sounds.muted = !this.sounds.muted;
+            muteButton.innerHTML = this.sounds.muted ? '🔇' : '🔊';
+            
+            if (this.sounds.muted) {
+                if (this.sounds.wind) this.sounds.wind.pause();
+                if (this.sounds.walking) this.sounds.walking.pause();
+                if (this.sounds.music) this.sounds.music.pause();
+            } else {
+                if (this.sounds.music) {
+                    this.sounds.music.play().catch(e => console.log('Music play failed:', e));
+                }
+                if (!this.isWalking && this.sounds.wind) {
+                    this.sounds.wind.play().catch(e => console.log('Wind play failed:', e));
+                }
+                if (this.isWalking && this.sounds.walking) {
+                    this.sounds.walking.play().catch(e => console.log('Walking play failed:', e));
+                }
+            }
+        };
+        
+        soundControls.appendChild(volumeSlider);
+        soundControls.appendChild(muteButton);
+        this.container.appendChild(soundControls);
+    },
+    
     destroy() {
+        // Stop all sounds
+        if (this.sounds.wind) {
+            this.sounds.wind.pause();
+            this.sounds.wind = null;
+        }
+        if (this.sounds.walking) {
+            this.sounds.walking.pause();
+            this.sounds.walking = null;
+        }
+        if (this.sounds.music) {
+            this.sounds.music.pause();
+            this.sounds.music = null;
+        }
+        
+        // Remove torch lights
+        if (this.torchLight) {
+            this.scene.remove(this.torchLight);
+            this.torchLight.dispose();
+        }
+        if (this.torchPointLight) {
+            this.scene.remove(this.torchPointLight);
+            this.torchPointLight.dispose();
+        }
+        
         if (this.renderer) {
             this.renderer.dispose();
         }

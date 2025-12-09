@@ -39,6 +39,9 @@ const UniverseView = {
     walkingSpeed: 0,
     groundLevel: 100, // Planet radius
     moduleRegions: [], // Module regions within course countries
+    walkingSounds: [], // Array of footstep audio files
+    currentWalkingSoundIndex: 0,
+    walkingSoundInterval: null,
     
     init() {
         // Add roundRect polyfill if not available
@@ -185,25 +188,38 @@ const UniverseView = {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             this.audioContext = new AudioContext();
             
-            // Load sounds (using placeholder paths - will need actual audio files)
-            // Wind sound for flying
-            this.sounds.wind = new Audio();
+            // Load sounds from actual audio files
+            // Paths are relative to the School directory where index.html is served from
+            const basePath = 'sounds/';
+            
+            // Wind sound for flying - calm, not annoying
+            this.sounds.wind = new Audio(basePath + 'wind/wind-calm.wav');
             this.sounds.wind.loop = true;
-            this.sounds.wind.volume = 0.3;
+            this.sounds.wind.volume = 0.25; // Lower volume for calm wind
+            this.sounds.wind.preload = 'auto';
             
-            // Walking sound
-            this.sounds.walking = new Audio();
-            this.sounds.walking.loop = true;
-            this.sounds.walking.volume = 0.4;
+            // Walking sound - create array of footstep files for variety
+            this.walkingSounds = [];
+            for (let i = 1; i <= 10; i++) {
+                const footstep = new Audio(basePath + `footsteps/Player_Footstep_${String(i).padStart(2, '0')}.wav`);
+                footstep.volume = 0.35;
+                footstep.preload = 'auto';
+                this.walkingSounds.push(footstep);
+            }
+            this.currentWalkingSoundIndex = 0;
+            this.walkingSoundInterval = null;
             
-            // Ambient music
-            this.sounds.ambient = new Audio();
+            // Ambient music - light background sound
+            // Using quiet room ambience for subtle background
+            this.sounds.ambient = new Audio(basePath + 'ambient/ambient-quiet.wav');
             this.sounds.ambient.loop = true;
-            this.sounds.ambient.volume = 0.2;
+            this.sounds.ambient.volume = 0.15; // Very light
+            this.sounds.ambient.preload = 'auto';
             
-            // Landing sound
-            this.sounds.landing = new Audio();
-            this.sounds.landing.volume = 0.5;
+            // Landing sound - use a subtle impact or whoosh
+            this.sounds.landing = new Audio(basePath + 'landing/landing-whoosh.wav');
+            this.sounds.landing.volume = 0.4;
+            this.sounds.landing.preload = 'auto';
         } catch (e) {
             console.warn('Audio not supported:', e);
             this.soundEnabled = false;
@@ -240,14 +256,53 @@ const UniverseView = {
             this.controls.enableZoom = false;
         }
         
-        // Play walking sound
-        if (this.soundEnabled && this.sounds.walking) {
-            this.sounds.walking.play().catch(e => console.warn('Walking sound failed:', e));
+        // Start alternating walking sounds
+        if (this.soundEnabled && this.walkingSounds && this.walkingSounds.length > 0) {
+            this.startWalkingSounds();
         }
         
         // Stop wind sound
         if (this.sounds.wind) {
             this.sounds.wind.pause();
+        }
+    },
+    
+    startWalkingSounds() {
+        // Play alternating footstep sounds
+        if (this.walkingSoundInterval) {
+            clearInterval(this.walkingSoundInterval);
+        }
+        
+        const playFootstep = () => {
+            if (!this.isWalking || !this.soundEnabled) {
+                clearInterval(this.walkingSoundInterval);
+                return;
+            }
+            
+            const footstep = this.walkingSounds[this.currentWalkingSoundIndex];
+            if (footstep) {
+                footstep.currentTime = 0; // Reset to start
+                footstep.play().catch(e => {});
+                this.currentWalkingSoundIndex = (this.currentWalkingSoundIndex + 1) % this.walkingSounds.length;
+            }
+        };
+        
+        // Play first footstep immediately
+        playFootstep();
+        
+        // Then play at walking pace (every 0.5 seconds)
+        this.walkingSoundInterval = setInterval(playFootstep, 500);
+    },
+    
+    stopWalkingSounds() {
+        if (this.walkingSoundInterval) {
+            clearInterval(this.walkingSoundInterval);
+            this.walkingSoundInterval = null;
+        }
+        if (this.walkingSounds) {
+            this.walkingSounds.forEach(sound => {
+                if (sound) sound.pause();
+            });
         }
     },
     
@@ -261,12 +316,64 @@ const UniverseView = {
             this.controls.enableZoom = true;
         }
         
-        // Stop walking sound, start wind sound
-        if (this.sounds.walking) {
-            this.sounds.walking.pause();
-        }
+        // Stop walking sounds, start wind sound
+        this.stopWalkingSounds();
         if (this.soundEnabled && this.sounds.wind && this.camera.position.length() > 200) {
             this.sounds.wind.play().catch(e => console.warn('Wind sound failed:', e));
+        }
+    },
+    
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        
+        if (!this.soundEnabled) {
+            // Pause all sounds
+            Object.values(this.sounds).forEach(sound => {
+                if (sound && sound.pause) sound.pause();
+            });
+            this.stopWalkingSounds();
+        } else {
+            // Resume appropriate sounds based on current state
+            const distance = this.camera.position.length();
+            if (this.isWalking && this.walkingSounds) {
+                this.startWalkingSounds();
+            } else if (distance > 200 && this.sounds.wind) {
+                this.sounds.wind.play().catch(e => console.warn('Wind sound failed:', e));
+            }
+            if (this.sounds.ambient) {
+                this.sounds.ambient.play().catch(e => console.warn('Ambient sound failed:', e));
+            }
+        }
+    },
+    
+    updateSounds() {
+        if (!this.soundEnabled) return;
+        
+        const distance = this.camera.position.length();
+        
+        // Wind sound when flying (far from ground)
+        if (this.sounds.wind && distance > 200 && !this.isWalking) {
+            if (this.sounds.wind.paused) {
+                this.sounds.wind.play().catch(e => {});
+            }
+            // Adjust volume based on speed/distance
+            const speed = this.travelSpeed || 0;
+            this.sounds.wind.volume = Math.min(0.3, 0.15 + (speed / 100) * 0.15);
+        } else if (this.sounds.wind) {
+            this.sounds.wind.pause();
+        }
+        
+        // Walking sounds are handled by startWalkingSounds/stopWalkingSounds
+        
+        // Ambient music - light background
+        if (this.sounds.ambient && distance < 500) {
+            if (this.sounds.ambient.paused) {
+                this.sounds.ambient.play().catch(e => {});
+            }
+            // Fade in as you get closer
+            this.sounds.ambient.volume = Math.min(0.2, (500 - distance) / 500 * 0.2);
+        } else if (this.sounds.ambient) {
+            this.sounds.ambient.pause();
         }
     },
     

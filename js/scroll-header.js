@@ -64,7 +64,7 @@ const ScrollHeaderManager = {
         `;
         document.body.appendChild(sidebar);
         this.sidebar = sidebar;
-        console.log('ScrollHeaderManager: Sidebar created and appended to body');
+        // Sidebar created successfully
     },
     
     handleScroll() {
@@ -106,7 +106,7 @@ const ScrollHeaderManager = {
             return;
         }
         
-        console.log('ScrollHeaderManager: animateHeader called, scrolled:', scrolled);
+        // Animate header based on scroll state
         
         if (scrolled) {
             // Ensure sidebar exists
@@ -122,7 +122,7 @@ const ScrollHeaderManager = {
             }
             
             // Create buttons directly in sidebar
-            console.log('Creating', this.headerButtons.length, 'buttons in sidebar');
+            // Creating buttons in sidebar
             this.headerButtons.forEach((btn, index) => {
                 // Create a fresh button element instead of cloning
                 const clone = document.createElement('button');
@@ -148,14 +148,14 @@ const ScrollHeaderManager = {
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    background: rgba(255, 255, 255, 0.95) !important;
-                    backdrop-filter: blur(10px) !important;
-                    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+                    background: transparent !important;
+                    backdrop-filter: none !important;
+                    border: none !important;
                     cursor: pointer !important;
                     pointer-events: auto !important;
                     opacity: 1 !important;
                     visibility: visible !important;
-                    transition: transform 0.3s ease, background 0.3s ease !important;
+                    transition: transform 0.3s ease !important;
                     font-size: 1.2rem !important;
                     box-sizing: border-box !important;
                     flex-shrink: 0 !important;
@@ -173,11 +173,11 @@ const ScrollHeaderManager = {
                 // Hover effect
                 clone.addEventListener('mouseenter', () => {
                     clone.style.setProperty('transform', 'translateX(10px) scale(1.15)', 'important');
-                    clone.style.setProperty('background', 'rgba(255, 255, 255, 1)', 'important');
+                    clone.style.setProperty('background', 'transparent', 'important');
                 });
                 clone.addEventListener('mouseleave', () => {
                     clone.style.setProperty('transform', 'translateX(0) scale(1)', 'important');
-                    clone.style.setProperty('background', 'rgba(255, 255, 255, 0.95)', 'important');
+                    clone.style.setProperty('background', 'transparent', 'important');
                 });
                 
                 if (this.sidebar) {
@@ -185,7 +185,7 @@ const ScrollHeaderManager = {
                     // Force reflow to ensure button is rendered
                     clone.offsetHeight;
                     const rect = clone.getBoundingClientRect();
-                    console.log('Button', index, 'appended to sidebar, size:', rect.width, 'x', rect.height, 'at', rect.left, rect.top);
+                    // Button appended to sidebar
                 } else {
                     console.error('Sidebar is null!');
                 }
@@ -193,7 +193,7 @@ const ScrollHeaderManager = {
             
             // Show sidebar - make absolutely sure it's visible
             if (this.sidebar) {
-                console.log('ScrollHeaderManager: Showing sidebar, children:', this.sidebar.children.length);
+                // Sidebar shown with buttons
                 
                 // Remove transition temporarily to ensure instant visibility
                 this.sidebar.style.setProperty('transition', 'none', 'important');
@@ -228,30 +228,14 @@ const ScrollHeaderManager = {
                             children: this.sidebar.children.length,
                             inViewport: rect.top >= 0 && rect.left >= 0 && rect.width > 0 && rect.height > 0
                         };
-                        console.log('ScrollHeaderManager: Sidebar state check:', state);
+                        // Sidebar state updated
                         
-                        // Log button positions relative to sidebar
+                        // Button positions calculated (debug logging removed for production)
                         Array.from(this.sidebar.children).forEach((child, idx) => {
                             const childRect = child.getBoundingClientRect();
                             const childComputed = window.getComputedStyle(child);
-                            console.log(`Button ${idx} position:`, {
-                                absolute: {
-                                    x: childRect.left,
-                                    y: childRect.top,
-                                    width: childRect.width,
-                                    height: childRect.height
-                                },
-                                relativeToSidebar: {
-                                    x: childRect.left - rect.left,
-                                    y: childRect.top - rect.top
-                                },
-                                computed: {
-                                    position: childComputed.position,
-                                    transform: childComputed.transform,
-                                    top: childComputed.top,
-                                    left: childComputed.left
-                                }
-                            });
+                            // Position tracking (no console output - position calculated but not logged)
+                            // Position data available if needed for debugging
                         });
                         
                         // If sidebar has 0 size, force it to have size

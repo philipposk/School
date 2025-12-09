@@ -84,6 +84,15 @@ This checklist covers everything **YOU** need to do. All the code is already don
      SUPABASE_URL=https://xxxxx.supabase.co
      SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
      FRONTEND_URL=https://school.6x7.gr
+     
+     # Optional: Messaging Platforms (see MESSAGING_API_KEYS_GUIDE.md)
+     FACEBOOK_PAGE_ACCESS_TOKEN=...
+     WHATSAPP_PHONE_NUMBER_ID=...
+     WHATSAPP_ACCESS_TOKEN=...
+     INSTAGRAM_BUSINESS_ACCOUNT_ID=...
+     VIBER_AUTH_TOKEN=...
+     TELEGRAM_BOT_TOKEN=...
+     DISCORD_WEBHOOK_URL=...
      ```
    - [ ] Click **Save**
 
@@ -150,6 +159,21 @@ This checklist covers everything **YOU** need to do. All the code is already don
   TWILIO_AUTH_TOKEN=...
   TWILIO_PHONE_NUMBER=+1234567890
   ```
+
+### ✅ Messaging Platforms (Optional - Facebook, WhatsApp, Instagram, Viber, Telegram, Discord)
+- [ ] **Facebook Messenger**: See `MESSAGING_API_KEYS_GUIDE.md` for setup
+- [ ] **WhatsApp**: See `MESSAGING_API_KEYS_GUIDE.md` for setup
+- [ ] **Instagram**: See `MESSAGING_API_KEYS_GUIDE.md` for setup
+- [ ] **Viber**: See `MESSAGING_API_KEYS_GUIDE.md` for setup
+- [ ] **Telegram**: See `MESSAGING_API_KEYS_GUIDE.md` for setup
+- [ ] **Discord**: See `MESSAGING_API_KEYS_GUIDE.md` for setup
+
+**Quick Setup Guide**: See `MESSAGING_API_KEYS_GUIDE.md` for detailed instructions on finding and setting up API keys for all messaging platforms.
+
+**Easiest to start with**:
+1. Telegram (5 min) - Create bot with @BotFather
+2. Discord (2 min) - Create webhook
+3. Viber (15 min) - Create public account
 
 ---
 

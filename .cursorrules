@@ -1,0 +1,153 @@
+# Cursor Rules for School Platform
+
+## 🎯 PRIMARY GOAL: Proactive Bug Prevention
+
+**BEFORE writing any code, check COMPREHENSIVE_TEST_SUITE.md for common bug patterns.**
+
+This test suite is designed to PREVENT bugs, not just catch them. When writing code:
+1. Review the "PROACTIVE PREVENTION" section in COMPREHENSIVE_TEST_SUITE.md
+2. Check for anti-patterns before implementing
+3. Use the provided code patterns as templates
+4. Run through the pre-code review checklist
+
+**The test suite should catch bugs BEFORE they happen, not after.**
+
+## 🧪 Testing & Bug Tracking Protocol
+
+### CRITICAL: When Fixing Bugs
+**ALWAYS update COMPREHENSIVE_TEST_SUITE.md when fixing any bug or issue.**
+
+1. **When a bug is reported:**
+   - Fix the bug
+   - Add a test case to COMPREHENSIVE_TEST_SUITE.md that would have caught this bug
+   - Mark the test as a regression test (add note: "Regression test for [bug description]")
+
+2. **Test Coverage Requirements:**
+   - Every bug fix MUST include a test case
+   - Tests should be specific enough to catch the exact issue
+   - Include both positive and negative test cases when applicable
+
+3. **Test Suite Updates:**
+   - Add tests to the appropriate section in COMPREHENSIVE_TEST_SUITE.md
+   - Use clear, actionable test descriptions
+   - Include expected behavior and edge cases
+
+### Example Workflow:
+```
+User reports: "Quiz answers not showing after submission"
+1. Fix the bug (add null checks, display logic)
+2. Add to COMPREHENSIVE_TEST_SUITE.md:
+   - [ ] Quiz answer display: All submitted answers visible after submission
+   - [ ] Quiz answer display: Explanations show for all questions (not just first)
+   - [ ] Quiz answer display: Input fields disabled after submission
+   - [ ] Quiz answer display: Visual feedback (green/red) for correct/incorrect
+3. Mark as: "Regression test for quiz answer display bug"
+```
+
+## 🐛 Known Issues & Test Coverage
+
+### Quiz System
+- ✅ Fixed: Quiz answers not displaying after submission (all questions)
+- ✅ Fixed: Explanations only showing for first question
+- ✅ Fixed: Input fields remaining editable after submission
+
+### Supabase Integration
+- ✅ Fixed: `supabase is not defined` errors
+- ✅ Fixed: Library loading race conditions
+
+### Console Errors
+- ✅ Fixed: Verbose ScrollHeaderManager logging
+- ✅ Fixed: `process is not defined` in payment-system.js
+
+## 📝 Code Quality Standards
+
+1. **Error Handling:**
+   - Always check for null/undefined before accessing properties
+   - Use try-catch for async operations
+   - Provide user-friendly error messages
+
+2. **Console Logging:**
+   - Remove debug logs before production
+   - Use appropriate log levels (console.error, console.warn, console.log)
+   - Don't log sensitive data
+
+3. **DOM Manipulation:**
+   - Always check if element exists before manipulation
+   - Use null checks: `if (element) { ... }`
+   - Handle edge cases (empty arrays, missing data)
+
+## 🔄 Maintenance Protocol
+
+- Update this file when adding new test categories
+- Keep known issues list updated
+- Document patterns that cause bugs
+- Share learnings in test descriptions
+
+## 🛡️ Proactive Code Review Checklist
+
+**BEFORE writing code, check for these common bug patterns:**
+
+### DOM Manipulation Anti-Patterns
+- ❌ **NEVER:** `document.getElementById('id').classList.add('class')` without null check
+- ✅ **ALWAYS:** `const el = document.getElementById('id'); if (el) { el.classList.add('class'); }`
+- ❌ **NEVER:** Accessing `.value` or `.innerHTML` without checking element exists
+- ✅ **ALWAYS:** Check element exists before accessing properties
+
+### Array/Loop Anti-Patterns
+- ❌ **NEVER:** `array.forEach(item => { element.classList.add() })` without null check
+- ✅ **ALWAYS:** Check element exists inside loop before manipulation
+- ❌ **NEVER:** Assuming all elements in array exist in DOM
+- ✅ **ALWAYS:** Verify DOM elements exist before manipulating
+
+### Browser Compatibility Anti-Patterns
+- ❌ **NEVER:** Using `process.env` in browser code
+- ✅ **ALWAYS:** Check `typeof process !== 'undefined'` or use browser alternatives
+- ❌ **NEVER:** Assuming Node.js APIs available in browser
+- ✅ **ALWAYS:** Use browser-compatible APIs or add polyfills
+
+### Library Loading Anti-Patterns
+- ❌ **NEVER:** Accessing global variables before library loads (`supabase.createClient()`)
+- ✅ **ALWAYS:** Check if library exists: `if (window.supabase && window.supabase.createClient)`
+- ❌ **NEVER:** Assuming CDN libraries load synchronously
+- ✅ **ALWAYS:** Use callbacks/promises/async-await for library loading
+
+### Quiz/Form Anti-Patterns
+- ❌ **NEVER:** Only showing first item in loop (explanation, answer, etc.)
+- ✅ **ALWAYS:** Show ALL items, verify loop completes for all indices
+- ❌ **NEVER:** Not disabling inputs after submission
+- ✅ **ALWAYS:** Disable inputs and show submitted values after form submission
+- ❌ **NEVER:** Not displaying user's submitted answers
+- ✅ **ALWAYS:** Show what user submitted alongside correct answer
+
+### Console Logging Anti-Patterns
+- ❌ **NEVER:** Excessive console.log in production code
+- ✅ **ALWAYS:** Use console.warn/error for important messages, remove debug logs
+- ❌ **NEVER:** Logging objects with `[object Object]` (use JSON.stringify)
+- ✅ **ALWAYS:** Log meaningful data or remove logs entirely
+
+## 🔍 Code Review Questions (Check BEFORE Writing Code)
+
+**MANDATORY:** Before writing ANY code, review COMPREHENSIVE_TEST_SUITE.md "PROACTIVE PREVENTION" section and ask:
+
+1. **Are there null checks?** - Every DOM access needs null check
+2. **Do loops handle missing elements?** - What if element doesn't exist?
+3. **Is this browser-compatible?** - No Node.js APIs in browser code
+4. **Are all items processed?** - Not just first item in array
+5. **Is user feedback clear?** - Show what user did, not just results
+6. **Are errors handled gracefully?** - Don't crash on missing elements
+7. **Is library loaded?** - Check if global variable exists before use
+8. **Is console clean?** - Remove debug logs or use appropriate level
+
+**Reference:** See COMPREHENSIVE_TEST_SUITE.md "PROACTIVE PREVENTION" section for code patterns and examples.
+
+## 📋 Pre-Commit Checklist
+
+Before committing code:
+- [ ] All DOM accesses have null checks
+- [ ] Loops handle missing elements gracefully
+- [ ] No Node.js APIs in browser code
+- [ ] All array items processed (not just first)
+- [ ] User feedback shows submitted values
+- [ ] Console logs are appropriate (or removed)
+- [ ] Error handling doesn't break user experience
+

@@ -28,6 +28,10 @@ build/
 .env
 .env.local
 
+# Credentials file
+credentials.json
+.credentials.json
+
 # Temporary files
 *.tmp
 *.temp
