@@ -30,7 +30,7 @@ const ReviewManager = {
             userId: userId,
             userName: userName,
             rating: rating,
-            comment: SecurityUtils.sanitizeText(comment || ''),
+            comment: (SecurityUtils && SecurityUtils.sanitizeText) ? SecurityUtils.sanitizeText(comment || '') : (comment || '').replace(/<[^>]*>/g, '').trim(),
             createdAt: existingIndex >= 0 ? this.reviews[existingIndex].createdAt : new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             helpfulCount: existingIndex >= 0 ? (this.reviews[existingIndex].helpfulCount || 0) : 0,
@@ -509,7 +509,7 @@ function renderReviewCard(review) {
             </div>
             
             ${review.comment ? `
-                <div class="review-comment">${SecurityUtils.escapeHtml(review.comment)}</div>
+                <div class="review-comment">${(SecurityUtils && SecurityUtils.escapeHTML) ? SecurityUtils.escapeHTML(review.comment) : review.comment.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]))}</div>
             ` : ''}
             
             <div class="review-footer">
