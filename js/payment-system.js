@@ -89,7 +89,7 @@ const PaymentManager = {
             return { success: true, plan: 'free' };
         }
         
-        const backendUrl = localStorage.getItem('backend_url') || '';
+        const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
         if (!backendUrl) {
             throw new Error('Backend not configured. Please configure backend URL.');
         }

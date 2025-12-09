@@ -13,7 +13,7 @@ const AuthManager = {
     
     // Send confirmation code via email
     async sendConfirmationCode(email, code) {
-        const backendUrl = localStorage.getItem('backend_url') || '';
+        const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
         if (!backendUrl) {
             console.warn('Backend not configured. Cannot send confirmation code.');
             return false;

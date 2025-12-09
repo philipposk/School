@@ -117,7 +117,7 @@ const ReminderManager = {
         const preferences = this.getPreferences();
         if (!preferences || !preferences.enabled) return;
         
-        const backendUrl = localStorage.getItem('backend_url') || '';
+        const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
         if (!backendUrl) {
             console.warn('Backend URL not configured. Reminders will not be sent.');
             return;

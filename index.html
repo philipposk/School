@@ -3452,7 +3452,7 @@
                             user = { ...data.user, ...profile };
                             
                             // Send welcome email if backend is configured
-                            const backendUrl = localStorage.getItem('backend_url');
+                            const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
                             if (backendUrl) {
                                 fetch(`${backendUrl}/api/notifications/welcome`, {
                                     method: 'POST',
@@ -4062,8 +4062,8 @@
                             </label>
                             <div style="display: flex; gap: 0.5rem;">
                                 <input type="text" id="backendUrlInput" 
-                                       placeholder="https://your-backend.railway.app" 
-                                       value="${localStorage.getItem('backend_url') || ''}"
+                                       placeholder="https://school-backend.fly.dev" 
+                                       value="${localStorage.getItem('backend_url') || 'https://school-backend.fly.dev'}"
                                        style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 0.85rem;"
                                        oninput="document.getElementById('backendUrlStatus').textContent = ''">
                                 <button onclick="saveBackendUrl()" 

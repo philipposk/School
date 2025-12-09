@@ -2,8 +2,8 @@
 // Uses backend proxy if available, falls back to direct API calls with user keys
 
 const AIConfig = {
-    // Backend URL (set via settings or localStorage)
-    backendUrl: localStorage.getItem('backend_url') || '',
+    // Backend URL (set via settings or localStorage, defaults to Fly.io backend)
+    backendUrl: localStorage.getItem('backend_url') || 'https://school-backend.fly.dev',
     
     // API Keys (fallback - user can set these via settings if no backend)
     groqApiKey: localStorage.getItem('groq_api_key') || '',
