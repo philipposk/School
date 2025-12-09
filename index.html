@@ -1767,6 +1767,7 @@
     <script src="js/review-system.js"></script>
     <script src="js/video-player.js"></script>
     <script src="js/forum-system.js"></script>
+    <script src="js/instructor-dashboard.js"></script>
     <script src="js/payment-system.js"></script>
     <script>
         // Configure marked
@@ -2111,6 +2112,30 @@
         }
 
         // Show courses listing with 3D hero
+        function openInstructorDashboard() {
+            if (!user || !user.email) {
+                alert('Please sign in first');
+                return;
+            }
+            
+            // Hide main content and show dashboard
+            const app = document.getElementById('app');
+            if (!app) return;
+            
+            app.innerHTML = `
+                <div class="instructor-dashboard-container">
+                    <div id="instructorDashboard"></div>
+                </div>
+            `;
+            
+            // Initialize and render dashboard
+            if (typeof InstructorDashboard !== 'undefined') {
+                InstructorDashboard.init().then(() => {
+                    renderInstructorDashboard();
+                });
+            }
+        }
+        
         function showCourses() {
             state.currentCourseId = null;
             const app = document.getElementById('app');
@@ -2957,6 +2982,7 @@
                             <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openMessaging === 'function') window.openMessaging(); else console.error('openMessaging not available'); }, 50);">Messages</div>
                             <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openAssignments === 'function') window.openAssignments(); else console.error('openAssignments not available'); }, 50);">Assignments</div>
                             <div class="profile-dropdown-item" onclick="openFriendsModal()">Friends</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); openInstructorDashboard();">🎓 Instructor Dashboard</div>
                             <div class="profile-dropdown-item" onclick="openGDPRSettings()">GDPR & Data</div>
                             <div class="profile-dropdown-item" onclick="logout()">Sign Out</div>
                         </div>

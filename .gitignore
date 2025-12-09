@@ -39,3 +39,4 @@ credentials.json
 backup-old-version/
 API_KEYS_BACKUP.md
 school-3/sounds/**/*.wav
+sounds/**/*.wav

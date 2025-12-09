@@ -9,9 +9,23 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   bio TEXT,
   avatar_url TEXT,
   social_links JSONB DEFAULT '{}',
+  is_instructor BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add is_instructor column if it doesn't exist (for existing tables)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'profiles' 
+        AND column_name = 'is_instructor'
+    ) THEN
+        ALTER TABLE public.profiles ADD COLUMN is_instructor BOOLEAN DEFAULT FALSE;
+    END IF;
+END $$;
 
 -- User progress
 CREATE TABLE IF NOT EXISTS public.user_progress (
@@ -130,6 +144,30 @@ CREATE TABLE IF NOT EXISTS public.forum_posts (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Courses Table (for instructor-created courses)
+CREATE TABLE IF NOT EXISTS public.courses (
+  id TEXT PRIMARY KEY,
+  instructor_id TEXT NOT NULL,
+  instructor_name TEXT,
+  title TEXT NOT NULL,
+  description TEXT,
+  subtitle TEXT,
+  category TEXT DEFAULT 'general',
+  price DECIMAL(10, 2) DEFAULT 0,
+  is_free BOOLEAN DEFAULT TRUE,
+  thumbnail TEXT,
+  level TEXT DEFAULT 'Beginner',
+  duration TEXT DEFAULT '8 weeks',
+  modules INTEGER DEFAULT 8,
+  modules_data JSONB DEFAULT '[]'::jsonb,
+  is_published BOOLEAN DEFAULT FALSE,
+  enrollment_count INTEGER DEFAULT 0,
+  rating DECIMAL(3, 2) DEFAULT 0,
+  review_count INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Enable Row Level Security (idempotent - safe to run multiple times)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_progress ENABLE ROW LEVEL SECURITY;
@@ -141,6 +179,7 @@ ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.course_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.forum_threads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.forum_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist (for idempotency)
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
@@ -244,6 +283,24 @@ CREATE POLICY "Users can update own posts" ON public.forum_posts
 
 CREATE POLICY "Users can delete own posts" ON public.forum_posts
   FOR DELETE USING (auth.uid()::text = author_id);
+
+-- Courses Policies: Anyone can view published courses, instructors can manage own courses
+DROP POLICY IF EXISTS "Anyone can view published courses" ON public.courses;
+DROP POLICY IF EXISTS "Instructors can create courses" ON public.courses;
+DROP POLICY IF EXISTS "Instructors can update own courses" ON public.courses;
+DROP POLICY IF EXISTS "Instructors can delete own courses" ON public.courses;
+
+CREATE POLICY "Anyone can view published courses" ON public.courses
+  FOR SELECT USING (is_published = true OR auth.uid()::text = instructor_id);
+
+CREATE POLICY "Instructors can create courses" ON public.courses
+  FOR INSERT WITH CHECK (auth.uid()::text = instructor_id);
+
+CREATE POLICY "Instructors can update own courses" ON public.courses
+  FOR UPDATE USING (auth.uid()::text = instructor_id);
+
+CREATE POLICY "Instructors can delete own courses" ON public.courses
+  FOR DELETE USING (auth.uid()::text = instructor_id);
 
 -- Function to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
