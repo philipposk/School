@@ -1,0 +1,108 @@
+{
+  "title": "Module 8: Advanced Techniques & Final Project",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "Advanced prompt engineering involves:",
+      "options": [
+        "Simple prompts",
+        "Complex, detailed prompts",
+        "No prompts",
+        "Copying code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Advanced prompt engineering uses complex, detailed prompts that break down features and provide comprehensive context."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "Multi-step generation helps with:",
+      "options": [
+        "Simpler code",
+        "Complex features",
+        "Faster generation",
+        "Skipping steps"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Multi-step generation breaks complex features into manageable steps, making it easier for AI to handle."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "Architecture patterns help:",
+      "options": [
+        "Slow development",
+        "Organize complex apps",
+        "Skip planning",
+        "Nothing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Architecture patterns help organize complex applications and maintain code structure as projects grow."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "Performance optimization should:",
+      "options": [
+        "Change functionality",
+        "Improve speed",
+        "Add features",
+        "Remove features"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Performance optimization should improve speed and efficiency without changing functionality."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "Final project should demonstrate:",
+      "options": [
+        "Only coding",
+        "Complete workflow",
+        "Only deployment",
+        "Only testing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Final project should demonstrate the complete vibecoding workflow from planning to deployment."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "Documentation is important for:",
+      "options": [
+        "Only you",
+        "Future developers",
+        "No one",
+        "Only users"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Documentation helps future developers (including yourself) understand and maintain the codebase."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "How do you break down complex features for AI generation?",
+      "sampleAnswer": "Break into: 1) List all components needed, 2) Define relationships between parts, 3) Specify technologies for each part, 4) Include error handling requirements, 5) Reference existing patterns, 6) Generate step by step."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "What architecture pattern would you use for a large application?",
+      "sampleAnswer": "For large apps: Feature-based structure (organize by features), Layered architecture (presentation/application/domain/infrastructure), or Component composition (build complex UIs from simple components). Choose based on team and project needs."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "Why is comprehensive testing important for final projects?",
+      "sampleAnswer": "Comprehensive testing: proves code works correctly, catches bugs before deployment, provides confidence, prevents regressions, demonstrates quality, and shows professional development practices."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "What makes a good final project presentation?",
+      "sampleAnswer": "Good presentation includes: live demo walkthrough, key features showcase, technical highlights, architecture overview, development process explanation, challenges faced, lessons learned, and future improvements."
+    }
+  ]
+}
+

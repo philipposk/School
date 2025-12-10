@@ -1,0 +1,48 @@
+{
+  "module": "Module 8: Decision-Making & Final Project",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Expected value formula considers:",
+      "options": ["only probabilities", "probabilities and outcomes", "only outcomes", "emotional factors"],
+      "correct_answer": 1,
+      "explanation": "Expected value multiplies probabilities by their corresponding outcomes and sums them."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Framing effects demonstrate:",
+      "options": ["rational decision-making", "presentation influence", "mathematical accuracy", "expert superiority"],
+      "correct_answer": 1,
+      "explanation": "Framing effects show how the same information presented differently influences decisions."
+    },
+    {
+      "id": 3,
+      "type": "short_answer",
+      "question": "Give real-life example of expected value application:",
+      "acceptable_answers": [
+        "investment decisions",
+        "insurance choices",
+        "career planning",
+        "medical treatment",
+        "risk assessment"
+      ],
+      "explanation": "Expected value helps evaluate choices involving uncertainty and risk."
+    },
+    {
+      "id": 4,
+      "type": "short_answer",
+      "question": "Why combine logic with probability in decision-making?",
+      "acceptable_answers": [
+        "logic provides structure",
+        "probability handles uncertainty",
+        "together they improve decisions",
+        "comprehensive reasoning approach"
+      ],
+      "explanation": "Combining logic and probability provides both structure and uncertainty handling for better decisions."
+    }
+  ],
+  "passing_score": 3,
+  "time_limit": 10
+}

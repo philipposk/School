@@ -5,7 +5,8 @@
   "main": "backend-proxy-example.js",
   "scripts": {
     "start": "node backend-proxy-example.js",
-    "dev": "nodemon backend-proxy-example.js"
+    "dev": "nodemon backend-proxy-example.js",
+    "test:features": "node run-playwright-tests.js"
   },
   "keywords": ["ai", "proxy", "groq", "openai", "email", "sms", "supabase"],
   "author": "",
@@ -17,7 +18,8 @@
     "stripe": "^14.21.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "playwright": "^1.49.0"
   },
   "engines": {
     "node": ">=18.0.0"

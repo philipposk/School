@@ -1,0 +1,74 @@
+{
+  "module": "Module 1: Foundations of Critical Thinking",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "A statement offered in support of another statement is a:",
+      "options": ["conclusion", "premise", "explanation", "indicator"],
+      "correct_answer": 1,
+      "explanation": "A premise is a statement that provides support or evidence for a conclusion."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Validity concerns:",
+      "options": ["truth of premises", "structure", "opinions", "rhetoric"],
+      "correct_answer": 1,
+      "explanation": "Validity is about the logical structure - if premises are true, conclusion must be true."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Soundness = validity +:",
+      "options": ["evidence", "truth of premises", "strong language", "clarity"],
+      "correct_answer": 1,
+      "explanation": "Soundness requires both valid structure and actually true premises."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "'Thus' is a:",
+      "options": ["premise indicator", "conclusion indicator", "explanation marker", "rhetorical device"],
+      "correct_answer": 1,
+      "explanation": "'Thus' typically indicates that a conclusion is being presented."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Hidden premises are:",
+      "options": ["unimportant assumptions", "obvious statements", "assumptions that must be true for argument to work", "emotional appeals"],
+      "correct_answer": 2,
+      "explanation": "Hidden premises are unstated assumptions necessary for the argument to be valid."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "An explanation is NOT:",
+      "options": ["clarification of accepted facts", "evidence for persuasion", "description of causes", "account of how something works"],
+      "correct_answer": 1,
+      "explanation": "Explanations clarify existing understanding, while arguments attempt to persuade."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one conclusion indicator:",
+      "acceptable_answers": ["therefore", "thus", "so", "hence", "it follows that", "consequently"],
+      "explanation": "Conclusion indicators signal that a conclusion is being presented based on previous premises."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is a valid argument not always sound?",
+      "acceptable_answers": [
+        "because premises might be false",
+        "validity only concerns structure",
+        "soundness requires true premises",
+        "a valid argument can have false premises"
+      ],
+      "explanation": "Validity ensures proper structure, but soundness also requires that the premises are actually true."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}

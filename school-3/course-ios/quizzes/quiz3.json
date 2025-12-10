@@ -1,0 +1,78 @@
+{
+  "module": "Module 3: State Management",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is @State used for?",
+      "options": ["Shared state", "Local state owned by view", "Global state", "Computed values"],
+      "correct_answer": 1,
+      "explanation": "@State is used for simple, local state that is owned and managed by a single view."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "How do you create a binding?",
+      "options": ["@Binding", "$ prefix", "Binding()", "bind()"],
+      "correct_answer": 1,
+      "explanation": "Use the $ prefix before a @State property to create a Binding that can be passed to child views."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What does @Published do?",
+      "options": ["Creates state", "Marks property as observable", "Binds views", "Computes values"],
+      "correct_answer": 1,
+      "explanation": "@Published marks a property in an ObservableObject as observable, so views update when it changes."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "When should you use @ObservableObject?",
+      "options": ["Simple local state", "Complex shared state", "Constants", "Computed properties"],
+      "correct_answer": 1,
+      "explanation": "@ObservableObject is used for complex state that needs to be shared across multiple views."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What is @EnvironmentObject used for?",
+      "options": ["Local state", "Shared across view hierarchy", "Binding", "Published properties"],
+      "correct_answer": 1,
+      "explanation": "@EnvironmentObject shares data across the entire view hierarchy without passing it explicitly."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What's the difference between @StateObject and @ObservedObject?",
+      "options": ["Nothing", "@StateObject creates, @ObservedObject observes", "They're the same", "@ObservedObject creates"],
+      "correct_answer": 1,
+      "explanation": "@StateObject creates and owns the object, while @ObservedObject observes an object created elsewhere."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "When would you use @Binding instead of @State?",
+      "acceptable_answers": [
+        "When passing state to child views",
+        "For two-way data flow between parent and child",
+        "When child needs to modify parent's state"
+      ],
+      "explanation": "Use @Binding when you need to pass state from a parent view to a child view and allow the child to modify it."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Explain the difference between @State, @Binding, and @ObservableObject.",
+      "acceptable_answers": [
+        "@State for local state, @Binding for shared with children, @ObservableObject for complex shared state",
+        "Different property wrappers for different state management needs",
+        "Local vs shared vs complex state management"
+      ],
+      "explanation": "@State manages local state in a view, @Binding creates two-way connections between parent and child, and @ObservableObject manages complex state shared across multiple views."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

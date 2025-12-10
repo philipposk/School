@@ -1,0 +1,93 @@
+{
+  "module": "Module 4: Introduction to Investing",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "The relationship between risk and return is:",
+      "options": [
+        "inverse (higher risk = lower return)",
+        "direct (higher risk = higher return potential)",
+        "unrelated",
+        "random"
+      ],
+      "correct_answer": 1,
+      "explanation": "There is a direct relationship: higher risk investments have the potential for higher returns, while lower risk investments offer lower return potential."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "For long-term goals (10+ years), the best asset class is typically:",
+      "options": ["cash", "bonds", "stocks", "real estate only"],
+      "correct_answer": 2,
+      "explanation": "Stocks have historically provided the best long-term returns for goals with 10+ year time horizons."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "A Roth IRA offers:",
+      "options": [
+        "tax-deductible contributions",
+        "tax-free growth and withdrawals",
+        "required distributions at 65",
+        "employer matching"
+      ],
+      "correct_answer": 1,
+      "explanation": "Roth IRAs offer tax-free growth and tax-free withdrawals in retirement, making them ideal for long-term wealth building."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Dollar-cost averaging means:",
+      "options": [
+        "investing all at once",
+        "investing fixed amounts regularly",
+        "timing the market",
+        "only investing when prices drop"
+      ],
+      "correct_answer": 1,
+      "explanation": "Dollar-cost averaging involves investing fixed amounts at regular intervals, reducing the impact of market volatility."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Before investing, you should first:",
+      "options": [
+        "open a brokerage account",
+        "establish an emergency fund",
+        "buy individual stocks",
+        "wait for market crash"
+      ],
+      "correct_answer": 1,
+      "explanation": "An emergency fund should be established before investing to avoid needing to sell investments during emergencies."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Name one type of investment risk:",
+      "acceptable_answers": [
+        "market risk",
+        "inflation risk",
+        "interest rate risk",
+        "credit risk",
+        "liquidity risk"
+      ],
+      "explanation": "Investment risks include market risk (price fluctuations), inflation risk, interest rate risk, credit risk, and liquidity risk."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the main advantage of starting to invest early?",
+      "acceptable_answers": [
+        "more time for compound growth",
+        "time is your greatest asset",
+        "smaller contributions needed",
+        "longer time horizon allows more risk"
+      ],
+      "explanation": "Starting early allows more time for compound interest to work, meaning you need smaller contributions to reach the same goal."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

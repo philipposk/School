@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Fix: Set Supabase Credentials</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            margin-top: 20px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Quick Fix: Set Supabase Credentials</h1>
+        
+        <p>This will set your Supabase credentials in localStorage so your app can connect to Supabase.</p>
+        
+        <button onclick="setCredentials()">✅ Set Supabase Credentials</button>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="info">
+            <strong>📋 Your Credentials:</strong><br>
+            <strong>URL:</strong> <code>https://jmjezmfhygvazfunuujt.supabase.co</code><br>
+            <strong>Anon Key:</strong> <code>eyJhbGc...PVOM4</code> (set automatically)
+        </div>
+        
+        <div class="info" style="margin-top: 20px;">
+            <strong>✅ After clicking the button:</strong><br>
+            1. Credentials will be saved<br>
+            2. Refresh your main page (localhost:8001)<br>
+            3. Supabase errors should be gone!
+        </div>
+    </div>
+    
+    <script>
+        function setCredentials() {
+            const SUPABASE_URL = 'https://jmjezmfhygvazfunuujt.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4';
+            
+            try {
+                localStorage.setItem('supabase_url', SUPABASE_URL);
+                localStorage.setItem('supabase_anon_key', SUPABASE_ANON_KEY);
+                
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status success';
+                status.innerHTML = `
+                    ✅ <strong>Credentials Set Successfully!</strong><br><br>
+                    <strong>URL:</strong> ${SUPABASE_URL}<br>
+                    <strong>Key:</strong> ${SUPABASE_ANON_KEY.substring(0, 20)}...<br><br>
+                    <strong>Next Step:</strong> Refresh your main page (localhost:8001) and the Supabase errors should be gone!
+                `;
+                
+                // Also log to console
+                console.log('✅ Supabase credentials set:', {
+                    url: SUPABASE_URL,
+                    key: SUPABASE_ANON_KEY.substring(0, 20) + '...'
+                });
+                
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status error';
+                status.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Error setting credentials:', error);
+            }
+        }
+        
+        // Check current status
+        window.onload = function() {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (url && key) {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status info';
+                status.innerHTML = `
+                    ℹ️ <strong>Credentials Already Set!</strong><br><br>
+                    <strong>URL:</strong> ${url}<br>
+                    <strong>Key:</strong> ${key.substring(0, 20)}...<br><br>
+                    If you're still seeing errors, try clicking the button again to refresh them.
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Fix: Set Supabase Credentials</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            margin-top: 20px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Quick Fix: Set Supabase Credentials</h1>
+        
+        <p>This will set your Supabase credentials in localStorage so your app can connect to Supabase.</p>
+        
+        <button onclick="setCredentials()">✅ Set Supabase Credentials</button>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="info">
+            <strong>📋 Your Credentials:</strong><br>
+            <strong>URL:</strong> <code>https://jmjezmfhygvazfunuujt.supabase.co</code><br>
+            <strong>Anon Key:</strong> <code>eyJhbGc...PVOM4</code> (set automatically)
+        </div>
+        
+        <div class="info" style="margin-top: 20px;">
+            <strong>✅ After clicking the button:</strong><br>
+            1. Credentials will be saved<br>
+            2. Refresh your main page (localhost:8001)<br>
+            3. Supabase errors should be gone!
+        </div>
+    </div>
+    
+    <script>
+        function setCredentials() {
+            const SUPABASE_URL = 'https://jmjezmfhygvazfunuujt.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4';
+            
+            try {
+                localStorage.setItem('supabase_url', SUPABASE_URL);
+                localStorage.setItem('supabase_anon_key', SUPABASE_ANON_KEY);
+                
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status success';
+                status.innerHTML = `
+                    ✅ <strong>Credentials Set Successfully!</strong><br><br>
+                    <strong>URL:</strong> ${SUPABASE_URL}<br>
+                    <strong>Key:</strong> ${SUPABASE_ANON_KEY.substring(0, 20)}...<br><br>
+                    <strong>Next Step:</strong> Refresh your main page (localhost:8001) and the Supabase errors should be gone!
+                `;
+                
+                // Also log to console
+                console.log('✅ Supabase credentials set:', {
+                    url: SUPABASE_URL,
+                    key: SUPABASE_ANON_KEY.substring(0, 20) + '...'
+                });
+                
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status error';
+                status.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Error setting credentials:', error);
+            }
+        }
+        
+        // Check current status
+        window.onload = function() {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (url && key) {
+                const status = document.getElementById('status');
+                status.style.display = 'block';
+                status.className = 'status info';
+                status.innerHTML = `
+                    ℹ️ <strong>Credentials Already Set!</strong><br><br>
+                    <strong>URL:</strong> ${url}<br>
+                    <strong>Key:</strong> ${key.substring(0, 20)}...<br><br>
+                    If you're still seeing errors, try clicking the button again to refresh them.
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
+

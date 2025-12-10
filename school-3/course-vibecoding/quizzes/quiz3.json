@@ -1,0 +1,108 @@
+{
+  "title": "Module 3: INSTRUCTIONS - Requirements & Planning",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "INSTRUCTIONS.md defines:",
+      "options": [
+        "How to code",
+        "What to build",
+        "When to deploy",
+        "Where to host"
+      ],
+      "correctAnswer": 1,
+      "explanation": "INSTRUCTIONS.md defines WHAT you're building - the features, user experience, and requirements."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "The 'magic moment' refers to:",
+      "options": [
+        "When code compiles",
+        "When users experience core value",
+        "When app launches",
+        "When tests pass"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The magic moment is when users first experience the core value of your app - it guides all design and development decisions."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "MVP features should be:",
+      "options": [
+        "As many as possible",
+        "3-5 core features",
+        "All future features",
+        "Only nice-to-haves"
+      ],
+      "correctAnswer": 1,
+      "explanation": "MVP should focus on 3-5 core features that solve the main problem and make the app useful."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "User roles should be defined:",
+      "options": [
+        "After building",
+        "In INSTRUCTIONS.md",
+        "Only for complex apps",
+        "By users themselves"
+      ],
+      "correctAnswer": 1,
+      "explanation": "User roles should be defined in INSTRUCTIONS.md before development begins."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "Data modeling helps AI understand:",
+      "options": [
+        "Code structure",
+        "Database relationships",
+        "API endpoints",
+        "UI components"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Data modeling in INSTRUCTIONS helps AI understand database relationships and data structures."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "Mock integrations are useful for:",
+      "options": [
+        "Production apps",
+        "Testing UX without costs",
+        "Final versions",
+        "Complex features"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Mock integrations allow you to test UX without API costs and develop faster during MVP phase."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "Why is it important to define the 'magic moment'?",
+      "sampleAnswer": "The magic moment guides all design and development decisions. It helps focus on what truly matters to users and ensures the core value proposition is clear and achievable."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "What's the difference between MVP and future features?",
+      "sampleAnswer": "MVP features are must-have core functionality (3-5 features) that solve the main problem. Future features are nice-to-have enhancements that can be added incrementally after MVP launch."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "How does data modeling in INSTRUCTIONS help AI generation?",
+      "sampleAnswer": "Data modeling helps AI understand database relationships, data structures, and how different entities relate to each other, leading to more accurate code generation for models, APIs, and components."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "Explain why you might mock integrations in MVP but use real ones later.",
+      "sampleAnswer": "Mock integrations allow faster MVP development, test UX without API costs, validate concepts before committing to services, and avoid surprise bills during development. Real integrations are added after validating the concept."
+    }
+  ]
+}
+

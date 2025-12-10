@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Reload - Fix Supabase</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .step {
+            background: #252526;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid #007acc;
+        }
+        .success { border-color: #4ec9b0; }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #005a9e; }
+        code {
+            background: #1e1e1e;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Force Reload - Fix Supabase Errors</h1>
+    
+    <div class="step">
+        <h2>Step 1: Set Credentials</h2>
+        <button onclick="setCredentials()">✅ Set Supabase Credentials</button>
+        <div id="step1"></div>
+    </div>
+    
+    <div class="step">
+        <h2>Step 2: Clear Cache & Reload</h2>
+        <p><strong>IMPORTANT:</strong> You MUST hard refresh to load the fixed code!</p>
+        <p><strong>Windows/Linux:</strong> Press <code>Ctrl + Shift + R</code></p>
+        <p><strong>Mac:</strong> Press <code>Cmd + Shift + R</code></p>
+        <button onclick="hardReload()">🔄 Hard Reload Main Page</button>
+        <div id="step2"></div>
+    </div>
+    
+    <div class="step">
+        <h2>Step 3: Verify</h2>
+        <p>After reloading, check browser console (F12) - should see:</p>
+        <code>✅ Supabase client created successfully</code>
+        <p>If you still see errors, the browser cached the old file. Try:</p>
+        <ol>
+            <li>Close all browser tabs with localhost:8001</li>
+            <li>Clear browser cache (Settings → Clear browsing data)</li>
+            <li>Open localhost:8001 again</li>
+        </ol>
+    </div>
+
+    <script>
+        function setCredentials() {
+            const SUPABASE_URL = 'https://jmjezmfhygvazfunuujt.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4';
+            
+            localStorage.setItem('supabase_url', SUPABASE_URL);
+            localStorage.setItem('supabase_anon_key', SUPABASE_ANON_KEY);
+            
+            document.getElementById('step1').innerHTML = `
+                <div class="step success" style="margin-top: 10px;">
+                    ✅ Credentials set!<br>
+                    URL: ${SUPABASE_URL}<br>
+                    Key: ${SUPABASE_ANON_KEY.substring(0, 20)}...
+                </div>
+            `;
+        }
+        
+        function hardReload() {
+            // Open main page with cache-busting parameter
+            const url = 'http://localhost:8001/index.html?nocache=' + Date.now();
+            window.open(url, '_blank');
+            
+            document.getElementById('step2').innerHTML = `
+                <div class="step success" style="margin-top: 10px;">
+                    ✅ Opened main page with cache-busting.<br>
+                    Check the new tab - errors should be gone!
+                </div>
+            `;
+        }
+        
+        // Auto-set credentials on load
+        window.onload = () => {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (url && key) {
+                document.getElementById('step1').innerHTML = `
+                    <div class="step success" style="margin-top: 10px;">
+                        ✅ Credentials already set!
+                    </div>
+                `;
+            } else {
+                setCredentials();
+            }
+        };
+    </script>
+</body>
+</html>
+

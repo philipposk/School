@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Resend API Key - Quick Save</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #999;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        .key-display {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+            display: none;
+        }
+        .success {
+            background: #1e4620;
+            color: #81c784;
+            border: 1px solid #4CAF50;
+        }
+        .info {
+            background: #1a237e;
+            color: #9fa8da;
+            border: 1px solid #3f51b5;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .instructions {
+            background: #3e2723;
+            color: #ffcc80;
+            border: 1px solid #ff9800;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .step {
+            margin: 10px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+        }
+        code {
+            background: #0a0a0a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #4CAF50;
+        }
+        .copy-hint {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Save Your Resend API Key</h1>
+        <div class="subtitle">I see you have the "school" key in your Resend dashboard. Let's save it properly!</div>
+        
+        <div class="info">
+            <strong>📍 Your Resend Dashboard:</strong><br>
+            • Key name: <strong>"school"</strong><br>
+            • Token starts with: <code>re_fkdK8Eyu...</code><br>
+            • Created: 8 minutes ago
+        </div>
+        
+        <div class="instructions">
+            <strong>📋 How to get the FULL key:</strong>
+            <div class="step">Go to your Resend dashboard (resend.com/api-keys)</div>
+            <div class="step">Click on the "school" key row</div>
+            <div class="step">Click "Show" or "Copy" button (or click the eye icon 👁️)</div>
+            <div class="step">Copy the FULL key (it starts with <code>re_fkdK8Eyu</code> but is longer)</div>
+            <div class="step">Paste it in the box below</div>
+        </div>
+        
+        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 14px;">
+            Paste your FULL Resend API key here:
+        </label>
+        <input 
+            type="text" 
+            id="resendKey" 
+            placeholder="re_fkdK8Eyu..." 
+            autocomplete="off"
+            spellcheck="false"
+        />
+        <div class="copy-hint">
+            💡 Tip: The full key is longer than what's shown in the dashboard. Make sure you copy the complete key!
+        </div>
+        
+        <button onclick="saveKey()" id="saveBtn">💾 Save Resend API Key</button>
+        
+        <div id="status" class="status"></div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-size: 13px; color: #999;">
+            <strong>✅ What happens when you save:</strong><br>
+            • Saved to localStorage (backup)<br>
+            • Ready to add to Fly.io: <code>flyctl secrets set RESEND_API_KEY="..." -a school-backend</code><br>
+            • Will be stored securely (not in Git)
+        </div>
+    </div>
+    
+    <script>
+        function validateKey(key) {
+            if (!key) return { valid: false, error: 'Please enter your Resend API key' };
+            if (!key.startsWith('re_')) return { valid: false, error: 'Resend API keys must start with "re_"' };
+            if (key.length < 30) return { valid: false, error: 'The key seems too short. Make sure you copied the FULL key (not just the preview)' };
+            return { valid: true };
+        }
+        
+        async function saveKey() {
+            const keyInput = document.getElementById('resendKey');
+            const key = keyInput.value.trim();
+            const status = document.getElementById('status');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            // Validate
+            const validation = validateKey(key);
+            if (!validation.valid) {
+                status.className = 'status';
+                status.style.display = 'block';
+                status.style.background = '#3e2723';
+                status.style.color = '#ffcc80';
+                status.style.border = '1px solid #ff9800';
+                status.textContent = '⚠️ ' + validation.error;
+                return;
+            }
+            
+            // Disable button
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            try {
+                // Save to localStorage
+                localStorage.setItem('resend_api_key', key);
+                
+                // Try to save to backend if available
+                const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
+                try {
+                    // Note: Backend would need an endpoint to save this, but for now we'll just save locally
+                    console.log('Key saved to localStorage');
+                } catch (e) {
+                    console.log('Local save only');
+                }
+                
+                // Success message
+                status.className = 'status success';
+                status.style.display = 'block';
+                status.innerHTML = `
+                    ✅ <strong>Resend API Key Saved Successfully!</strong><br><br>
+                    
+                    <strong>Next Steps:</strong><br>
+                    1. Add to Fly.io backend:<br>
+                    <code style="display: block; margin: 10px 0; padding: 10px; background: #0a0a0a; border-radius: 4px;">
+                    flyctl secrets set RESEND_API_KEY="${key}" -a school-backend
+                    </code>
+                    
+                    2. Or add to Railway/Render environment variables:<br>
+                    <code style="display: block; margin: 10px 0; padding: 10px; background: #0a0a0a; border-radius: 4px;">
+                    RESEND_API_KEY=${key}
+                    </code>
+                    
+                    <br>✅ Key is also saved in browser localStorage as backup.
+                `;
+                
+                // Copy command to clipboard
+                const command = `flyctl secrets set RESEND_API_KEY="${key}" -a school-backend`;
+                navigator.clipboard.writeText(command).then(() => {
+                    console.log('Command copied to clipboard');
+                });
+                
+            } catch (error) {
+                status.className = 'status';
+                status.style.display = 'block';
+                status.style.background = '#3e2723';
+                status.style.color = '#ffcc80';
+                status.style.border = '1px solid #ff9800';
+                status.textContent = '⚠️ Error saving: ' + error.message;
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Save Resend API Key';
+            }
+        }
+        
+        // Check for existing key
+        window.addEventListener('load', () => {
+            const existingKey = localStorage.getItem('resend_api_key');
+            if (existingKey && existingKey.startsWith('re_')) {
+                const status = document.getElementById('status');
+                status.className = 'status info';
+                status.style.display = 'block';
+                status.textContent = `ℹ️ Found existing key in localStorage (starts with ${existingKey.substring(0, 12)}...). Enter new key to update, or use the existing one.`;
+            }
+            
+            // Focus input
+            document.getElementById('resendKey').focus();
+        });
+        
+        // Allow Enter key to save
+        document.getElementById('resendKey').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                saveKey();
+            }
+        });
+    </script>
+</body>
+</html>

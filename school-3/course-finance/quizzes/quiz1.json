@@ -1,0 +1,92 @@
+{
+  "module": "Module 1: Foundations of Personal Finance",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "The 50/30/20 rule allocates 20% to:",
+      "options": ["needs", "wants", "savings and debt repayment", "entertainment"],
+      "correct_answer": 2,
+      "explanation": "The 50/30/20 rule allocates 20% of income to savings and debt repayment."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "An emergency fund should cover:",
+      "options": [
+        "1 month of expenses",
+        "3-6 months of expenses",
+        "1 year of income",
+        "all debt"
+      ],
+      "correct_answer": 1,
+      "explanation": "A full emergency fund should cover 3-6 months of essential expenses."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Zero-based budgeting means:",
+      "options": [
+        "spending nothing",
+        "every euro has a purpose",
+        "zero savings",
+        "zero debt"
+      ],
+      "correct_answer": 1,
+      "explanation": "Zero-based budgeting means every euro of income is allocated to a specific purpose."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "A SMART goal must be:",
+      "options": [
+        "expensive",
+        "specific and measurable",
+        "short-term only",
+        "easy to achieve"
+      ],
+      "correct_answer": 1,
+      "explanation": "SMART goals are Specific, Measurable, Achievable, Relevant, and Time-bound."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Positive cash flow occurs when:",
+      "options": [
+        "expenses exceed income",
+        "income exceeds expenses",
+        "debt is zero",
+        "savings are high"
+      ],
+      "correct_answer": 1,
+      "explanation": "Positive cash flow means your income is greater than your expenses."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Name one benefit of having an emergency fund:",
+      "acceptable_answers": [
+        "prevents debt accumulation",
+        "reduces financial stress",
+        "provides security",
+        "allows better decision-making",
+        "covers unexpected expenses"
+      ],
+      "explanation": "Emergency funds provide financial security and prevent the need to go into debt for unexpected expenses."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between a need and a want? Give one example of each:",
+      "acceptable_answers": [
+        "needs are essential for survival, wants are desires; housing is a need, entertainment is a want",
+        "needs are necessary expenses, wants are optional; food is a need, dining out is a want",
+        "needs are required, wants are discretionary; utilities are a need, hobbies are a want"
+      ],
+      "explanation": "Needs are essential expenses required for basic living, while wants are discretionary expenses that enhance quality of life."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

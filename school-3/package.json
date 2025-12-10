@@ -1,0 +1,26 @@
+{
+  "name": "school-backend-proxy",
+  "version": "1.0.0",
+  "description": "Complete backend server for School Platform - AI proxy, email notifications, SMS, Supabase integration",
+  "main": "backend-proxy-example.js",
+  "scripts": {
+    "start": "node backend-proxy-example.js",
+    "dev": "nodemon backend-proxy-example.js"
+  },
+  "keywords": ["ai", "proxy", "groq", "openai", "email", "sms", "supabase"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@supabase/supabase-js": "^2.39.0",
+    "stripe": "^14.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

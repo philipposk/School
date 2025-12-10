@@ -1,0 +1,36 @@
+# Exclude backup directories
+backup-old-version/
+backup*/
+**/backup*/
+
+# Exclude node_modules
+node_modules/
+npm-debug.log
+
+# Exclude git
+.git/
+.gitignore
+
+# Exclude documentation
+*.md
+docs/
+
+# Exclude scripts
+*.sh
+
+# Exclude IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Exclude test files
+test/
+tests/
+*.test.js
+
+# Exclude other files
+.env
+.env.local
+*.log
+

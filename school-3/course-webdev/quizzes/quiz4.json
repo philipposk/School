@@ -1,0 +1,88 @@
+{
+  "module": "Module 4: JavaScript Basics",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Which keyword creates a variable that cannot be reassigned?",
+      "options": ["let", "const", "var", "variable"],
+      "correct_answer": 1,
+      "explanation": "const creates a constant variable that cannot be reassigned after declaration."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does === check?",
+      "options": ["Value equality only", "Value and type equality", "Assignment", "Comparison"],
+      "correct_answer": 1,
+      "explanation": "=== (strict equality) checks both value and type, unlike == which only checks value."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Which method selects an element by ID?",
+      "options": ["document.querySelector()", "document.getElementById()", "document.getElement()", "document.select()"],
+      "correct_answer": 1,
+      "explanation": "getElementById() specifically selects an element by its ID attribute."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What does addEventListener do?",
+      "options": ["Adds HTML content", "Listens for events", "Creates elements", "Changes styles"],
+      "correct_answer": 1,
+      "explanation": "addEventListener attaches an event handler to an element, listening for specified events."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Which loop iterates through array items?",
+      "options": ["for...in", "for...of", "while...of", "do...for"],
+      "correct_answer": 1,
+      "explanation": "for...of loops iterate through iterable objects like arrays, giving you the values directly."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What is the DOM?",
+      "options": ["Document Object Model", "Data Object Method", "Dynamic Object Manager", "Document Order Method"],
+      "correct_answer": 0,
+      "explanation": "DOM stands for Document Object Model, representing HTML as objects that JavaScript can manipulate."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between let and const?",
+      "acceptable_answers": [
+        "let can be reassigned",
+        "const cannot be reassigned",
+        "let mutable",
+        "const immutable",
+        "let variable",
+        "const constant"
+      ],
+      "explanation": "let allows reassignment, while const creates a constant that cannot be reassigned after declaration."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Name three JavaScript events you can listen for.",
+      "acceptable_answers": [
+        "click",
+        "mouseover",
+        "mouseout",
+        "input",
+        "submit",
+        "keydown",
+        "load",
+        "change",
+        "focus",
+        "blur"
+      ],
+      "explanation": "Common JavaScript events include click, mouseover, mouseout, input, submit, keydown, load, change, focus, and blur."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

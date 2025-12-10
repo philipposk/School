@@ -1,0 +1,97 @@
+{
+  "module": "Module 7: Tax Optimization",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "A tax credit is more valuable than a deduction because:",
+      "options": [
+        "it reduces taxable income more",
+        "it reduces taxes dollar-for-dollar",
+        "it's easier to claim",
+        "it's always larger"
+      ],
+      "correct_answer": 1,
+      "explanation": "Tax credits reduce your tax bill dollar-for-dollar, while deductions only reduce taxable income (worth less)."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Long-term capital gains are taxed at:",
+      "options": [
+        "ordinary income rates",
+        "lower rates than short-term gains",
+        "the same as short-term",
+        "0% always"
+      ],
+      "correct_answer": 1,
+      "explanation": "Long-term capital gains (assets held >1 year) are taxed at preferential rates (0%, 15%, or 20%) compared to ordinary income rates."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "An HSA offers:",
+      "options": [
+        "single tax advantage",
+        "double tax advantage",
+        "triple tax advantage",
+        "no tax advantage"
+      ],
+      "correct_answer": 2,
+      "explanation": "HSAs offer triple tax advantage: pre-tax contributions, tax-free growth, and tax-free withdrawals for medical expenses."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Tax-loss harvesting means:",
+      "options": [
+        "avoiding all losses",
+        "selling losers to offset gains",
+        "only investing in winners",
+        "ignoring taxes"
+      ],
+      "correct_answer": 1,
+      "explanation": "Tax-loss harvesting involves selling investments at a loss to offset capital gains and reduce tax liability."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Roth accounts are best when:",
+      "options": [
+        "you expect lower tax rate in retirement",
+        "you expect higher tax rate in retirement",
+        "you need tax deduction now",
+        "you're already retired"
+      ],
+      "correct_answer": 1,
+      "explanation": "Roth accounts are ideal when you expect to be in a higher tax bracket in retirement, as withdrawals are tax-free."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "What is the main advantage of holding investments longer than 1 year?",
+      "acceptable_answers": [
+        "qualify for long-term capital gains rates",
+        "lower tax rates",
+        "preferential tax treatment",
+        "tax savings"
+      ],
+      "explanation": "Holding investments longer than 1 year qualifies them for long-term capital gains rates, which are lower than ordinary income rates."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Name one tax-inefficient investment that belongs in a tax-advantaged account:",
+      "acceptable_answers": [
+        "bonds",
+        "REITs",
+        "actively managed funds",
+        "high-turnover funds"
+      ],
+      "explanation": "Tax-inefficient investments like bonds (interest taxed as income) and REITs (high dividends) benefit from tax-advantaged accounts."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

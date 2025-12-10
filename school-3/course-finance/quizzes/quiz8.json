@@ -1,0 +1,92 @@
+{
+  "module": "Module 8: Building Your Financial Plan",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Net worth is calculated as:",
+      "options": [
+        "income - expenses",
+        "assets - liabilities",
+        "savings - debt",
+        "investments - spending"
+      ],
+      "correct_answer": 1,
+      "explanation": "Net worth is calculated by subtracting total liabilities (debts) from total assets."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Priority 1 financial goals include:",
+      "options": [
+        "luxury purchases",
+        "emergency fund and high-interest debt",
+        "advanced investments",
+        "vacation planning"
+      ],
+      "correct_answer": 1,
+      "explanation": "Priority 1 goals are foundational: emergency fund, high-interest debt payoff, and basic insurance."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "A good savings rate target is:",
+      "options": ["5%", "10%", "20%+", "50%"],
+      "correct_answer": 2,
+      "explanation": "A savings rate of 20% or more is considered excellent and accelerates wealth building."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Financial plans should be reviewed:",
+      "options": [
+        "never (set and forget)",
+        "annually only",
+        "monthly/quarterly/annually",
+        "only when problems occur"
+      ],
+      "correct_answer": 2,
+      "explanation": "Financial plans should be reviewed regularly: monthly for cash flow, quarterly for progress, and annually for comprehensive review."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "The most important financial habit is:",
+      "options": [
+        "investing in stocks",
+        "paying yourself first",
+        "avoiding all debt",
+        "maximizing credit cards"
+      ],
+      "correct_answer": 1,
+      "explanation": "Paying yourself first (automating savings before spending) is the foundation of wealth building."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "What are the three priority levels for financial goals?",
+      "acceptable_answers": [
+        "essential foundation, security building, wealth acceleration",
+        "foundation, security, acceleration",
+        "priority 1 essential, priority 2 security, priority 3 acceleration"
+      ],
+      "explanation": "The three priority levels are: Priority 1 (Essential Foundation), Priority 2 (Security Building), and Priority 3 (Wealth Acceleration)."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Why is it important to automate savings and investments?",
+      "acceptable_answers": [
+        "removes decision fatigue",
+        "ensures consistency",
+        "builds habits",
+        "reduces temptation to spend",
+        "makes it effortless"
+      ],
+      "explanation": "Automation ensures consistent saving and investing by removing the need for monthly decisions and reducing the temptation to spend instead."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

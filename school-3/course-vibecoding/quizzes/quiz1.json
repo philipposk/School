@@ -1,0 +1,108 @@
+{
+  "title": "Module 1: Foundations of Vibecoding",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "What is vibecoding?",
+      "options": [
+        "A programming language",
+        "A methodology for AI-assisted development",
+        "A code editor",
+        "A testing framework"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Vibecoding is a methodology for building applications faster by leveraging AI coding assistants like Cursor."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "Cursor AI's main advantage over ChatGPT is:",
+      "options": [
+        "It's free",
+        "Deep integration with your codebase",
+        "It's faster",
+        "It has better UI"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Cursor provides deep integration with your codebase, allowing it to read and modify multiple files simultaneously."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "The vibecoding workflow starts with:",
+      "options": [
+        "Generating code",
+        "Planning",
+        "Testing",
+        "Deploying"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The workflow starts with planning - defining what you're building before generating code."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "AI coding assistants excel at:",
+      "options": [
+        "Making architectural decisions",
+        "Generating boilerplate code",
+        "Understanding complex business logic",
+        "Optimizing performance"
+      ],
+      "correctAnswer": 1,
+      "explanation": "AI excels at generating boilerplate code, creating common patterns, and following established conventions."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "What should you always do after AI generates code?",
+      "options": [
+        "Use it immediately",
+        "Review and understand it",
+        "Deploy it",
+        "Delete it"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Always review and understand AI-generated code before using it. AI is a powerful assistant, but you remain the architect."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "The first step in setting up vibecoding is:",
+      "options": [
+        "Writing code",
+        "Installing Cursor",
+        "Deploying",
+        "Testing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The first step is installing Cursor AI editor and setting up your development environment."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "List three things AI coding assistants do well.",
+      "sampleAnswer": "AI coding assistants excel at: 1) Generating boilerplate code, 2) Creating common patterns and following conventions, 3) Writing tests, 4) Refactoring code, 5) Following established coding styles."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "Why is it important to review AI-generated code before using it?",
+      "sampleAnswer": "Reviewing AI-generated code is important because: AI can make mistakes, might miss edge cases, may not understand complex business logic without context, and you need to ensure it follows your project's conventions and requirements."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "What is the difference between Cursor Chat and Cursor Composer?",
+      "sampleAnswer": "Cursor Chat is conversational and iterative, good for exploration and refinement. Cursor Composer is for multi-file generation, good for creating complete features across multiple files simultaneously."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "Explain one limitation of AI coding assistants.",
+      "sampleAnswer": "AI coding assistants struggle with: understanding complex business logic without context, making architectural decisions without guidance, handling edge cases without explicit instructions, or optimizing performance without clear requirements."
+    }
+  ]
+}
+

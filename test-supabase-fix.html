@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase Fix</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log {
+            background: #252526;
+            pa[Violation] Forced reflow while executing JavaScript took 31ms
+(index):2201 [Violation] 'requestAnimationFrame' handler took 142ms
+contentScript.bundle.js:31 getIdsFromUrl result - promptId: null jobId: null agentMode: false
+contentScript.bundle.js:31 Checking domain: localhost
+contentScript.bundle.js:31 🔍 Delay detection: URL parameter 'null', using 1000ms delay
+contentScript.bundle.js:31 🚀 Queue initialized with delay feature active (1000ms between prompts)
+contentScript.bundle.js:31 ⚠️ IMPORTANT: Make sure URL has delay parameter if you want to customize delay time
+contentScript.bundle.js:31 ✅ Queue initialization complete - ready to process messages
+wrapper.mjs:1 Uncaught TypeError: Cannot read properties of null (reading 'AuthClient')
+    at wrapper.mjs:1:1
+(anonymous) @ wrapper.mjs:1Understand this error
+supabase-client.js:30 Uncaught ReferenceError: supabase is not defined
+    at script.onload (supabase-client.js:30:13)
+script.onload @ supabase-client.js:30
+script
+initSupabase @ supabase-client.js:22
+init @ supabase-client.js:41
+(anonymous) @ supabase-client.js:363Understand this error
+:8001/favicon.ico:1  GET http://localhost:8001/favicon.ico 404 (File not found)Understand this error
+(index):2201 [Violation] 'requestAnimationFrame' handler took 255ms
+(index):2201 [Violation] 'requestAnimationFrame' handler took 79msdding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #007acc;
+        }
+        .success { border-color: #4ec9b0; }
+        .error { border-color: #f48771; }
+        .warning { border-color: #dcdcaa; }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Supabase Fix Test</h1>
+    <button onclick="setCredentials()">1. Set Credentials</button>
+    <button onclick="testSupabase()">2. Test Supabase</button>
+    <button onclick="clearCache()">3. Clear Cache & Reload</button>
+    <div id="logs"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            document.getElementById('logs').appendChild(div);
+            console.log(message);
+        }
+
+        function setCredentials() {
+            const SUPABASE_URL = 'https://jmjezmfhygvazfunuujt.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4';
+            
+            localStorage.setItem('supabase_url', SUPABASE_URL);
+            localStorage.setItem('supabase_anon_key', SUPABASE_ANON_KEY);
+            log('✅ Credentials set in localStorage', 'success');
+            log(`URL: ${SUPABASE_URL}`);
+            log(`Key: ${SUPABASE_ANON_KEY.substring(0, 20)}...`);
+        }
+
+        async function testSupabase() {
+            log('Testing Supabase loading...', 'info');
+            
+            // Check credentials
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (!url || !key) {
+                log('❌ Credentials not set! Click "Set Credentials" first.', 'error');
+                return;
+            }
+            
+            log(`✅ Credentials found: ${url}`, 'success');
+            
+            // Try loading Supabase
+            try {
+                // Method 1: Try ES module import
+                log('Trying ES module import...', 'info');
+                const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+                const { createClient } = module;
+                const client = createClient(url, key);
+                log('✅ Supabase client created successfully (ES module)!', 'success');
+                log('Testing connection...', 'info');
+                
+                // Test connection
+                const { data, error } = await client.from('profiles').select('count').limit(1);
+                if (error) {
+                    log(`⚠️ Connection test: ${error.message}`, 'warning');
+                } else {
+                    log('✅ Connection test successful!', 'success');
+                }
+                
+            } catch (error) {
+                log(`❌ ES module failed: ${error.message}`, 'error');
+                log('Trying UMD method...', 'info');
+                
+                // Method 2: Try UMD
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+                    script.onload = () => {
+                        setTimeout(() => {
+                            let lib = null;
+                            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                                lib = window.supabase;
+                            } else if (typeof supabase !== 'undefined') {
+                                lib = supabase;
+                            }
+                            
+                            if (lib) {
+                                try {
+                                    const client = lib.createClient(url, key);
+                                    log('✅ Supabase client created (UMD)!', 'success');
+                                } catch (e) {
+                                    log(`❌ Error creating client: ${e.message}`, 'error');
+                                }
+                            } else {
+                                log('❌ Supabase library loaded but createClient not found', 'error');
+                                log('Available: ' + Object.keys(window).filter(k => k.toLowerCase().includes('supabase')).join(', '), 'warning');
+                            }
+                            resolve();
+                        }, 500);
+                    };
+                    script.onerror = () => {
+                        log('❌ Failed to load Supabase library', 'error');
+                        resolve();
+                    };
+                    document.head.appendChild(script);
+                });
+            }
+        }
+
+        function clearCache() {
+            log('Clearing cache and reloading...', 'info');
+            // Force reload without cache
+            window.location.reload(true);
+        }
+
+        // Auto-check credentials on load
+        window.onload = () => {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (url && key) {
+                log('✅ Credentials already set', 'success');
+            } else {
+                log('⚠️ Credentials not set. Click "Set Credentials" first.', 'warning');
+            }
+        };
+    </script>
+</body>
+</html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase Fix</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log {
+            background: #252526;
+            pa[Violation] Forced reflow while executing JavaScript took 31ms
+(index):2201 [Violation] 'requestAnimationFrame' handler took 142ms
+contentScript.bundle.js:31 getIdsFromUrl result - promptId: null jobId: null agentMode: false
+contentScript.bundle.js:31 Checking domain: localhost
+contentScript.bundle.js:31 🔍 Delay detection: URL parameter 'null', using 1000ms delay
+contentScript.bundle.js:31 🚀 Queue initialized with delay feature active (1000ms between prompts)
+contentScript.bundle.js:31 ⚠️ IMPORTANT: Make sure URL has delay parameter if you want to customize delay time
+contentScript.bundle.js:31 ✅ Queue initialization complete - ready to process messages
+wrapper.mjs:1 Uncaught TypeError: Cannot read properties of null (reading 'AuthClient')
+    at wrapper.mjs:1:1
+(anonymous) @ wrapper.mjs:1Understand this error
+supabase-client.js:30 Uncaught ReferenceError: supabase is not defined
+    at script.onload (supabase-client.js:30:13)
+script.onload @ supabase-client.js:30
+script
+initSupabase @ supabase-client.js:22
+init @ supabase-client.js:41
+(anonymous) @ supabase-client.js:363Understand this error
+:8001/favicon.ico:1  GET http://localhost:8001/favicon.ico 404 (File not found)Understand this error
+(index):2201 [Violation] 'requestAnimationFrame' handler took 255ms
+(index):2201 [Violation] 'requestAnimationFrame' handler took 79msdding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #007acc;
+        }
+        .success { border-color: #4ec9b0; }
+        .error { border-color: #f48771; }
+        .warning { border-color: #dcdcaa; }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Supabase Fix Test</h1>
+    <button onclick="setCredentials()">1. Set Credentials</button>
+    <button onclick="testSupabase()">2. Test Supabase</button>
+    <button onclick="clearCache()">3. Clear Cache & Reload</button>
+    <div id="logs"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            document.getElementById('logs').appendChild(div);
+            console.log(message);
+        }
+
+        function setCredentials() {
+            const SUPABASE_URL = 'https://jmjezmfhygvazfunuujt.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4';
+            
+            localStorage.setItem('supabase_url', SUPABASE_URL);
+            localStorage.setItem('supabase_anon_key', SUPABASE_ANON_KEY);
+            log('✅ Credentials set in localStorage', 'success');
+            log(`URL: ${SUPABASE_URL}`);
+            log(`Key: ${SUPABASE_ANON_KEY.substring(0, 20)}...`);
+        }
+
+        async function testSupabase() {
+            log('Testing Supabase loading...', 'info');
+            
+            // Check credentials
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (!url || !key) {
+                log('❌ Credentials not set! Click "Set Credentials" first.', 'error');
+                return;
+            }
+            
+            log(`✅ Credentials found: ${url}`, 'success');
+            
+            // Try loading Supabase
+            try {
+                // Method 1: Try ES module import
+                log('Trying ES module import...', 'info');
+                const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+                const { createClient } = module;
+                const client = createClient(url, key);
+                log('✅ Supabase client created successfully (ES module)!', 'success');
+                log('Testing connection...', 'info');
+                
+                // Test connection
+                const { data, error } = await client.from('profiles').select('count').limit(1);
+                if (error) {
+                    log(`⚠️ Connection test: ${error.message}`, 'warning');
+                } else {
+                    log('✅ Connection test successful!', 'success');
+                }
+                
+            } catch (error) {
+                log(`❌ ES module failed: ${error.message}`, 'error');
+                log('Trying UMD method...', 'info');
+                
+                // Method 2: Try UMD
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+                    script.onload = () => {
+                        setTimeout(() => {
+                            let lib = null;
+                            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                                lib = window.supabase;
+                            } else if (typeof supabase !== 'undefined') {
+                                lib = supabase;
+                            }
+                            
+                            if (lib) {
+                                try {
+                                    const client = lib.createClient(url, key);
+                                    log('✅ Supabase client created (UMD)!', 'success');
+                                } catch (e) {
+                                    log(`❌ Error creating client: ${e.message}`, 'error');
+                                }
+                            } else {
+                                log('❌ Supabase library loaded but createClient not found', 'error');
+                                log('Available: ' + Object.keys(window).filter(k => k.toLowerCase().includes('supabase')).join(', '), 'warning');
+                            }
+                            resolve();
+                        }, 500);
+                    };
+                    script.onerror = () => {
+                        log('❌ Failed to load Supabase library', 'error');
+                        resolve();
+                    };
+                    document.head.appendChild(script);
+                });
+            }
+        }
+
+        function clearCache() {
+            log('Clearing cache and reloading...', 'info');
+            // Force reload without cache
+            window.location.reload(true);
+        }
+
+        // Auto-check credentials on load
+        window.onload = () => {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_anon_key');
+            
+            if (url && key) {
+                log('✅ Credentials already set', 'success');
+            } else {
+                log('⚠️ Credentials not set. Click "Set Credentials" first.', 'warning');
+            }
+        };
+    </script>
+</body>
+</html>
+

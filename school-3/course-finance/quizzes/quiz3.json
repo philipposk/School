@@ -1,0 +1,93 @@
+{
+  "module": "Module 3: Banking & Savings Strategies",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "High-yield savings accounts typically offer:",
+      "options": [
+        "lower interest than traditional banks",
+        "10-20x higher interest than traditional banks",
+        "same interest as traditional banks",
+        "no interest"
+      ],
+      "correct_answer": 1,
+      "explanation": "High-yield savings accounts, especially from online banks, typically offer 10-20x higher interest rates than traditional brick-and-mortar banks."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "The best strategy for building savings is:",
+      "options": [
+        "save whatever is left at month end",
+        "pay yourself first with automation",
+        "save only when you have extra",
+        "wait until you earn more"
+      ],
+      "correct_answer": 1,
+      "explanation": "Paying yourself first with automated transfers ensures savings happen consistently and removes the temptation to spend."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Money market accounts typically offer:",
+      "options": [
+        "lower interest than savings accounts",
+        "higher interest than savings accounts",
+        "no interest",
+        "same interest as checking"
+      ],
+      "correct_answer": 1,
+      "explanation": "Money market accounts typically offer higher interest rates than regular savings accounts while maintaining liquidity."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "FDIC insurance covers up to:",
+      "options": ["€100,000", "€250,000", "unlimited", "€50,000"],
+      "correct_answer": 1,
+      "explanation": "FDIC insurance covers up to €250,000 per depositor, per bank, per account type."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "The most important factor in choosing a savings account is:",
+      "options": [
+        "bank name recognition",
+        "interest rate and fees",
+        "physical branch location",
+        "account minimum"
+      ],
+      "correct_answer": 1,
+      "explanation": "Interest rate and fees have the biggest impact on your savings growth, making them the most important factors."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Name one benefit of automating your savings:",
+      "acceptable_answers": [
+        "removes decision fatigue",
+        "ensures consistency",
+        "builds habits",
+        "reduces temptation to spend",
+        "makes saving effortless"
+      ],
+      "explanation": "Automating savings removes the need to make decisions each month and ensures consistent saving behavior."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between a checking and savings account?",
+      "acceptable_answers": [
+        "checking is for daily transactions, savings earns interest",
+        "savings has limited transactions, checking has unlimited",
+        "savings earns interest, checking typically doesn't",
+        "checking has debit card access, savings doesn't"
+      ],
+      "explanation": "Checking accounts are designed for frequent transactions and daily use, while savings accounts are for storing money and earning interest with limited transaction access."
+    }
+  ],
+  "passing_score": 5,
+  "time_limit": 15
+}
+

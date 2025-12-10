@@ -1,0 +1,70 @@
+{
+  "module": "Module 1: The Human Mind: An Introduction",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Self-awareness is:",
+      "options": ["Judging yourself harshly", "Observing your thoughts and feelings without immediate judgment", "Ignoring your emotions", "Comparing yourself to others"],
+      "correct_answer": 1,
+      "explanation": "Self-awareness involves observing your thoughts, feelings, and behaviors objectively without immediate judgment."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Mental frameworks are:",
+      "options": ["Fixed and unchangeable", "Lenses through which we interpret reality", "Only for smart people", "Unimportant"],
+      "correct_answer": 1,
+      "explanation": "Mental frameworks are the lenses through which we interpret reality, shaped by our experiences, culture, and beliefs."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "The optimistic view of human nature includes:",
+      "options": ["People can't change", "People can grow and transform", "Everyone is selfish", "Understanding doesn't help"],
+      "correct_answer": 1,
+      "explanation": "The optimistic view recognizes that people can grow and transform through awareness and understanding."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Compassionate observation means:",
+      "options": ["Ignoring problems", "Noticing patterns without immediate judgment", "Being naive", "Never setting boundaries"],
+      "correct_answer": 1,
+      "explanation": "Compassionate observation involves noticing patterns without immediately labeling them as good or bad."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Mind, body, and spirit are:",
+      "options": ["Completely separate", "Interconnected", "Only mind matters", "Only spirit matters"],
+      "correct_answer": 1,
+      "explanation": "Mind, body, and spirit are interconnected aspects of human experience."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Understanding mental frameworks helps us:",
+      "options": ["Judge others more harshly", "Develop compassion for different perspectives", "Avoid difficult people", "Stay in our comfort zone"],
+      "correct_answer": 1,
+      "explanation": "Understanding that everyone has different mental frameworks helps us develop compassion for different perspectives."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one benefit of self-awareness:",
+      "acceptable_answers": ["Recognize patterns in behavior", "Understand emotional reactions", "Enable personal growth", "Improve relationships", "Better decision making"],
+      "explanation": "Self-awareness has many benefits including recognizing patterns, understanding emotions, enabling growth, and improving relationships."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is compassionate observation important for understanding human minds?",
+      "acceptable_answers": ["Helps us understand without judgment", "Allows us to see patterns clearly", "Creates space for growth", "Reduces reactivity", "Enables deeper understanding"],
+      "explanation": "Compassionate observation helps us understand minds without immediate judgment, allowing for clearer perception and deeper understanding."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

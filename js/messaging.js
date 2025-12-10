@@ -154,6 +154,14 @@ const MessagingManager = {
     // Generate AI response using Groq API
     async generateAIResponse(userMessage, conversationId = null) {
         try {
+            // Use enhanced AI if available, otherwise fallback to basic
+            if (typeof AIEnhanced !== 'undefined' && AIEnhanced.generateEnhancedTutorResponse) {
+                const currentCourse = state?.currentCourseId || null;
+                const currentModule = state?.currentModuleId || null;
+                return await AIEnhanced.generateEnhancedTutorResponse(userMessage, conversationId, currentCourse, currentModule);
+            }
+            
+            // Fallback to original implementation
             // Build context from user's learning progress and search history
             const completed = state.completedModules?.length || 0;
             const total = courses ? courses.reduce((sum, c) => sum + (c.modules_data?.length || 0), 0) : 0;

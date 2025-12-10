@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract API Keys from localStorage</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .key-display {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            border: 1px solid #444;
+        }
+        .key-label {
+            color: #81c784;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .copy-btn {
+            background: #2196F3;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        .copy-btn:hover {
+            background: #1976D2;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .success {
+            background: #1e4620;
+            color: #81c784;
+            border: 1px solid #4CAF50;
+        }
+        .info {
+            background: #1a237e;
+            color: #9fa8da;
+            border: 1px solid #3f51b5;
+        }
+        .warning {
+            background: #3e2723;
+            color: #ffcc80;
+            border: 1px solid #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Extract API Keys from localStorage</h1>
+        
+        <div class="info">
+            <strong>Instructions:</strong><br>
+            1. Open this page on <code>localhost:8000</code> (same domain as your app)<br>
+            2. Click "Extract Keys" below<br>
+            3. Copy the keys and add them to <code>credentials.json</code>
+        </div>
+        
+        <button onclick="extractKeys()">Extract Keys from localStorage</button>
+        <button onclick="copyAllToClipboard()">Copy All to Clipboard</button>
+        
+        <div id="results"></div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+    
+    <script>
+        function extractKeys() {
+            const results = document.getElementById('results');
+            const status = document.getElementById('status');
+            
+            // Extract all relevant keys from localStorage
+            const keys = {
+                groq_api_key: localStorage.getItem('groq_api_key') || 'NOT_FOUND',
+                openai_api_key: localStorage.getItem('openai_api_key') || 'NOT_FOUND',
+                backend_url: localStorage.getItem('backend_url') || 'NOT_FOUND',
+                supabase_url: localStorage.getItem('supabase_url') || 'NOT_FOUND',
+                supabase_anon_key: localStorage.getItem('supabase_anon_key') || 'NOT_FOUND'
+            };
+            
+            let html = '<h2 style="color: #4CAF50; margin-top: 30px;">Found Keys:</h2>';
+            
+            for (const [keyName, keyValue] of Object.entries(keys)) {
+                const displayValue = keyValue === 'NOT_FOUND' 
+                    ? '<span style="color: #ff9800;">NOT_FOUND</span>' 
+                    : keyValue.length > 50 
+                        ? keyValue.substring(0, 20) + '...' + keyValue.substring(keyValue.length - 10)
+                        : keyValue;
+                
+                html += `
+                    <div class="key-display">
+                        <div class="key-label">${keyName.replace(/_/g, ' ').toUpperCase()}</div>
+                        <div style="margin: 10px 0;">${displayValue}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${keyName}', \`${keyValue}\`)">
+                            Copy ${keyName === 'NOT_FOUND' ? 'Placeholder' : 'Key'}
+                        </button>
+                    </div>
+                `;
+            }
+            
+            results.innerHTML = html;
+            
+            // Show status
+            const foundCount = Object.values(keys).filter(v => v !== 'NOT_FOUND').length;
+            status.style.display = 'block';
+            status.className = foundCount > 0 ? 'status success' : 'status warning';
+            status.innerHTML = `Found ${foundCount} key(s) in localStorage`;
+        }
+        
+        function copyToClipboard(keyName, value) {
+            if (value === 'NOT_FOUND') {
+                alert('No key found for ' + keyName);
+                return;
+            }
+            
+            navigator.clipboard.writeText(value).then(() => {
+                alert(`Copied ${keyName} to clipboard!`);
+            }).catch(err => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = value;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert(`Copied ${keyName} to clipboard!`);
+            });
+        }
+        
+        function copyAllToClipboard() {
+            const keys = {
+                groq_api_key: localStorage.getItem('groq_api_key') || '',
+                openai_api_key: localStorage.getItem('openai_api_key') || '',
+                backend_url: localStorage.getItem('backend_url') || '',
+                supabase_url: localStorage.getItem('supabase_url') || '',
+                supabase_anon_key: localStorage.getItem('supabase_anon_key') || ''
+            };
+            
+            const json = JSON.stringify(keys, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                alert('All keys copied to clipboard as JSON!');
+            }).catch(err => {
+                alert('Failed to copy. Please copy manually.');
+            });
+        }
+        
+        // Auto-extract on load
+        window.addEventListener('load', () => {
+            setTimeout(extractKeys, 500);
+        });
+    </script>
+</body>
+</html>
+

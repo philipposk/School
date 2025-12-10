@@ -1,0 +1,78 @@
+{
+  "module": "Module 8: App Store Deployment",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What do you need to test on a device?",
+      "options": ["Just Xcode", "Apple Developer account and device", "Just a device", "Nothing special"],
+      "correct_answer": 1,
+      "explanation": "You need an Apple Developer account (free for development) and a physical iOS device to test apps."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What is an archive?",
+      "options": ["Backup", "Build ready for distribution", "Source code", "Screenshot"],
+      "correct_answer": 1,
+      "explanation": "An archive is a build of your app that's ready for distribution to the App Store or TestFlight."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What is TestFlight used for?",
+      "options": ["Final release", "Beta testing", "Development", "Debugging"],
+      "correct_answer": 1,
+      "explanation": "TestFlight is Apple's platform for beta testing apps before releasing to the App Store."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What size should app icon be?",
+      "options": ["512x512", "1024x1024", "256x256", "Any size"],
+      "correct_answer": 1,
+      "explanation": "App Store requires a 1024x1024 pixel app icon in PNG format."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "What must increment for each upload?",
+      "options": ["Version number", "Build number", "Bundle ID", "App name"],
+      "correct_answer": 1,
+      "explanation": "The build number must increment for each upload to App Store Connect, even if the version stays the same."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Where do you upload your app?",
+      "options": ["GitHub", "App Store Connect", "Xcode", "iTunes"],
+      "correct_answer": 1,
+      "explanation": "Apps are uploaded to App Store Connect, Apple's platform for managing app submissions."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What are common reasons apps get rejected from App Store?",
+      "acceptable_answers": [
+        "Crashes, bugs, missing information, guideline violations",
+        "Technical issues, content problems, policy violations",
+        "Various reasons related to quality and guidelines"
+      ],
+      "explanation": "Common rejection reasons include crashes, broken functionality, missing information, misleading content, privacy violations, and guideline violations."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "What's the difference between version number and build number?",
+      "acceptable_answers": [
+        "Version is user-facing, build is for each upload",
+        "Version shows to users, build tracks uploads",
+        "Different numbering systems for different purposes"
+      ],
+      "explanation": "Version number is what users see (e.g., 1.0.0), while build number increments with each upload and is used internally."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

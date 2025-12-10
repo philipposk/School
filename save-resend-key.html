@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Resend Key</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        h1 { 
+            color: #4CAF50; 
+            margin-bottom: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover { background: #45a049; }
+        .success {
+            background: #1e4620;
+            color: #81c784;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #4CAF50;
+        }
+        .command-box {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #333;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            color: #4CAF50;
+        }
+        .copy-btn {
+            background: #2196F3;
+            margin: 5px;
+            width: auto;
+            padding: 10px 20px;
+        }
+        .copy-btn:hover { background: #1976D2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Save Resend API Key</h1>
+        <p style="color: #999; margin-bottom: 20px;">Paste your Resend key and get the Fly.io command</p>
+        
+        <input 
+            type="text" 
+            id="resendKey" 
+            placeholder="re_..." 
+            autocomplete="off"
+            spellcheck="false"
+        />
+        
+        <button onclick="saveKey()">💾 Generate Fly.io Command</button>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        function saveKey() {
+            const keyInput = document.getElementById('resendKey');
+            const key = keyInput.value.trim();
+            const result = document.getElementById('result');
+            
+            if (!key) {
+                alert('Please paste your Resend API key first!');
+                return;
+            }
+            
+            if (!key.startsWith('re_')) {
+                alert('Resend API keys start with "re_"');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('resend_api_key', key);
+            
+            // Generate command
+            const command = 'flyctl secrets set RESEND_API_KEY="' + key + '" -a school-backend';
+            
+            // Show result
+            result.className = 'success';
+            result.innerHTML = `
+                <h2>✅ Key Saved!</h2>
+                <p>Run this command in your terminal:</p>
+                <div class="command-box">${command}</div>
+                <button class="copy-btn" onclick="copyToClipboard('${command.replace(/'/g, "\\'")}')">📋 Copy Command</button>
+                <button class="copy-btn" onclick="copyToClipboard('${key.replace(/'/g, "\\'")}')">📋 Copy Key</button>
+            `;
+            
+            // Auto-copy command
+            copyToClipboard(command);
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Copied to clipboard');
+            }).catch(err => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+        }
+        
+        // Check for existing key
+        window.addEventListener('load', () => {
+            const existing = localStorage.getItem('resend_api_key');
+            if (existing) {
+                document.getElementById('resendKey').value = existing;
+            }
+        });
+        
+        // Allow Enter key
+        document.getElementById('resendKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveKey();
+            }
+        });
+    </script>
+</body>
+</html>

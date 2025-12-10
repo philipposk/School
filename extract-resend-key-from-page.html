@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract Resend Key from Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        h1 { color: #4CAF50; }
+        .instructions {
+            background: #3e2723;
+            color: #ffcc80;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #45a049; }
+        .result {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            border: 1px solid #444;
+        }
+        code {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Extract Resend Key from Page</h1>
+        
+        <div class="instructions">
+            <strong>If the key is still visible on the Resend page:</strong><br><br>
+            
+            <strong>Method 1: Browser Console (Easiest)</strong><br>
+            1. On the Resend page where the key is shown<br>
+            2. Press <code>F12</code> (or right-click → Inspect)<br>
+            3. Go to <strong>Console</strong> tab<br>
+            4. Paste this code and press Enter:<br><br>
+            
+            <code style="display: block; padding: 10px; background: #0a0a0a; margin: 10px 0;">
+            // Find all text containing 're_'<br>
+            const walker = document.createTreeWalker(<br>
+            &nbsp;&nbsp;document.body,<br>
+            &nbsp;&nbsp;NodeFilter.SHOW_TEXT,<br>
+            &nbsp;&nbsp;null,<br>
+            &nbsp;&nbsp;false<br>
+            );<br>
+            let node;<br>
+            const keys = [];<br>
+            while (node = walker.nextNode()) {<br>
+            &nbsp;&nbsp;if (node.textContent.includes('re_') && node.textContent.length > 30) {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;keys.push(node.textContent.trim());<br>
+            &nbsp;&nbsp;}<br>
+            }<br>
+            console.log('Found keys:', keys);<br>
+            keys.forEach(k => console.log('Key:', k));
+            </code><br><br>
+            
+            <strong>Method 2: Inspect Element</strong><br>
+            1. Right-click on the key text → <strong>Inspect</strong><br>
+            2. In the Elements panel, find the element<br>
+            3. Look for <code>value</code> attribute or text content<br>
+            4. Double-click to select, then copy<br><br>
+            
+            <strong>Method 3: View Page Source</strong><br>
+            1. Right-click → <strong>View Page Source</strong><br>
+            2. Press <code>Cmd+F</code> (Mac) or <code>Ctrl+F</code> (Windows)<br>
+            3. Search for <code>re_</code><br>
+            4. Look for the full key in the HTML
+        </div>
+        
+        <button onclick="copyExtractionCode()">📋 Copy Extraction Code</button>
+        <button onclick="showAlternative()">🔄 Show Alternative: Create New Key</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+    
+    <script>
+        function copyExtractionCode() {
+            const code = `// Run this in browser console on Resend page
+const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+);
+let node;
+const keys = [];
+while (node = walker.nextNode()) {
+    if (node.textContent.includes('re_') && node.textContent.length > 30) {
+        keys.push(node.textContent.trim());
+    }
+}
+console.log('Found keys:', keys);
+keys.forEach(k => {
+    console.log('Full Key:', k);
+    navigator.clipboard.writeText(k).then(() => {
+        console.log('✅ Copied to clipboard:', k.substring(0, 20) + '...');
+    });
+});`;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ Code copied! Go to Resend page, open console (F12), paste and press Enter');
+            });
+        }
+        
+        function showAlternative() {
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').innerHTML = `
+                <strong>🆕 Create a NEW Key (Recommended if old one is lost):</strong><br><br>
+                
+                1. Go to Resend dashboard → API Keys<br>
+                2. Click <strong>"+ Create API key"</strong><br>
+                3. Name it: <code>school-backup</code><br>
+                4. <strong>IMMEDIATELY COPY THE KEY</strong> (you only see it once!)<br>
+                5. Paste it in <code>save-resend-key-now.html</code><br>
+                6. Save it<br>
+                7. Delete the old "school" key if needed<br>
+                8. Use the new key going forward<br><br>
+                
+                <strong>⚠️ Important:</strong> Copy the key IMMEDIATELY after creation - Resend only shows it once!
+            `;
+        }
+    </script>
+</body>
+</html>

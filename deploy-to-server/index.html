@@ -17,7 +17,7 @@
             page_path: window.location.pathname
         });
     </script>
-    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <link rel="stylesheet" href="css/enhanced-styles.css">
     <link rel="stylesheet" href="css/messaging-assignments.css">
@@ -27,6 +27,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         :root {
@@ -69,6 +73,8 @@
             line-height: 1.7;
             overflow-x: hidden;
             transition: background 0.3s, color 0.3s;
+            perspective: 1000px;
+            perspective-origin: center center;
         }
 
         /* Header */
@@ -80,6 +86,8 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
         }
 
         .header-content {
@@ -224,6 +232,21 @@
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            position: relative;
+            z-index: 2001;
+        }
+        
+        /* Prevent modal content clicks from closing modal */
+        .modal-content {
+            pointer-events: auto;
+        }
+        
+        .modal {
+            cursor: pointer; /* Show pointer on backdrop */
+        }
+        
+        .modal .modal-content {
+            cursor: default; /* Default cursor on content */
         }
 
         /* Split-screen modal for assignment submission */
@@ -482,6 +505,7 @@
 
         .page-header {
             margin-bottom: 2rem;
+            transform-style: preserve-3d;
         }
 
         .page-title {
@@ -500,6 +524,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 2rem;
+            perspective: 1200px;
+            transform-style: preserve-3d;
         }
 
         .course-card {
@@ -507,14 +533,32 @@
             border-radius: 12px;
             padding: 2rem;
             box-shadow: var(--shadow);
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             border: 1px solid var(--border);
+            transform-style: preserve-3d;
+            position: relative;
+            will-change: transform;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
         }
 
         .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-10px) translateZ(20px) rotateX(3deg) rotateY(-2deg);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .course-card:hover::before {
+            opacity: 1;
         }
 
         .course-icon {
@@ -1359,18 +1403,18 @@
             transform: translateX(5px);
         }
 
-        /* AI Chatbot Bubble */
+        /* AI Chatbot Bubble - Always fixed bottom-right */
         .chatbot-bubble {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
+            position: fixed !important;
+            bottom: 6rem !important;
+            right: 2rem !important;
             width: 64px;
             height: 64px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
             cursor: pointer;
-            z-index: 1000;
+            z-index: 9999 !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1402,17 +1446,17 @@
         }
 
         .chatbot-window {
-            position: fixed;
-            bottom: 100px;
-            right: 2rem;
+            position: fixed !important;
+            bottom: 6rem !important;
+            right: 2rem !important;
             width: 400px;
             max-width: calc(100vw - 4rem);
             height: 600px;
-            max-height: calc(100vh - 120px);
+            max-height: calc(100vh - 140px);
             background: var(--card);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            z-index: 999;
+            z-index: 9998 !important;
             display: none;
             flex-direction: column;
             border: 1px solid var(--border);
@@ -1650,9 +1694,9 @@
                 🎓 Learning Platform
             </div>
             <div class="header-right">
-                <a href="about.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s; margin-right: 0.5rem;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">About</a>
-                <a href="pedagogy.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s; margin-right: 0.5rem;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">How We Teach</a>
-                <a href="community.html" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s; margin-right: 0.5rem;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Community</a>
+                <a href="about.html" class="header-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">About</a>
+                <a href="pedagogy.html" class="header-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">How We Teach</a>
+                <a href="community.html" class="header-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Community</a>
                 <button class="header-btn" onclick="openAISearch()" title="AI Search">
                     🔍
                 </button>
@@ -1720,19 +1764,32 @@
     <script src="js/i18n.js"></script>
     <script src="js/security.js"></script>
     <script src="js/ai-config.js"></script>
+    <script src="js/supabase-client.js?v=2.2"></script>
+    <script src="js/migration-to-supabase.js"></script>
     <script src="js/enhanced-features.js"></script>
+    <script src="js/3d-world.js"></script>
+    <script src="js/universe-view.js"></script>
     <script src="js/certificates.js"></script>
     <script src="js/user-profiles.js"></script>
+    <script src="js/scroll-header.js?v=2.0"></script>
+    <script src="js/resizable-panels.js"></script>
     <script src="js/messaging.js"></script>
+    <script src="js/assignments.js"></script>
+    <script src="js/gdpr-compliance.js"></script>
     <script src="js/reminder-system.js"></script>
+    <script src="js/auth-enhanced.js"></script>
+    <script src="js/review-system.js"></script>
+    <script src="js/video-player.js"></script>
+    <script src="js/forum-system.js"></script>
+    <script src="js/instructor-dashboard.js"></script>
+    <script src="js/admin-dashboard.js"></script>
     <script src="js/payment-system.js"></script>
     <script src="js/search-system.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/flashcards.js"></script>
     <script src="js/onboarding.js"></script>
     <script src="js/learner-analytics.js"></script>
-    <script src="js/assignments.js"></script>
-    <script src="js/gdpr-compliance.js"></script>
+    <script src="js/ai-enhanced.js"></script>
     <script>
         // Configure marked
         marked.setOptions({
@@ -1791,14 +1848,14 @@
                 duration: '8 weeks',
                 level: 'Intermediate',
                 modules_data: [
-                    { id: 1, title: 'Foundations of Critical Thinking', subtitle: 'What Is an Argument? Validity, Soundness, and Structure' },
-                    { id: 2, title: 'Deduction: Propositional Logic & Syllogisms', subtitle: 'Guaranteed Truth Through Structure' },
-                    { id: 3, title: 'Induction, Evidence & Strength', subtitle: 'From Specific to General' },
-                    { id: 4, title: 'Probabilistic Thinking & Bayes', subtitle: 'Navigating Uncertainty' },
-                    { id: 5, title: 'Cognitive Biases & Debiasing', subtitle: 'Overcoming Mental Shortcuts' },
-                    { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning' },
-                    { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning' },
-                    { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking' }
+                    { id: 1, title: 'Foundations of Critical Thinking', subtitle: 'What Is an Argument? Validity, Soundness, and Structure', videoId: '6OLpl5p0fMg' },
+                    { id: 2, title: 'Deduction: Propositional Logic & Syllogisms', subtitle: 'Guaranteed Truth Through Structure', videoId: 'qMFpYcPqy5E' },
+                    { id: 3, title: 'Induction, Evidence & Strength', subtitle: 'From Specific to General', videoId: 'j0XmH4kQh5c' },
+                    { id: 4, title: 'Probabilistic Thinking & Bayes', subtitle: 'Navigating Uncertainty', videoId: 'HZGCoVF3YvU' },
+                    { id: 5, title: 'Cognitive Biases & Debiasing', subtitle: 'Overcoming Mental Shortcuts', videoId: 'wEwGBIrI-BQ' },
+                    { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning', videoId: 'fXLTQi7vVsI' },
+                    { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning', videoId: 'NKEhds0KK08' },
+                    { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking', videoId: 'Vq2XxZjkNqA' }
                 ],
                 // Translations for course content
                 translations: {
@@ -1829,14 +1886,14 @@
                 duration: '8 weeks',
                 level: 'Beginner',
                 modules_data: [
-                    { id: 1, title: 'Foundations of Personal Finance', subtitle: 'Budgeting, Emergency Funds, and Financial Goals' },
-                    { id: 2, title: 'Understanding Debt & Credit', subtitle: 'Credit Scores, Debt Management, and Interest Rates' },
-                    { id: 3, title: 'Banking & Savings Strategies', subtitle: 'Account Optimization and High-Yield Savings' },
-                    { id: 4, title: 'Introduction to Investing', subtitle: 'Risk, Return, Asset Classes, and Investment Accounts' },
-                    { id: 5, title: 'Stocks & Bonds Fundamentals', subtitle: 'Market Mechanics, ETFs, and Diversification' },
-                    { id: 6, title: 'Retirement Planning', subtitle: '401(k), IRAs, Compound Interest, and Retirement Calculators' },
-                    { id: 7, title: 'Tax Optimization', subtitle: 'Tax-Advantaged Accounts, Deductions, and Tax-Efficient Investing' },
-                    { id: 8, title: 'Building Your Financial Plan', subtitle: 'Integration, Goal Prioritization, and Ongoing Management' }
+                    { id: 1, title: 'Foundations of Personal Finance', subtitle: 'Budgeting, Emergency Funds, and Financial Goals', videoId: 'Gc2i3IZ9uLU' },
+                    { id: 2, title: 'Understanding Debt & Credit', subtitle: 'Credit Scores, Debt Management, and Interest Rates', videoId: 'mPqAq4XkpYQ' },
+                    { id: 3, title: 'Banking & Savings Strategies', subtitle: 'Account Optimization and High-Yield Savings', videoId: 'Z3Hlz82e1vo' },
+                    { id: 4, title: 'Introduction to Investing', subtitle: 'Risk, Return, Asset Classes, and Investment Accounts', videoId: 'F3nXGJY2WIg' },
+                    { id: 5, title: 'Stocks & Bonds Fundamentals', subtitle: 'Market Mechanics, ETFs, and Diversification', videoId: 'kQhDzB5vJXc' },
+                    { id: 6, title: 'Retirement Planning', subtitle: '401(k), IRAs, Compound Interest, and Retirement Calculators', videoId: 't7lwupE1q1Q' },
+                    { id: 7, title: 'Tax Optimization', subtitle: 'Tax-Advantaged Accounts, Deductions, and Tax-Efficient Investing', videoId: 'VU8cXod2qfs' },
+                    { id: 8, title: 'Building Your Financial Plan', subtitle: 'Integration, Goal Prioritization, and Ongoing Management', videoId: 'B3F4LsaYkBs' }
                 ],
                 translations: {
                     el: {
@@ -1866,14 +1923,14 @@
                 duration: '8 weeks',
                 level: 'Beginner',
                 modules_data: [
-                    { id: 1, title: 'SwiftUI Foundations', subtitle: 'Views, Modifiers, and the Declarative Paradigm' },
-                    { id: 2, title: 'Layout & Navigation', subtitle: 'Building Multi-Screen Apps with Navigation and Layouts' },
-                    { id: 3, title: 'State Management', subtitle: 'Managing App State with @State, @Binding, and @ObservableObject' },
-                    { id: 4, title: 'Lists & Data', subtitle: 'Displaying Dynamic Data with Lists, Models, and Persistence' },
-                    { id: 5, title: 'User Input & Forms', subtitle: 'Collecting User Input with TextFields, Pickers, and Form Validation' },
-                    { id: 6, title: 'Networking & APIs', subtitle: 'Fetching Data from the Internet with URLSession and async/await' },
-                    { id: 7, title: 'Advanced UI', subtitle: 'Animations, Gestures, and Custom Views' },
-                    { id: 8, title: 'App Store Deployment', subtitle: 'Testing, Certificates, and Publishing Your App' }
+                    { id: 1, title: 'SwiftUI Foundations', subtitle: 'Views, Modifiers, and the Declarative Paradigm', videoId: 'bqu6BquVi2M' },
+                    { id: 2, title: 'Layout & Navigation', subtitle: 'Building Multi-Screen Apps with Navigation and Layouts', videoId: 'yAXp1l1_HXw' },
+                    { id: 3, title: 'State Management', subtitle: 'Managing App State with @State, @Binding, and @ObservableObject', videoId: 'eWW4L2j3y14' },
+                    { id: 4, title: 'Lists & Data', subtitle: 'Displaying Dynamic Data with Lists, Models, and Persistence', videoId: 'PL8seg1LkNfhkGgHZJYyRqVzcX5bGzQ-t' },
+                    { id: 5, title: 'User Input & Forms', subtitle: 'Collecting User Input with TextFields, Pickers, and Form Validation', videoId: 'PL8seg1LkNfhkV5Zd6u3n3iKWUPJ1Y55K' },
+                    { id: 6, title: 'Networking & APIs', subtitle: 'Fetching Data from the Internet with URLSession and async/await', videoId: 'PL8seg1LkNfhkV5Zd6u3n3iKWUPJ1Y55K' },
+                    { id: 7, title: 'Advanced UI', subtitle: 'Animations, Gestures, and Custom Views', videoId: 'PL8seg1LkNfhkV5Zd6u3n3iKWUPJ1Y55K' },
+                    { id: 8, title: 'App Store Deployment', subtitle: 'Testing, Certificates, and Publishing Your App', videoId: 'PL8seg1LkNfhkV5Zd6u3n3iKWUPJ1Y55K' }
                 ],
                 translations: {
                     el: {
@@ -1903,14 +1960,14 @@
                 duration: '8 weeks',
                 level: 'Beginner to Advanced',
                 modules_data: [
-                    { id: 1, title: 'Foundations of Vibecoding', subtitle: 'Introduction to AI-Assisted Development with Cursor' },
-                    { id: 2, title: 'CURSOR_RULES: Defining Your Tech Stack', subtitle: 'Creating Effective CURSOR_RULES.md Files' },
-                    { id: 3, title: 'INSTRUCTIONS: Requirements & Planning', subtitle: 'Writing Comprehensive INSTRUCTIONS.md Files' },
-                    { id: 4, title: 'Code Generation & Structure', subtitle: 'Prompt Engineering for Code Generation' },
-                    { id: 5, title: 'Iterative Refinement', subtitle: 'Incremental Updates and Improvements' },
-                    { id: 6, title: 'Testing & Quality Assurance', subtitle: 'Ensuring AI-Generated Code Works Correctly' },
-                    { id: 7, title: 'Integration & Deployment', subtitle: 'Connecting APIs and Shipping to Production' },
-                    { id: 8, title: 'Advanced Techniques & Final Project', subtitle: 'Mastering Complex Patterns and Building Your Portfolio' }
+                    { id: 1, title: 'Foundations of Vibecoding', subtitle: 'Introduction to AI-Assisted Development with Cursor', videoId: 'j0XmH4kQh5c' },
+                    { id: 2, title: 'CURSOR_RULES: Defining Your Tech Stack', subtitle: 'Creating Effective CURSOR_RULES.md Files', videoId: 'j0XmH4kQh5c' },
+                    { id: 3, title: 'INSTRUCTIONS: Requirements & Planning', subtitle: 'Writing Comprehensive INSTRUCTIONS.md Files', videoId: 'j0XmH4kQh5c' },
+                    { id: 4, title: 'Code Generation & Structure', subtitle: 'Prompt Engineering for Code Generation', videoId: 'j0XmH4kQh5c' },
+                    { id: 5, title: 'Iterative Refinement', subtitle: 'Incremental Updates and Improvements', videoId: 'j0XmH4kQh5c' },
+                    { id: 6, title: 'Testing & Quality Assurance', subtitle: 'Ensuring AI-Generated Code Works Correctly', videoId: 'j0XmH4kQh5c' },
+                    { id: 7, title: 'Integration & Deployment', subtitle: 'Connecting APIs and Shipping to Production', videoId: 'j0XmH4kQh5c' },
+                    { id: 8, title: 'Advanced Techniques & Final Project', subtitle: 'Mastering Complex Patterns and Building Your Portfolio', videoId: 'j0XmH4kQh5c' }
                 ],
                 translations: {
                     el: {
@@ -1940,14 +1997,14 @@
                 duration: '8 weeks',
                 level: 'Beginner to Intermediate',
                 modules_data: [
-                    { id: 1, title: 'The Human Mind: An Introduction', subtitle: 'Understanding Consciousness, Self-Awareness, and Mental Frameworks' },
-                    { id: 2, title: 'Theology & Human Nature', subtitle: 'Exploring Spiritual Perspectives on the Human Condition' },
-                    { id: 3, title: 'Narcissism: Understanding the Spectrum', subtitle: 'Recognizing Patterns with Compassion and Clarity' },
-                    { id: 4, title: 'The Optimist\'s Mindset', subtitle: 'Cultivating Realistic Optimism and Resilience' },
-                    { id: 5, title: 'Self-Awareness & Growth', subtitle: 'Developing Emotional Intelligence and Introspection' },
-                    { id: 6, title: 'Relationships & Boundaries', subtitle: 'Building Healthy Connections While Protecting Yourself' },
-                    { id: 7, title: 'Spiritual Practices & Mindfulness', subtitle: 'Integrating Wisdom Traditions for Daily Living' },
-                    { id: 8, title: 'Integration & Transformation', subtitle: 'Bringing It All Together for Lasting Change' }
+                    { id: 1, title: 'The Human Mind: An Introduction', subtitle: 'Understanding Consciousness, Self-Awareness, and Mental Frameworks', videoId: 'e7F8aq9eWek' },
+                    { id: 2, title: 'Theology & Human Nature', subtitle: 'Exploring Spiritual Perspectives on the Human Condition', videoId: 'e7F8aq9eWek' },
+                    { id: 3, title: 'Narcissism: Understanding the Spectrum', subtitle: 'Recognizing Patterns with Compassion and Clarity', videoId: 'e7F8aq9eWek' },
+                    { id: 4, title: 'The Optimist\'s Mindset', subtitle: 'Cultivating Realistic Optimism and Resilience', videoId: 'e7F8aq9eWek' },
+                    { id: 5, title: 'Self-Awareness & Growth', subtitle: 'Developing Emotional Intelligence and Introspection', videoId: 'e7F8aq9eWek' },
+                    { id: 6, title: 'Relationships & Boundaries', subtitle: 'Building Healthy Connections While Protecting Yourself', videoId: 'e7F8aq9eWek' },
+                    { id: 7, title: 'Spiritual Practices & Mindfulness', subtitle: 'Integrating Wisdom Traditions for Daily Living', videoId: 'e7F8aq9eWek' },
+                    { id: 8, title: 'Integration & Transformation', subtitle: 'Bringing It All Together for Lasting Change', videoId: 'e7F8aq9eWek' }
                 ],
                 translations: {
                     el: {
@@ -1977,14 +2034,14 @@
                 duration: '8 weeks',
                 level: 'Beginner to Intermediate',
                 modules_data: [
-                    { id: 1, title: 'ASL Basics & Fingerspelling', subtitle: 'Your First Steps in American Sign Language' },
-                    { id: 2, title: 'Greetings & Introductions', subtitle: 'Meeting People in ASL' },
-                    { id: 3, title: 'Daily Life & Activities', subtitle: 'Talking About Your Life in ASL' },
-                    { id: 4, title: 'Questions & Conversations', subtitle: 'Asking Questions and Having Conversations in ASL' },
-                    { id: 5, title: 'Time & Calendar', subtitle: 'Expressing Time in ASL' },
-                    { id: 6, title: 'Emotions & Descriptions', subtitle: 'Expressing Feelings and Describing in ASL' },
-                    { id: 7, title: 'Deaf Culture & Community', subtitle: 'Understanding Deaf Culture and Community' },
-                    { id: 8, title: 'Advanced Communication', subtitle: 'Storytelling, Fluency, and Real-World ASL' }
+                    { id: 1, title: 'ASL Basics & Fingerspelling', subtitle: 'Your First Steps in American Sign Language', videoId: 'DLVyBq5tq-4' },
+                    { id: 2, title: 'Greetings & Introductions', subtitle: 'Meeting People in ASL', videoId: 'DLVyBq5tq-4' },
+                    { id: 3, title: 'Daily Life & Activities', subtitle: 'Talking About Your Life in ASL', videoId: 'DLVyBq5tq-4' },
+                    { id: 4, title: 'Questions & Conversations', subtitle: 'Asking Questions and Having Conversations in ASL', videoId: 'DLVyBq5tq-4' },
+                    { id: 5, title: 'Time & Calendar', subtitle: 'Expressing Time in ASL', videoId: 'DLVyBq5tq-4' },
+                    { id: 6, title: 'Emotions & Descriptions', subtitle: 'Expressing Feelings and Describing in ASL', videoId: 'DLVyBq5tq-4' },
+                    { id: 7, title: 'Deaf Culture & Community', subtitle: 'Understanding Deaf Culture and Community', videoId: 'DLVyBq5tq-4' },
+                    { id: 8, title: 'Advanced Communication', subtitle: 'Storytelling, Fluency, and Real-World ASL', videoId: 'DLVyBq5tq-4' }
                 ],
                 translations: {
                     el: {
@@ -2001,6 +2058,117 @@
                             { title: 'Συναισθήματα & Περιγραφές', subtitle: 'Εκφράζοντας Συναισθήματα και Περιγράφοντας σε ASL' },
                             { title: 'Κουλτούρα Κωφών & Κοινότητα', subtitle: 'Κατανόηση της Κουλτούρας και της Κοινότητας Κωφών' },
                             { title: 'Προχωρημένη Επικοινωνία', subtitle: 'Αφήγηση, Ευχέρεια και ASL στον Πραγματικό Κόσμο' }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'teaching-physics-elementary',
+                title: 'Teaching Physics: Elementary & Middle School',
+                description: 'Learn to teach physics concepts to ages 8-12. Hands-on experiments, visual learning, and age-appropriate explanations.',
+                icon: '🔬',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Beginner to Intermediate',
+                modules_data: [
+                    { id: 1, title: 'Introduction to Teaching Physics to Young Minds', subtitle: 'Understanding Child Development and Physics Education', videoId: '6OLpl5p0fMg' },
+                    { id: 2, title: 'Forces and Motion: Making It Tangible', subtitle: 'Teaching Newton\'s Laws Through Play and Experiments', videoId: 'qMFpYcPqy5E' },
+                    { id: 3, title: 'Energy and Simple Machines', subtitle: 'Engaging Activities for Teaching Energy Transfer', videoId: 'j0XmH4kQh5c' },
+                    { id: 4, title: 'Light and Sound: Visual and Auditory Learning', subtitle: 'Interactive Experiments for Waves and Vibrations', videoId: 'HZGCoVF3YvU' },
+                    { id: 5, title: 'Magnetism and Electricity: Safe Experiments', subtitle: 'Teaching Electromagnetism with Age-Appropriate Activities', videoId: 'wEwGBIrI-BQ' },
+                    { id: 6, title: 'States of Matter: Solids, Liquids, and Gases', subtitle: 'Practical Demonstrations for Understanding Matter', videoId: 'fXLTQi7vVsI' },
+                    { id: 7, title: 'Gravity and Space: Sparking Wonder', subtitle: 'Connecting Classroom Physics to the Universe', videoId: 'NKEhds0KK08' },
+                    { id: 8, title: 'Assessment and Engagement Strategies', subtitle: 'Creating Effective Lessons and Measuring Understanding', videoId: 'Vq2XxZjkNqA' }
+                ],
+                translations: {
+                    el: {
+                        title: 'Διδασκαλία Φυσικής: Δημοτικό & Γυμνάσιο',
+                        description: 'Μάθετε να διδάσκετε έννοιες φυσικής σε ηλικίες 8-12. Πρακτικά πειράματα, οπτική μάθηση και εξηγήσεις κατάλληλες για την ηλικία.',
+                        level: 'Αρχάριος έως Μεσαίο',
+                        duration: '8 εβδομάδες',
+                        modules: [
+                            { title: 'Εισαγωγή στη Διδασκαλία Φυσικής σε Νεαρά Μυαλά', subtitle: 'Κατανόηση Αναπτυξιακής Ψυχολογίας και Εκπαίδευσης Φυσικής' },
+                            { title: 'Δυνάμεις και Κίνηση: Κάνοντάς το Απτό', subtitle: 'Διδασκαλία των Νόμων του Newton Μέσω Παιχνιδιού και Πειραμάτων' },
+                            { title: 'Ενέργεια και Απλές Μηχανές', subtitle: 'Ενεργητικές Δραστηριότητες για τη Διδασκαλία Μεταφοράς Ενέργειας' },
+                            { title: 'Φως και Ήχος: Οπτική και Ακουστική Μάθηση', subtitle: 'Διαδραστικά Πειράματα για Κύματα και Δονήσεις' },
+                            { title: 'Μαγνητισμός και Ηλεκτρισμός: Ασφαλή Πειράματα', subtitle: 'Διδασκαλία Ηλεκτρομαγνητισμού με Δραστηριότητες Κατάλληλες για την Ηλικία' },
+                            { title: 'Καταστάσεις της Ύλης: Στερεά, Υγρά και Αέρια', subtitle: 'Πρακτικές Επιδείξεις για την Κατανόηση της Ύλης' },
+                            { title: 'Βαρύτητα και Διάστημα: Ενθάρρυνση Θαυμασμού', subtitle: 'Σύνδεση Φυσικής Τάξης με το Σύμπαν' },
+                            { title: 'Στρατηγικές Αξιολόγησης και Συμμετοχής', subtitle: 'Δημιουργία Αποτελεσματικών Μαθημάτων και Μέτρηση Κατανόησης' }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'teaching-physics-high-school',
+                title: 'Teaching Physics: High School',
+                description: 'Master teaching physics to ages 13-18. Algebra-based concepts, problem-solving strategies, and engaging demonstrations.',
+                icon: '⚛️',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Intermediate',
+                modules_data: [
+                    { id: 1, title: 'Pedagogy for High School Physics', subtitle: 'Effective Teaching Methods for Teen Learners', videoId: '6OLpl5p0fMg' },
+                    { id: 2, title: 'Kinematics and Vectors', subtitle: 'Teaching Motion with Mathematical Rigor', videoId: 'qMFpYcPqy5E' },
+                    { id: 3, title: 'Dynamics: Forces and Newton\'s Laws', subtitle: 'Building Deep Understanding of Mechanics', videoId: 'j0XmH4kQh5c' },
+                    { id: 4, title: 'Energy, Momentum, and Conservation Laws', subtitle: 'Problem-Solving Approaches for Conservation Principles', videoId: 'HZGCoVF3YvU' },
+                    { id: 5, title: 'Circular Motion and Gravitation', subtitle: 'Connecting Centripetal Force to Planetary Motion', videoId: 'wEwGBIrI-BQ' },
+                    { id: 6, title: 'Waves, Sound, and Optics', subtitle: 'Teaching Wave Properties and Light Behavior', videoId: 'fXLTQi7vVsI' },
+                    { id: 7, title: 'Electricity and Magnetism', subtitle: 'Circuit Analysis and Electromagnetic Phenomena', videoId: 'NKEhds0KK08' },
+                    { id: 8, title: 'Modern Physics and Assessment', subtitle: 'Introducing Quantum Concepts and Effective Evaluation', videoId: 'Vq2XxZjkNqA' }
+                ],
+                translations: {
+                    el: {
+                        title: 'Διδασκαλία Φυσικής: Γυμνάσιο & Λύκειο',
+                        description: 'Κατέκτησε τη διδασκαλία φυσικής σε ηλικίες 13-18. Έννοιες βασισμένες στην άλγεβρα, στρατηγικές επίλυσης προβλημάτων και ελκυστικές επιδείξεις.',
+                        level: 'Μεσαίο',
+                        duration: '8 εβδομάδες',
+                        modules: [
+                            { title: 'Παιδαγωγική για Φυσική Γυμνασίου & Λυκείου', subtitle: 'Αποτελεσματικές Μεθόδοι Διδασκαλίας για Εφήβους Μαθητές' },
+                            { title: 'Κινηματική και Διανύσματα', subtitle: 'Διδασκαλία Κίνησης με Μαθηματική Αυστηρότητα' },
+                            { title: 'Δυναμική: Δυνάμεις και Νόμοι του Newton', subtitle: 'Δόμηση Βαθιάς Κατανόησης Μηχανικής' },
+                            { title: 'Ενέργεια, Ορμή και Νόμοι Διατήρησης', subtitle: 'Προσεγγίσεις Επίλυσης Προβλημάτων για Αρχές Διατήρησης' },
+                            { title: 'Κυκλική Κίνηση και Βαρύτητα', subtitle: 'Σύνδεση Κεντρομόλου Δύναμης με Πλανητική Κίνηση' },
+                            { title: 'Κύματα, Ήχος και Οπτική', subtitle: 'Διδασκαλία Ιδιοτήτων Κυμάτων και Συμπεριφοράς Φωτός' },
+                            { title: 'Ηλεκτρισμός και Μαγνητισμός', subtitle: 'Ανάλυση Κυκλωμάτων και Ηλεκτρομαγνητικά Φαινόμενα' },
+                            { title: 'Σύγχρονη Φυσική και Αξιολόγηση', subtitle: 'Εισαγωγή Κβαντικών Εννοιών και Αποτελεσματική Αξιολόγηση' }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'teaching-physics-advanced',
+                title: 'Teaching Physics: Advanced & AP Level',
+                description: 'Excel at teaching calculus-based physics. AP Physics, exam preparation, and advanced problem-solving techniques.',
+                icon: '🎓',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Advanced',
+                modules_data: [
+                    { id: 1, title: 'Advanced Physics Pedagogy', subtitle: 'Teaching Methods for Calculus-Based Physics', videoId: '6OLpl5p0fMg' },
+                    { id: 2, title: 'AP Mechanics: Kinematics and Dynamics', subtitle: 'Deep Dive into Motion and Forces with Calculus', videoId: 'qMFpYcPqy5E' },
+                    { id: 3, title: 'Work, Energy, and Momentum Systems', subtitle: 'Teaching Multi-Object Systems and Collisions', videoId: 'j0XmH4kQh5c' },
+                    { id: 4, title: 'Rotational Motion and Angular Momentum', subtitle: 'Complex Rotational Dynamics and Torque', videoId: 'HZGCoVF3YvU' },
+                    { id: 5, title: 'Oscillations and Waves', subtitle: 'Simple Harmonic Motion and Wave Mechanics', videoId: 'wEwGBIrI-BQ' },
+                    { id: 6, title: 'Electric Fields and Potential', subtitle: 'Teaching Electrostatics and Gauss\'s Law', videoId: 'fXLTQi7vVsI' },
+                    { id: 7, title: 'Magnetic Fields and Electromagnetic Induction', subtitle: 'Faraday\'s Law and AC Circuits', videoId: 'NKEhds0KK08' },
+                    { id: 8, title: 'AP Exam Preparation and Assessment', subtitle: 'Test Strategies, Free Response, and Student Success', videoId: 'Vq2XxZjkNqA' }
+                ],
+                translations: {
+                    el: {
+                        title: 'Διδασκαλία Φυσικής: Προχωρημένο & AP Επίπεδο',
+                        description: 'Εξαιρετικά στη διδασκαλία φυσικής βασισμένης στον λογισμό. AP Physics, προετοιμασία εξετάσεων και προχωρημένες τεχνικές επίλυσης προβλημάτων.',
+                        level: 'Προχωρημένο',
+                        duration: '8 εβδομάδες',
+                        modules: [
+                            { title: 'Προχωρημένη Παιδαγωγική Φυσικής', subtitle: 'Μέθοδοι Διδασκαλίας για Φυσική Βασισμένη στον Λογισμό' },
+                            { title: 'AP Μηχανική: Κινηματική και Δυναμική', subtitle: 'Βαθιά Εξερεύνηση Κίνησης και Δυνάμεων με Λογισμό' },
+                            { title: 'Εργασία, Ενέργεια και Συστήματα Ορμής', subtitle: 'Διδασκαλία Συστημάτων Πολλαπλών Αντικειμένων και Συγκρούσεων' },
+                            { title: 'Στροφική Κίνηση και Γωνιακή Ορμή', subtitle: 'Σύνθετη Στροφική Δυναμική και Ροπή' },
+                            { title: 'Ταλαντώσεις και Κύματα', subtitle: 'Απλή Αρμονική Κίνηση και Μηχανική Κυμάτων' },
+                            { title: 'Ηλεκτρικά Πεδία και Δυναμικό', subtitle: 'Διδασκαλία Ηλεκτροστατικής και Νόμος του Gauss' },
+                            { title: 'Μαγνητικά Πεδία και Ηλεκτρομαγνητική Επαγωγή', subtitle: 'Νόμος του Faraday και Κυκλώματα AC' },
+                            { title: 'Προετοιμασία Εξετάσεων AP και Αξιολόγηση', subtitle: 'Στρατηγικές Δοκιμών, Ελεύθερη Απάντηση και Επιτυχία Μαθητών' }
                         ]
                     }
                 }
@@ -2045,6 +2213,9 @@
         function init() {
             initTheme();
             // Initialize theme and layout managers
+            if (typeof ViewModeManager !== 'undefined') {
+                ViewModeManager.init();
+            }
             if (typeof ThemeManager !== 'undefined') {
                 ThemeManager.init();
             }
@@ -2073,6 +2244,30 @@
         }
 
         // Show courses listing with 3D hero
+        function openInstructorDashboard() {
+            if (!user || !user.email) {
+                alert('Please sign in first');
+                return;
+            }
+            
+            // Hide main content and show dashboard
+            const app = document.getElementById('app');
+            if (!app) return;
+            
+            app.innerHTML = `
+                <div class="instructor-dashboard-container">
+                    <div id="instructorDashboard"></div>
+                </div>
+            `;
+            
+            // Initialize and render dashboard
+            if (typeof InstructorDashboard !== 'undefined') {
+                InstructorDashboard.init().then(() => {
+                    renderInstructorDashboard();
+                });
+            }
+        }
+        
         function showCourses() {
             state.currentCourseId = null;
             const app = document.getElementById('app');
@@ -2080,6 +2275,11 @@
                 console.error('App element not found!');
                 return;
             }
+            
+            // Check view mode from ViewModeManager
+            const viewMode = (typeof ViewModeManager !== 'undefined' && ViewModeManager.getCurrentMode) 
+                ? ViewModeManager.getCurrentMode() 
+                : (localStorage.getItem('viewMode') || 'enhanced');
             
             // Use custom layout if available, otherwise use default
             const translatedCourses = window.getTranslatedCourses ? window.getTranslatedCourses() : courses;
@@ -2096,6 +2296,71 @@
                 return;
             }
             
+            // Handle 3D World view mode
+            if (viewMode === '3d-world') {
+                app.innerHTML = `
+                    <div class="courses-container" id="courses-container" style="padding: 0; height: 100vh; overflow: hidden;">
+                        <!-- 3D World will be initialized here -->
+                    </div>
+                `;
+                // Initialize 3D world
+                setTimeout(() => {
+                    if (typeof init3DWorld === 'function') {
+                        init3DWorld();
+                    } else if (typeof ThreeDWorld !== 'undefined') {
+                        ThreeDWorld.init();
+                    }
+                }, 100);
+                return;
+            }
+            
+            // Handle Universe view mode
+            if (viewMode === 'universe') {
+                app.innerHTML = `
+                    <div class="courses-container" id="courses-container" style="padding: 0; height: 100vh; overflow: hidden;">
+                        <!-- Universe View will be initialized here -->
+                    </div>
+                `;
+                // Initialize Universe view
+                setTimeout(() => {
+                    if (typeof initUniverseView === 'function') {
+                        initUniverseView();
+                    } else if (typeof UniverseView !== 'undefined') {
+                        UniverseView.init();
+                    }
+                }, 100);
+                return;
+            }
+            
+            // Handle Simple view mode (no 3D effects)
+            if (viewMode === 'simple') {
+                const simpleHTML = `
+                    <div class="courses-container">
+                        <div class="page-header">
+                            <h1 class="page-title">${window.i18n ? (window.i18n.t('courses') || 'Courses') : 'Courses'}</h1>
+                            <p class="page-subtitle">${window.i18n ? (window.i18n.t('selectCourse') || 'Select a course to begin') : 'Select a course to begin'}</p>
+                        </div>
+                        <div class="courses-grid" id="coursesSection">
+                            ${translatedCourses.map(course => `
+                                <div class="course-card" onclick="loadCourse('${course.id}')" style="transform: none !important;">
+                                    <div class="course-icon">${course.icon}</div>
+                                    <h2 class="course-title">${course.title}</h2>
+                                    <p class="course-description">${course.description}</p>
+                                    <div class="course-meta">
+                                        <span>📚 ${course.modules} ${window.i18n ? window.i18n.t('modules') : 'modules'}</span>
+                                        <span>⏱️ ${course.duration}</span>
+                                        <span>📊 ${course.level}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                app.innerHTML = simpleHTML;
+                return;
+            }
+            
+            // Enhanced view mode (with 3D effects) - default behavior
             let layoutHTML = null;
             if (typeof UILayoutManager !== 'undefined' && UILayoutManager.renderCourses) {
                 try {
@@ -2118,6 +2383,23 @@
                                 <span>📚 ${course.modules} ${window.i18n ? window.i18n.t('modules') : 'modules'}</span>
                                 <span>⏱️ ${course.duration}</span>
                                 <span>📊 ${course.level}</span>
+                            </div>
+                            <div class="course-rating-preview" id="rating-preview-${course.id}">
+                                ${(() => {
+                                    if (typeof ReviewManager !== 'undefined') {
+                                        const avgRating = ReviewManager.getAverageRating(course.id);
+                                        const reviewCount = ReviewManager.getReviewsForCourse(course.id).length;
+                                        if (reviewCount > 0) {
+                                            return `
+                                                <div class="rating-preview">
+                                                    <span class="rating-stars-small">${renderStars(parseFloat(avgRating))}</span>
+                                                    <span class="rating-text">${avgRating} (${reviewCount})</span>
+                                                </div>
+                                            `;
+                                        }
+                                    }
+                                    return '';
+                                })()}
                             </div>
                             <div class="modern-course-arrow">
                                 ${window.i18n ? (window.i18n.t('startCourse') || 'Start Learning') : 'Start Learning'} →
@@ -2259,6 +2541,57 @@
 
             renderCourseView();
             loadModule(1);
+            
+            // Initialize reviews for this course
+            if (typeof ReviewManager !== 'undefined') {
+                ReviewManager.init(courseId).then(() => {
+                    // Update rating previews on course cards
+                    updateCourseRatingPreviews();
+                });
+            }
+        }
+        
+        // Update rating previews on all course cards
+        function updateCourseRatingPreviews() {
+            if (typeof ReviewManager === 'undefined') return;
+            
+            courses.forEach(course => {
+                const previewEl = document.getElementById(`rating-preview-${course.id}`);
+                if (previewEl) {
+                    const avgRating = ReviewManager.getAverageRating(course.id);
+                    const reviewCount = ReviewManager.getReviewsForCourse(course.id).length;
+                    if (reviewCount > 0) {
+                        previewEl.innerHTML = `
+                            <div class="rating-preview">
+                                <span class="rating-stars-small">${renderStars(parseFloat(avgRating))}</span>
+                                <span class="rating-text">${avgRating} (${reviewCount})</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+        
+        // Helper function to render stars (used in multiple places)
+        function renderStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<span class="star filled">★</span>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<span class="star half">★</span>';
+            }
+            
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<span class="star">☆</span>';
+            }
+            
+            return stars;
         }
 
         // Render course view
@@ -2321,6 +2654,10 @@
             renderCourseView();
             
             const contentArea = document.getElementById('content');
+            if (!contentArea) {
+                console.error('Content area not found');
+                return;
+            }
             contentArea.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading module...</p></div>';
 
             try {
@@ -2350,6 +2687,12 @@
                 // Process markdown to hide answers and make resources clickable
                 html = processModuleContent(html, moduleId);
 
+                // Check if module has video
+                const moduleVideoId = module.videoId || null;
+                const videoSection = moduleVideoId && typeof VideoPlayer !== 'undefined' 
+                    ? renderVideoInModule(moduleVideoId, moduleId)
+                    : '';
+                
                 contentArea.innerHTML = `
                     <div class="module-header">
                         <h1 class="module-title">${module.title}</h1>
@@ -2357,19 +2700,70 @@
                         <div class="module-actions">
                             <button class="btn btn-primary" onclick="startQuiz(${moduleId})">Take Quiz</button>
                             <button class="btn btn-secondary" onclick="downloadModule(${moduleId})">Download PDF</button>
+                            <button class="btn" onclick="generateModuleSummary('${state.currentCourseId}', ${moduleId})" title="AI Summary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">📝 AI Summary</button>
+                            <button class="btn" onclick="generateModuleFlashcards('${state.currentCourseId}', ${moduleId})" title="Generate Flashcards" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">🃏 Generate Flashcards</button>
                         </div>
                     </div>
+                    <div id="moduleSummary-${moduleId}" class="module-summary" style="display: none; margin: 1rem 0; padding: 1.5rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 8px; border-left: 4px solid #667eea;"></div>
+                    ${videoSection}
                     <div class="module-content">${html}</div>
+                    <div id="forumContainer-${moduleId}" class="module-forum"></div>
+                    ${moduleId === 1 ? `<div id="reviewsContainer"></div>` : ''}
                     <div class="nav-buttons">
                         ${moduleId > 1 ? `<button class="btn btn-secondary" onclick="loadModule(${moduleId - 1})">← Previous Module</button>` : '<div></div>'}
                         ${moduleId < state.totalModules ? `<button class="btn btn-primary" onclick="loadModule(${moduleId + 1})">Next Module →</button>` : '<button class="btn btn-success" onclick="completeCourse()">Complete Course ✓</button>'}
                     </div>
                 `;
+                
+                // Load video if module has one
+                if (moduleVideoId && typeof VideoPlayer !== 'undefined') {
+                    setTimeout(() => {
+                        VideoPlayer.embedYouTube(moduleVideoId, `video-container-${moduleId}`, {
+                            autoplay: false,
+                            controls: true,
+                            modestbranding: true,
+                            showRelated: false
+                        });
+                    }, 100);
+                }
+                
+                // Load forum for this module
+                if (typeof ForumManager !== 'undefined') {
+                    setTimeout(() => {
+                        renderForum(state.currentCourseId, moduleId, `forumContainer-${moduleId}`);
+                    }, 100);
+                }
+                
+                // Load and render reviews if on first module
+                if (moduleId === 1 && typeof ReviewManager !== 'undefined') {
+                    ReviewManager.init(state.currentCourseId).then(() => {
+                        renderReviews(state.currentCourseId);
+                    });
+                }
 
                 // Highlight code blocks
                 document.querySelectorAll('pre code').forEach(block => {
                     hljs.highlightElement(block);
                 });
+                
+                // Auto-generate module summary if AI Enhanced is available
+                if (typeof AIEnhanced !== 'undefined' && AIEnhanced.generateModuleSummary) {
+                    setTimeout(async () => {
+                        const summary = await AIEnhanced.generateModuleSummary(state.currentCourseId, moduleId);
+                        if (summary) {
+                            const summaryDiv = document.getElementById(`moduleSummary-${moduleId}`);
+                            if (summaryDiv) {
+                                summaryDiv.style.display = 'block';
+                                summaryDiv.innerHTML = `
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-weight: 600; color: #667eea;">
+                                        🤖 AI-Generated Summary
+                                    </div>
+                                    <div style="color: var(--text); line-height: 1.6; white-space: pre-wrap;">${summary.summary}</div>
+                                `;
+                            }
+                        }
+                    }, 500);
+                }
 
                 updateProgress();
             } catch (error) {
@@ -2489,35 +2883,95 @@
             const total = currentQuiz.questions.length;
             const moduleKey = `${state.currentCourseId}-${moduleId}`;
             
+            // Process questions and generate AI explanations
+            const explanationPromises = [];
+            
             currentQuiz.questions.forEach((q, idx) => {
+                // Show explanation for this question
                 const explanation = document.getElementById(`explanation_${idx}`);
-                explanation.classList.add('show');
+                if (explanation) {
+                    explanation.classList.add('show');
+                } else {
+                    console.warn(`Explanation element not found for question ${idx + 1}`);
+                }
+                
+                let isCorrect = false;
+                let userAnswer = '';
+                let correctAnswer = '';
                 
                 if (q.type === 'multiple_choice') {
                     const selected = quizAnswers[idx];
                     const correct = q.correct_answer;
-                    const optionEl = document.getElementById(`q${idx}_opt${selected}`);
+                    userAnswer = selected !== undefined ? q.options[selected] : 'No answer';
+                    correctAnswer = q.options[correct];
+                    isCorrect = selected === correct;
                     
-                    if (selected === correct) {
-                        score++;
-                        if (optionEl) {
-                            optionEl.classList.add('correct');
-                        }
-                    } else {
-                        if (optionEl) {
-                            optionEl.classList.add('incorrect');
-                        }
-                        const correctEl = document.getElementById(`q${idx}_opt${correct}`);
-                        if (correctEl) {
-                            correctEl.classList.add('correct');
+                    if (selected !== undefined) {
+                        const optionEl = document.getElementById(`q${idx}_opt${selected}`);
+                        
+                        if (selected === correct) {
+                            score++;
+                            if (optionEl) {
+                                optionEl.classList.add('correct');
+                            }
+                        } else {
+                            if (optionEl) {
+                                optionEl.classList.add('incorrect');
+                            }
+                            const correctEl = document.getElementById(`q${idx}_opt${correct}`);
+                            if (correctEl) {
+                                correctEl.classList.add('correct');
+                            }
                         }
                     }
                 } else {
-                    const answer = document.getElementById(`answer_${idx}`).value.toLowerCase().trim();
-                    const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
-                    if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
-                        score++;
+                    const answerInput = document.getElementById(`answer_${idx}`);
+                    if (answerInput) {
+                        const answer = answerInput.value.toLowerCase().trim();
+                        userAnswer = answerInput.value;
+                        correctAnswer = q.acceptable_answers[0] || 'N/A';
+                        
+                        // Disable input after submission to preserve answer
+                        answerInput.disabled = true;
+                        answerInput.style.backgroundColor = 'var(--hover-bg)';
+                        answerInput.style.cursor = 'not-allowed';
+                        
+                        // Add visual indicator showing submitted answer
+                        const submittedAnswer = answerInput.value;
+                        if (submittedAnswer) {
+                            const answerDisplay = document.createElement('div');
+                            answerDisplay.className = 'submitted-answer';
+                            answerDisplay.style.cssText = 'margin-top: 0.5rem; padding: 0.5rem; background: var(--card); border-radius: 4px; font-style: italic; color: var(--text-light);';
+                            answerDisplay.textContent = `Your answer: ${submittedAnswer}`;
+                            answerInput.parentNode.insertBefore(answerDisplay, answerInput.nextSibling);
+                        }
+                        
+                        const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
+                        if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
+                            score++;
+                            isCorrect = true;
+                            if (answerInput) {
+                                answerInput.style.borderColor = 'var(--success)';
+                            }
+                        } else {
+                            if (answerInput) {
+                                answerInput.style.borderColor = 'var(--error)';
+                            }
+                        }
                     }
+                }
+                
+                // Generate AI explanation for this question
+                if (typeof AIEnhanced !== 'undefined' && AIEnhanced.generateQuizExplanation) {
+                    explanationPromises.push(
+                        AIEnhanced.generateQuizExplanation(q.question, userAnswer, correctAnswer, isCorrect)
+                            .then(explanation => {
+                                if (explanation) {
+                                    this.addAIExplanationToQuestion(idx, explanation);
+                                }
+                            })
+                            .catch(err => console.warn('Failed to generate AI explanation:', err))
+                    );
                 }
             });
             
@@ -2533,8 +2987,45 @@
             `;
             
             document.querySelector('.quiz-container').insertAdjacentHTML('beforeend', scoreHTML);
+            
+            // Wait for AI explanations to load
+            Promise.all(explanationPromises).then(() => {
+                console.log('All AI explanations generated');
+            });
+            
             renderCourseView();
             loadModule(moduleId);
+        }
+        
+        // Add AI explanation to question
+        function addAIExplanationToQuestion(questionIdx, explanationData) {
+            const questionContainer = document.querySelector(`#question_${questionIdx}`);
+            if (!questionContainer) return;
+            
+            // Check if AI explanation already exists
+            let aiExplanationDiv = questionContainer.querySelector('.ai-explanation');
+            if (!aiExplanationDiv) {
+                aiExplanationDiv = document.createElement('div');
+                aiExplanationDiv.className = 'ai-explanation';
+                aiExplanationDiv.style.cssText = 'margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 8px; border-left: 4px solid #667eea;';
+                
+                const aiHeader = document.createElement('div');
+                aiHeader.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-weight: 600; color: #667eea;';
+                aiHeader.innerHTML = '🤖 AI Explanation';
+                aiExplanationDiv.appendChild(aiHeader);
+                
+                const aiContent = document.createElement('div');
+                aiContent.className = 'ai-explanation-content';
+                aiContent.style.cssText = 'color: var(--text); line-height: 1.6;';
+                aiExplanationDiv.appendChild(aiContent);
+                
+                questionContainer.appendChild(aiExplanationDiv);
+            }
+            
+            const contentDiv = aiExplanationDiv.querySelector('.ai-explanation-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = explanationData.explanation.replace(/\n/g, '<br>');
+            }
         }
 
         function downloadResource(resourceName) {
@@ -2706,9 +3197,12 @@
                             <div class="profile-dropdown-item" onclick="viewMyProfile()">My Profile</div>
                             <div class="profile-dropdown-item" onclick="openProfileEditModal()">Edit Profile</div>
                             <div class="profile-dropdown-item" onclick="viewCertificates()">My Certificates</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); generateStudyPlan();">📚 My Study Plan</div>
                             <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openMessaging === 'function') window.openMessaging(); else console.error('openMessaging not available'); }, 50);">Messages</div>
                             <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openAssignments === 'function') window.openAssignments(); else console.error('openAssignments not available'); }, 50);">Assignments</div>
                             <div class="profile-dropdown-item" onclick="openFriendsModal()">Friends</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); openInstructorDashboard();">🎓 Instructor Dashboard</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); openAdminDashboard();">🔐 Admin Dashboard</div>
                             <div class="profile-dropdown-item" onclick="openGDPRSettings()">GDPR & Data</div>
                             <div class="profile-dropdown-item" onclick="logout()">Sign Out</div>
                         </div>
@@ -2736,10 +3230,16 @@
         }
 
         function openProfileModal() {
-            document.getElementById('profileModal').classList.add('show');
+            const modal = document.getElementById('profileModal');
+            modal.classList.add('show');
             document.getElementById('profileName').value = user.name;
             document.getElementById('profileEmail').value = user.email;
             document.getElementById('profileDropdown').classList.remove('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                modal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
         }
 
         function closeProfileModal() {
@@ -2780,7 +3280,21 @@
             }
             
             document.getElementById('certificatesContent').innerHTML = CertificateManager.renderCertificatesModal();
-            document.getElementById('certificatesModal').classList.add('show');
+            const certificatesModal = document.getElementById('certificatesModal');
+            certificatesModal.classList.add('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                } else {
+                    certificatesModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
             
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) {
@@ -2810,7 +3324,21 @@
             }
             
             document.getElementById('profileEditContent').innerHTML = UserProfileManager.renderEditProfileModal();
-            document.getElementById('profileEditModal').classList.add('show');
+            const profileEditModal = document.getElementById('profileEditModal');
+            profileEditModal.classList.add('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                } else {
+                    profileEditModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
             
             // Add character counter for bio
             setTimeout(() => {
@@ -2847,6 +3375,11 @@
         }
         
         function openFriendsModal() {
+            // Ensure courses are shown first
+            if (typeof showCourses === 'function') {
+                showCourses();
+            }
+            
             const modal = document.getElementById('friendsModal');
             if (!modal) {
                 const modalHTML = `
@@ -2873,6 +3406,24 @@
                 friendsContent.innerHTML = '<p>Loading friends...</p>';
             }
             document.getElementById('friendsModal').classList.add('show');
+            
+            // Scroll window to center to ensure modal is visible
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                // Calculate center position
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                
+                // Only scroll if we're not already near the center
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ 
+                        top: centerPosition, 
+                        behavior: 'smooth' 
+                    });
+                }
+            }, 300);
             
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) {
@@ -3068,8 +3619,139 @@
         window.openGDPRSettings = openGDPRSettings;
         window.closeGDPRSettings = closeGDPRSettings;
 
+        // Universal modal close function
+        function closeModal(modalElement) {
+            if (!modalElement) return;
+            
+            // Handle different modal types
+            const modalId = modalElement.id;
+            
+            if (modalId === 'settingsModal') {
+                if (typeof closeSettings === 'function') {
+                    closeSettings();
+                    return;
+                }
+            } else if (modalId === 'assignmentsModal') {
+                if (typeof closeAssignments === 'function') {
+                    closeAssignments();
+                    return;
+                }
+            } else if (modalId === 'messagingModal') {
+                if (typeof closeMessaging === 'function') {
+                    closeMessaging();
+                    return;
+                }
+            } else if (modalId === 'friendsModal') {
+                if (typeof closeFriendsModal === 'function') {
+                    closeFriendsModal();
+                    return;
+                }
+            } else if (modalId === 'profileEditModal') {
+                if (typeof closeProfileEditModal === 'function') {
+                    closeProfileEditModal();
+                    return;
+                }
+            } else if (modalId === 'course-details-modal') {
+                // 3D world course details modal - remove it
+                modalElement.remove();
+                return;
+            } else if (modalId === 'predictionModal') {
+                if (typeof closePrediction === 'function') {
+                    closePrediction();
+                    return;
+                }
+            } else if (modalId === 'aiSearchModal') {
+                if (typeof closeAISearch === 'function') {
+                    closeAISearch();
+                    return;
+                }
+            }
+            
+            // Default: just remove show class
+            modalElement.classList.remove('show');
+        }
+        
+        // Add click-outside-to-close functionality to all modals
+        document.addEventListener('click', function(e) {
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                // Check if click is on the backdrop (modal itself, not modal-content)
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
+            });
+        });
+        
+        // Improve ESC key handler
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeElement = document.activeElement;
+                const isInputFocused = activeElement && (
+                    activeElement.tagName === 'INPUT' ||
+                    activeElement.tagName === 'TEXTAREA' ||
+                    activeElement.isContentEditable
+                );
+                
+                // Check for specific modals first (always allow ESC to close modals)
+                const aiSearchModal = document.getElementById('aiSearchModal');
+                if (aiSearchModal && aiSearchModal.classList.contains('show')) {
+                    if (typeof closeAISearch === 'function') {
+                        closeAISearch();
+                        return;
+                    }
+                }
+                
+                const predictionModal = document.getElementById('predictionModal');
+                if (predictionModal && predictionModal.classList.contains('show')) {
+                    if (typeof closePrediction === 'function') {
+                        closePrediction();
+                        return;
+                    }
+                }
+                
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal && settingsModal.classList.contains('show')) {
+                    if (typeof closeSettings === 'function') {
+                        closeSettings();
+                        return;
+                    }
+                }
+                
+                // Only prevent default behavior if not typing in an input field
+                if (!isInputFocused) {
+                    // Fallback: close any other modals
+                    const modals = document.querySelectorAll('.modal.show');
+                    if (modals.length > 0) {
+                        // Close the topmost modal (last one in DOM order)
+                        const topModal = modals[modals.length - 1];
+                        closeModal(topModal);
+                    }
+                    
+                    // Also close any dropdowns
+                    const dropdown = document.getElementById('profileDropdown');
+                    if (dropdown) {
+                        dropdown.classList.remove('show');
+                    }
+                }
+            }
+        });
+
         function openLoginModal() {
-            document.getElementById('loginModal').classList.add('show');
+            const loginModal = document.getElementById('loginModal');
+            loginModal.classList.add('show');
+            
+            // Auto-scroll to modal
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ top: centerPosition, behavior: 'smooth' });
+                } else {
+                    loginModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         }
 
         // Simple password-based authentication (client-side only)
@@ -3108,7 +3790,7 @@
                 </div>
             `;
             
-            form.onsubmit = (e) => {
+            form.onsubmit = async (e) => {
                 e.preventDefault();
                 const name = document.getElementById('signupName').value.trim();
                 const email = document.getElementById('signupEmail').value.trim().toLowerCase();
@@ -3125,6 +3807,27 @@
                     return;
                 }
                 
+                // Use AuthManager for email confirmation (if available)
+                if (typeof AuthManager !== 'undefined') {
+                    try {
+                        const result = await AuthManager.signUpWithEmail(email, password, name);
+                        
+                        if (result.requiresVerification) {
+                            // Show confirmation code input
+                            showEmailConfirmationForm(email);
+                        } else {
+                            // No verification needed (shouldn't happen for email signup)
+                            alert('Account created! Please sign in.');
+                            showLoginForm();
+                        }
+                    } catch (error) {
+                        console.error('Signup error:', error);
+                        alert(error.message || 'Sign up failed. Please try again.');
+                    }
+                    return;
+                }
+                
+                // Fallback: Old method if AuthManager not available
                 // Check if user already exists
                 const users = JSON.parse(localStorage.getItem('users') || '{}');
                 if (users[email]) {
@@ -3133,26 +3836,63 @@
                     return;
                 }
                 
-                // Create new user account
-                users[email] = {
-                    name: name,
-                    email: emailValidation.email,
-                    passwordHash: hashPassword(password)
-                };
-                localStorage.setItem('users', JSON.stringify(users));
+                // Try Supabase first if configured
+                const supabaseUrl = localStorage.getItem('supabase_url');
+                const supabaseKey = localStorage.getItem('supabase_anon_key');
                 
-                // Auto sign in
-                user = { name: name, email: emailValidation.email };
-                localStorage.setItem('user', JSON.stringify(user));
-                
-                if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
-                    UserProfileManager.initDefaultFriends();
-                }
-                
-                document.getElementById('loginModal').classList.remove('show');
-                updateUserDisplay();
-                if (state.currentCourseId) {
-                    renderCourseView();
+                if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
+                    // Use Supabase authentication
+                    SupabaseManager.init().then(async () => {
+                        try {
+                            const { data, error } = await SupabaseManager.signUp(emailValidation.email, password, name);
+                            if (error) throw error;
+                            
+                            // Get profile
+                            const profile = await SupabaseManager.getProfile(data.user.id);
+                            user = { ...data.user, ...profile };
+                            
+                            // Send welcome email if backend is configured
+                            const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
+                            if (backendUrl) {
+                                fetch(`${backendUrl}/api/notifications/welcome`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: user.email, name: user.name })
+                                }).catch(err => console.log('Welcome email failed:', err));
+                            }
+                            
+                            document.getElementById('loginModal').classList.remove('show');
+                            updateUserDisplay();
+                            if (state.currentCourseId) {
+                                renderCourseView();
+                            }
+                        } catch (error) {
+                            console.error('Supabase signup error:', error);
+                            alert(error.message || 'Sign up failed. Please try again.');
+                        }
+                    });
+                } else {
+                    // Fallback: localStorage authentication
+                    users[email] = {
+                        name: name,
+                        email: emailValidation.email,
+                        passwordHash: hashPassword(password)
+                    };
+                    localStorage.setItem('users', JSON.stringify(users));
+                    
+                    // Auto sign in
+                    user = { name: name, email: emailValidation.email };
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                        UserProfileManager.initDefaultFriends();
+                    }
+                    
+                    document.getElementById('loginModal').classList.remove('show');
+                    updateUserDisplay();
+                    if (state.currentCourseId) {
+                        renderCourseView();
+                    }
                 }
             };
         }
@@ -3171,17 +3911,66 @@
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">Sign In</button>
                 </div>
+                
+                <!-- OAuth Buttons -->
+                <div style="margin: 1.5rem 0; text-align: center;">
+                    <div style="display: flex; align-items: center; margin: 1rem 0;">
+                        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                        <span style="padding: 0 1rem; color: var(--text-light); font-size: 0.875rem;">or</span>
+                        <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button type="button" class="btn" onclick="handleGoogleSignIn()" style="background: white; color: #333; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>🔵</span> Sign in with Google
+                        </button>
+                        <button type="button" class="btn" onclick="handleFacebookSignIn()" style="background: #1877F2; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>👥</span> Sign in with Facebook
+                        </button>
+                        <button type="button" class="btn" onclick="handleAppleSignIn()" style="background: #000; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>🍎</span> Sign in with Apple
+                        </button>
+                    </div>
+                </div>
+                
                 <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
                     Don't have an account? <a href="#" onclick="event.preventDefault(); showSignUpForm();" style="color: var(--theme-primary);">Sign up</a>
                 </p>
             `;
             
-            form.onsubmit = (e) => {
+            form.onsubmit = async (e) => {
                 e.preventDefault();
                 const emailOrUsername = document.getElementById('loginEmail').value.trim().toLowerCase();
                 const password = document.getElementById('loginPassword').value;
                 
-                // Check if it's an email or username
+                // Try Supabase first if configured
+                const supabaseUrl = localStorage.getItem('supabase_url');
+                const supabaseKey = localStorage.getItem('supabase_anon_key');
+                
+                if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
+                    // Use Supabase authentication
+                    try {
+                        await SupabaseManager.init();
+                        const { data, error } = await SupabaseManager.signIn(emailOrUsername, password);
+                        if (error) throw error;
+                        
+                        // Get profile
+                        const profile = await SupabaseManager.getProfile(data.user.id);
+                        user = { ...data.user, ...profile };
+                        
+                        document.getElementById('loginModal').classList.remove('show');
+                        updateUserDisplay();
+                        if (state.currentCourseId) {
+                            renderCourseView();
+                        }
+                        return;
+                    } catch (error) {
+                        console.error('Supabase login error:', error);
+                        alert(error.message || 'Login failed. Please check your credentials.');
+                        return;
+                    }
+                }
+                
+                // Fallback: localStorage authentication
                 const isEmail = emailOrUsername.includes('@');
                 const users = JSON.parse(localStorage.getItem('users') || '{}');
                 
@@ -3234,9 +4023,144 @@
             };
         }
 
+        // Email Confirmation Functions
+        function showEmailConfirmationForm(email) {
+            const form = document.getElementById('loginForm');
+            form.innerHTML = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem;">📧 Check Your Email</h3>
+                    <p style="color: var(--text-light); font-size: 0.875rem;">
+                        We sent a 6-digit confirmation code to<br>
+                        <strong>${email}</strong>
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmation Code</label>
+                    <input type="text" class="form-input" id="confirmationCode" placeholder="Enter 6-digit code" required maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: bold;">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="showSignUpForm()">Back</button>
+                    <button type="button" class="btn btn-primary" onclick="verifyEmailCode('${email}')">Verify Email</button>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                    Didn't receive code? <a href="#" onclick="event.preventDefault(); resendConfirmationCode('${email}');" style="color: var(--theme-primary);">Resend</a>
+                </p>
+            `;
+        }
+
+        async function verifyEmailCode(email) {
+            const code = document.getElementById('confirmationCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                alert('Please enter the 6-digit confirmation code');
+                return;
+            }
+            
+            if (typeof AuthManager === 'undefined') {
+                alert('Authentication system not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const result = await AuthManager.verifyEmail(email, code);
+                
+                if (result.success) {
+                    // Account created and verified
+                    user = result.user;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    if (UserProfileManager && typeof UserProfileManager.initDefaultFriends === 'function') {
+                        UserProfileManager.initDefaultFriends();
+                    }
+                    
+                    document.getElementById('loginModal').classList.remove('show');
+                    updateUserDisplay();
+                    
+                    if (state.currentCourseId) {
+                        renderCourseView();
+                    }
+                    
+                    alert('✅ Email verified! Account created successfully.');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                alert(error.message || 'Verification failed. Please try again.');
+            }
+        }
+
+        async function resendConfirmationCode(email) {
+            if (typeof AuthManager === 'undefined') {
+                alert('Authentication system not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const result = await AuthManager.resendConfirmationCode(email);
+                alert('✅ Confirmation code resent! Please check your email.');
+            } catch (error) {
+                console.error('Resend error:', error);
+                alert(error.message || 'Failed to resend code. Please try again.');
+            }
+        }
+
+        // OAuth Sign In Handlers
+        async function handleGoogleSignIn() {
+            try {
+                if (typeof AuthManager === 'undefined') {
+                    alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await AuthManager.signInWithGoogle();
+                // OAuth redirects, so this may not execute
+                console.log('Google sign in initiated');
+            } catch (error) {
+                console.error('Google sign in error:', error);
+                alert(error.message || 'Google sign in failed. Please try again.');
+            }
+        }
+
+        async function handleFacebookSignIn() {
+            try {
+                if (typeof AuthManager === 'undefined') {
+                    alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await AuthManager.signInWithFacebook();
+                // OAuth redirects, so this may not execute
+                console.log('Facebook sign in initiated');
+            } catch (error) {
+                console.error('Facebook sign in error:', error);
+                alert(error.message || 'Facebook sign in failed. Please try again.');
+            }
+        }
+
+        async function handleAppleSignIn() {
+            try {
+                if (typeof AuthManager === 'undefined') {
+                    alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                const result = await AuthManager.signInWithApple();
+                // OAuth redirects, so this may not execute
+                console.log('Apple sign in initiated');
+            } catch (error) {
+                console.error('Apple sign in error:', error);
+                alert(error.message || 'Apple sign in failed. Please try again.');
+            }
+        }
+
         // Make functions globally accessible
         window.showSignUpForm = showSignUpForm;
         window.showLoginForm = showLoginForm;
+        window.showEmailConfirmationForm = showEmailConfirmationForm;
+        window.verifyEmailCode = verifyEmailCode;
+        window.resendConfirmationCode = resendConfirmationCode;
+        window.handleGoogleSignIn = handleGoogleSignIn;
+        window.handleFacebookSignIn = handleFacebookSignIn;
+        window.handleAppleSignIn = handleAppleSignIn;
         
         // Initialize test account (for development/testing)
         function initTestAccount() {
@@ -3295,39 +4219,138 @@
             }
         });
 
-        // Close modals with ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.keyCode === 27) {
-                // Don't close if user is typing in an input, textarea, or contenteditable element
-                const activeElement = document.activeElement;
-                const isInputFocused = activeElement && (
-                    activeElement.tagName === 'INPUT' ||
-                    activeElement.tagName === 'TEXTAREA' ||
-                    activeElement.isContentEditable
-                );
-                
-                // Only close if not typing in an input field
-                if (!isInputFocused) {
-                    // Get all visible modals
-                    const modals = document.querySelectorAll('.modal.show');
-                    
-                    if (modals.length > 0) {
-                        // Close the topmost modal (last one in DOM order)
-                        const topModal = modals[modals.length - 1];
-                        topModal.classList.remove('show');
-                        
-                        // Also close any dropdowns
-                        const dropdown = document.getElementById('profileDropdown');
-                        if (dropdown) {
-                            dropdown.classList.remove('show');
-                        }
-                        
-                        // Prevent default behavior
-                        e.preventDefault();
-                    }
+        // ESC key handler is now handled by the universal handler above (removed duplicate)
+        
+        // AI-Enhanced Functions
+        async function generateModuleSummary(courseId, moduleId) {
+            if (typeof AIEnhanced === 'undefined' || !AIEnhanced.generateModuleSummary) {
+                alert('AI features are loading... Please try again in a moment.');
+                return;
+            }
+            
+            const summaryDiv = document.getElementById(`moduleSummary-${moduleId}`);
+            if (summaryDiv) {
+                summaryDiv.style.display = 'block';
+                summaryDiv.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner"></div><p>Generating AI summary...</p></div>';
+            }
+            
+            try {
+                const summary = await AIEnhanced.generateModuleSummary(courseId, moduleId);
+                if (summary && summaryDiv) {
+                    summaryDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #667eea;">
+                                🤖 AI-Generated Summary
+                            </div>
+                            <button onclick="document.getElementById('moduleSummary-${moduleId}').style.display='none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+                        </div>
+                        <div style="color: var(--text); line-height: 1.6; white-space: pre-wrap;">${summary.summary}</div>
+                    `;
+                }
+            } catch (error) {
+                if (summaryDiv) {
+                    summaryDiv.innerHTML = '<div style="color: var(--error);">Failed to generate summary. Please try again.</div>';
                 }
             }
-        });
+        }
+        
+        async function generateModuleFlashcards(courseId, moduleId) {
+            if (typeof AIEnhanced === 'undefined' || !AIEnhanced.generateFlashcardsFromModule) {
+                alert('AI features are loading... Please try again in a moment.');
+                return;
+            }
+            
+            if (typeof FlashcardManager === 'undefined') {
+                alert('Flashcard system not available.');
+                return;
+            }
+            
+            const button = event?.target;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Generating...';
+            }
+            
+            try {
+                const flashcards = await AIEnhanced.generateFlashcardsFromModule(courseId, moduleId, 10);
+                if (flashcards && flashcards.length > 0) {
+                    alert(`✅ Generated ${flashcards.length} flashcards! You can now study them in the Flashcards section.`);
+                } else {
+                    alert('No flashcards generated. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error generating flashcards:', error);
+                alert('Failed to generate flashcards. Please try again.');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '🃏 Generate Flashcards';
+                }
+            }
+        }
+        
+        async function generateStudyPlan() {
+            if (typeof AIEnhanced === 'undefined' || !AIEnhanced.generateStudyPlan) {
+                alert('AI features are loading... Please try again in a moment.');
+                return;
+            }
+            
+            showStudyPlan(null); // Show loading state
+        }
+        
+        async function showStudyPlan(existingPlan) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.id = 'studyPlanModal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2>📚 Your Personalized Study Plan</h2>
+                        <button class="close-btn" onclick="closeStudyPlanModal()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="studyPlanContent">
+                        <div style="text-align: center; padding: 2rem;">
+                            <div class="spinner"></div>
+                            <p>Generating your personalized study plan...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            try {
+                const plan = existingPlan || await AIEnhanced.generateStudyPlan();
+                if (plan) {
+                    document.getElementById('studyPlanContent').innerHTML = `
+                        <div style="line-height: 1.8; white-space: pre-wrap; color: var(--text);">${plan.plan}</div>
+                        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <button class="btn btn-primary" onclick="downloadStudyPlan()">Download Plan</button>
+                            <button class="btn btn-secondary" onclick="closeStudyPlanModal()">Close</button>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('studyPlanContent').innerHTML = '<p>Failed to generate study plan. Please try again.</p>';
+                }
+            } catch (error) {
+                document.getElementById('studyPlanContent').innerHTML = `<p style="color: var(--error);">Error: ${error.message}</p>`;
+            }
+        }
+        
+        function closeStudyPlanModal() {
+            const modal = document.getElementById('studyPlanModal');
+            if (modal) modal.remove();
+        }
+        
+        function downloadStudyPlan() {
+            const planContent = document.querySelector('#studyPlanContent div')?.textContent || '';
+            const blob = new Blob([planContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `study-plan-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
         // Make functions global
         window.showCourses = showCourses;
@@ -3339,6 +4362,11 @@
         window.downloadResource = downloadResource;
         window.downloadModule = downloadModule;
         window.completeCourse = completeCourse;
+        window.generateModuleSummary = generateModuleSummary;
+        window.generateModuleFlashcards = generateModuleFlashcards;
+        window.generateStudyPlan = generateStudyPlan;
+        window.showStudyPlan = showStudyPlan;
+        window.addAIExplanationToQuestion = addAIExplanationToQuestion;
         window.toggleProfileDropdown = toggleProfileDropdown;
         window.openProfileModal = openProfileModal;
         window.closeProfileModal = closeProfileModal;
@@ -3346,11 +4374,29 @@
         window.viewCertificates = viewCertificates;
         window.openLoginModal = openLoginModal;
         window.toggleTheme = toggleTheme;
+        window.generateModuleSummary = generateModuleSummary;
+        window.generateModuleFlashcards = generateModuleFlashcards;
+        window.generateStudyPlan = generateStudyPlan;
+        window.showStudyPlan = showStudyPlan;
+        window.addAIExplanationToQuestion = addAIExplanationToQuestion;
+        window.closeStudyPlanModal = closeStudyPlanModal;
+        window.downloadStudyPlan = downloadStudyPlan;
         
         // Unified Settings Modal
         window.openSettings = function() {
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const currentLanguage = localStorage.getItem('language') || 'en';
+            
+            // Ensure courses are shown first
+            if (typeof showCourses === 'function') {
+                showCourses();
+            }
+            
+            // Remove existing modal if present
+            const existingModal = document.getElementById('settingsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
             
             const modal = document.createElement('div');
             modal.className = 'modal show';
@@ -3386,9 +4432,30 @@
                             </div>
                         </div>
                         
+                        <!-- View Mode Selector -->
+                        <div style="margin-bottom: 2rem;">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem;">View Mode</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.75rem;">Choose how courses are displayed</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                                ${Object.entries(typeof ViewModeManager !== 'undefined' ? ViewModeManager.modes : {}).map(([key, mode]) => `
+                                    <div onclick="ViewModeManager.setMode('${key}'); updateSettingsModal();" 
+                                         style="padding: 1rem; border: 2px solid ${(typeof ViewModeManager !== 'undefined' && ViewModeManager.currentMode === key) ? 'var(--theme-primary)' : 'var(--border)'}; 
+                                                border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;
+                                                background: ${(typeof ViewModeManager !== 'undefined' && ViewModeManager.currentMode === key) ? 'var(--hover-bg)' : 'transparent'};"
+                                         onmouseover="this.style.transform='scale(1.05)'" 
+                                         onmouseout="this.style.transform='scale(1)'">
+                                        <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">${mode.icon}</div>
+                                        <div style="font-size: 0.75rem; font-weight: 600; color: var(--text);">${mode.name}</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-light); margin-top: 0.25rem;">${mode.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
                         <!-- Color Theme Selector -->
                         <div style="margin-bottom: 1rem;">
                             <div style="font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem;">Color Theme</div>
+                            <div style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.75rem;">Choose colors and styling (works with any view mode)</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem;">
                                 ${Object.entries(ThemeManager.themes).map(([key, theme]) => `
                                     <div onclick="ThemeManager.setTheme('${key}'); updateSettingsModal();" 
@@ -3516,6 +4583,76 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Backend Configuration Section -->
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔧</span> Backend Configuration
+                        </h3>
+                        <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 1rem; padding: 0.75rem; background: var(--hover-bg); border-radius: 8px;">
+                            ${localStorage.getItem('backend_url') 
+                                ? '<span style="color: var(--success);">✓ Backend configured</span>' 
+                                : '<span style="color: var(--warning);">⚠ No backend configured - using fallback mode</span>'}
+                            ${localStorage.getItem('supabase_url') && localStorage.getItem('supabase_anon_key')
+                                ? '<br><span style="color: var(--success);">✓ Supabase configured</span>' 
+                                : '<br><span style="color: var(--warning);">⚠ Supabase not configured - using localStorage</span>'}
+                        </div>
+                        
+                        <!-- Backend URL -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Backend Server URL (for shared AI API keys)
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="backendUrlInput" 
+                                       placeholder="https://school-backend.fly.dev" 
+                                       value="${localStorage.getItem('backend_url') || 'https://school-backend.fly.dev'}"
+                                       style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 0.85rem;"
+                                       oninput="document.getElementById('backendUrlStatus').textContent = ''">
+                                <button onclick="saveBackendUrl()" 
+                                        style="padding: 0.75rem 1.5rem; background: var(--theme-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    Save
+                                </button>
+                            </div>
+                            <div id="backendUrlStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-light);">
+                                Deploy backend to Railway/Render and paste URL here. See <a href="https://github.com/philipposk/School/blob/main/IMPLEMENTATION_GUIDE.md" target="_blank" style="color: var(--theme-primary);">IMPLEMENTATION_GUIDE.md</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Supabase Configuration -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Supabase URL
+                            </label>
+                            <input type="text" id="supabaseUrlInput" 
+                                   placeholder="https://xxxxx.supabase.co" 
+                                   value="${localStorage.getItem('supabase_url') || ''}"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 0.85rem; margin-bottom: 0.5rem;"
+                                   oninput="document.getElementById('supabaseStatus').textContent = ''">
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text);">
+                                Supabase Anon Key
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" id="supabaseKeyInput" 
+                                       placeholder="eyJhbGc..." 
+                                       value="${localStorage.getItem('supabase_anon_key') ? '••••••••••••' : ''}"
+                                       style="flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: monospace; font-size: 0.85rem;"
+                                       oninput="document.getElementById('supabaseStatus').textContent = ''">
+                                <button onclick="saveSupabaseConfig()" 
+                                        style="padding: 0.75rem 1.5rem; background: var(--theme-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    Save
+                                </button>
+                            </div>
+                            <div id="supabaseStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></div>
+                            <div style="margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-light);">
+                                Get credentials from Supabase Dashboard → Settings → API. See <a href="https://github.com/philipposk/School/blob/main/supabase-setup.md" target="_blank" style="color: var(--theme-primary);">supabase-setup.md</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             
@@ -3524,6 +4661,25 @@
             if (existing) existing.remove();
             
             document.body.appendChild(modal);
+            
+            // Scroll window to center to ensure modal is visible
+            // Since modals are fixed and centered, we need to scroll the page to show center area
+            setTimeout(() => {
+                const scrollPosition = window.scrollY;
+                const viewportHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                // Calculate center position
+                const centerPosition = (documentHeight - viewportHeight) / 2;
+                
+                // Only scroll if we're not already near the center
+                if (Math.abs(scrollPosition - centerPosition) > viewportHeight / 4) {
+                    window.scrollTo({ 
+                        top: centerPosition, 
+                        behavior: 'smooth' 
+                    });
+                }
+            }, 150);
         };
         
         window.closeSettings = function() {
@@ -3587,6 +4743,99 @@
                 status.textContent = 'Error: AI config not loaded';
                 status.style.color = 'var(--error)';
             }
+        };
+        
+        window.saveBackendUrl = function() {
+            const input = document.getElementById('backendUrlInput');
+            const status = document.getElementById('backendUrlStatus');
+            const url = input.value.trim();
+            
+            if (!url) {
+                status.textContent = 'Please enter a backend URL';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch (e) {
+                status.textContent = 'Invalid URL format';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            localStorage.setItem('backend_url', url);
+            if (typeof AIConfig !== 'undefined') {
+                AIConfig.setBackendUrl(url);
+            }
+            
+            status.textContent = '✓ Backend URL saved successfully!';
+            status.style.color = 'var(--success)';
+            
+            // Test connection
+            fetch(`${url}/health`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        status.textContent = '✓ Backend URL saved and connected!';
+                        status.style.color = 'var(--success)';
+                    }
+                })
+                .catch(err => {
+                    status.textContent = '⚠ Saved but connection test failed. Check URL.';
+                    status.style.color = 'var(--warning)';
+                });
+            
+            setTimeout(() => {
+                const modal = document.getElementById('settingsModal');
+                if (modal) {
+                    openSettings();
+                }
+            }, 1500);
+        };
+        
+        window.saveSupabaseConfig = function() {
+            const urlInput = document.getElementById('supabaseUrlInput');
+            const keyInput = document.getElementById('supabaseKeyInput');
+            const status = document.getElementById('supabaseStatus');
+            
+            const url = urlInput.value.trim();
+            const key = keyInput.value.trim();
+            
+            if (!url || !key) {
+                status.textContent = 'Please enter both URL and key';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch (e) {
+                status.textContent = 'Invalid URL format';
+                status.style.color = 'var(--error)';
+                return;
+            }
+            
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_anon_key', key);
+            
+            // Update Supabase client if loaded
+            if (typeof SupabaseManager !== 'undefined') {
+                SupabaseManager.init();
+            }
+            
+            status.textContent = '✓ Supabase configuration saved!';
+            status.style.color = 'var(--success)';
+            keyInput.value = '••••••••••••';
+            
+            setTimeout(() => {
+                const modal = document.getElementById('settingsModal');
+                if (modal) {
+                    openSettings();
+                }
+            }, 1500);
         };
         
         window.setLanguage = function(lang) {
@@ -3720,7 +4969,7 @@
                 const isGreek = currentLang === 'el';
                 errorMessage.innerHTML = `
                     <div class="chatbot-avatar">🤖</div>
-                    <div class="chatbot-text">${isGreek ? 'Συγγνώμη, συνάντησα σφάλμα. Παρακαλώ δοκιμάστε ξανά.' : 'Sorry, I encountered an error. Please try again.'}</div>
+                    <div class="chatbot-text">${isGreek ? 'Συγγνώμη, συνάντησα σφάλμα. Παρακαλώ δοκίμασε ξανά.' : 'Sorry, I encountered an error. Please try again.'}</div>
                 `;
                 messages.appendChild(errorMessage);
                 messages.scrollTop = messages.scrollHeight;
@@ -3787,15 +5036,15 @@ ${siteContext.currentCourse ? `ΤΡΕΧΟΝ ΜΑΘΗΜΑ: ${siteContext.currentC
 
 ΠΡΟΟΔΟΣ ΧΡΗΣΤΗ:
 - Ολοκληρωμένες ενότητες: ${siteContext.userProgress.completedModules} από ${siteContext.userProgress.totalModules}
-- Κουίζ που έχουν γίνει: ${siteContext.userProgress.quizScores}
+- Κουίζ που έχουν ολοκληρωθεί: ${siteContext.userProgress.quizScores}
 
 ${siteContext.currentUser ? `Τρέχων χρήστης: ${siteContext.currentUser.name} (${siteContext.currentUser.email})` : 'Ο χρήστης δεν είναι συνδεδεμένος'}
 
 ΟΔΗΓΙΕΣ:
 - Απάντησε σε ερωτήσεις βάσει του πραγματικού περιεχομένου μαθήματος που είναι διαθέσιμο στον ιστότοπο
-- Αν ρωτηθείς "ποιο είναι το ευκολότερο;" ή "easiest course", σύγκρινε τα επίπεδα δυσκολίας (Beginner < Intermediate < Advanced) και συνιστά το πιο εύκολο
+- Αν ρωτηθείς "ποιο είναι το ευκολότερο;" ή "easiest course", σύγκρινε τα επίπεδα δυσκολίας (Beginner < Intermediate < Advanced) και συνίστα το πιο εύκολο
 - Να είσαι χρήσιμος, συγκεκριμένος και να αναφέρεσαι σε πραγματικά μαθήματα/ενότητες όταν είναι σχετικό
-- Κρατήσε τις απαντήσεις σύντομες (2-4 προτάσεις)
+- Κράτα τις απαντήσεις σύντομες (2-4 προτάσεις)
 - Αν ρωτηθείς για κάτι που δεν είναι διαθέσιμο, πες το ευγενικά` 
                         : `You are a helpful AI assistant for an online learning platform. 
 You have access to the following information:
@@ -3846,7 +5095,7 @@ INSTRUCTIONS:
                     course.title.toLowerCase().includes(lowerMessage.split(' ')[0])) {
                     const moduleCount = course.modules_data?.length || 0;
                     return isGreek
-                        ? `Το μάθημα "${course.title}" έχει ${moduleCount} ενότητες και είναι ${course.level} επιπέδου. ${course.description} Θέλετε να ξεκινήσετε αυτό το μάθημα;`
+                        ? `Το μάθημα "${course.title}" έχει ${moduleCount} ενότητες και είναι ${course.level} επιπέδου. ${course.description} Θέλεις να ξεκινήσεις αυτό το μάθημα;`
                         : `The "${course.title}" course has ${moduleCount} modules and is ${course.level} level. ${course.description} Would you like to start this course?`;
                 }
                 
@@ -3856,7 +5105,7 @@ INSTRUCTIONS:
                         if (lowerMessage.includes(module.title.toLowerCase().split(' ')[0]) ||
                             module.title.toLowerCase().includes(lowerMessage.split(' ')[0])) {
                             return isGreek
-                                ? `Η ενότητα "${module.title}" είναι μέρος του μαθήματος "${course.title}". ${module.subtitle} Μπορείτε να την βρείτε στο μάθημα.`
+                                ? `Η ενότητα "${module.title}" είναι μέρος του μαθήματος "${course.title}". ${module.subtitle} Μπορείς να τη βρεις στο μάθημα.`
                                 : `The module "${module.title}" is part of the "${course.title}" course. ${module.subtitle} You can find it in the course.`;
                         }
                     }
@@ -3876,7 +5125,7 @@ INSTRUCTIONS:
                 if (beginnerCourses.length > 0) {
                     const easiest = beginnerCourses[0];
                     return isGreek
-                        ? `Το πιο εύκολο μάθημα είναι το "${easiest.title}" - ${easiest.level} επιπέδου με ${easiest.modules} ενότητες. ${easiest.description} Θέλετε να το ξεκινήσετε;`
+                        ? `Το πιο εύκολο μάθημα είναι το "${easiest.title}" - ${easiest.level} επιπέδου με ${easiest.modules} ενότητες. ${easiest.description} Θέλεις να το ξεκινήσεις;`
                         : `The easiest course is "${easiest.title}" - ${easiest.level} level with ${easiest.modules} modules. ${easiest.description} Would you like to start it?`;
                 } else {
                     // If no explicit beginner, find shortest/easiest by modules
@@ -3897,7 +5146,7 @@ INSTRUCTIONS:
                 const completed = siteContext.userProgress.completedModules;
                 const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
                 return isGreek
-                    ? `Έχετε ολοκληρώσει ${completed} από ${total} ενότητες (${percentage}%). Συνεχίστε την εξαιρετική δουλειά!`
+                    ? `Έχεις ολοκληρώσει ${completed} από ${total} ενότητες (${percentage}%). Συνέχισε την εξαιρετική δουλειά!`
                     : `You've completed ${completed} out of ${total} modules (${percentage}%). Keep up the great work!`;
             }
             
@@ -3906,7 +5155,7 @@ INSTRUCTIONS:
                 (isGreek && (lowerMessage.includes('ποια μαθήματα') || lowerMessage.includes('διαθέσιμα μαθήματα') || lowerMessage.includes('λίστα μαθημάτων')))) {
                 const courseList = coursesList.map(c => `- ${c.title} (${c.modules} ${isGreek ? 'ενότητες' : 'modules'}, ${c.level})`).join('\n');
                 return isGreek
-                    ? `Διαθέσιμα μαθήματα:\n${courseList}\n\nΚάντε κλικ σε οποιοδήποτε μάθημα για να ξεκινήσετε!`
+                    ? `Διαθέσιμα μαθήματα:\n${courseList}\n\nΚάνε κλικ σε οποιοδήποτε μάθημα για να ξεκινήσεις!`
                     : `Available courses:\n${courseList}\n\nClick on any course to get started!`;
             }
             
@@ -3914,29 +5163,29 @@ INSTRUCTIONS:
             if (lowerMessage.includes('course') || lowerMessage.includes('module') || lowerMessage.includes('learn') ||
                 (isGreek && (lowerMessage.includes('μάθημα') || lowerMessage.includes('ενότητα') || lowerMessage.includes('μάθηση')))) {
                 return isGreek 
-                    ? `Έχουμε ${coursesList.length} διαθέσιμα μαθήματα με συνολικά ${siteContext.userProgress.totalModules} ενότητες. Ποιο μάθημα σας ενδιαφέρει; Μπορώ να σας βοηθήσω να βρείτε το κατάλληλο μάθημα.`
+                    ? `Έχουμε ${coursesList.length} διαθέσιμα μαθήματα με συνολικά ${siteContext.userProgress.totalModules} ενότητες. Ποιο μάθημα σε ενδιαφέρει; Μπορώ να σε βοηθήσω να βρεις το κατάλληλο μάθημα.`
                     : `We have ${coursesList.length} available courses with ${siteContext.userProgress.totalModules} total modules. Which course interests you? I can help you find the right course.`;
             }
             
             if (lowerMessage.includes('quiz') || lowerMessage.includes('test') ||
                 (isGreek && (lowerMessage.includes('κουίζ') || lowerMessage.includes('τεστ')))) {
                 return isGreek
-                    ? `Κάθε ενότητα έχει διαδραστικό κουίζ. Έχετε ολοκληρώσει ${siteContext.userProgress.quizScores} κουίζ. Μπορείτε να κάνετε κουίζ από οποιαδήποτε ενότητα!`
+                    ? `Κάθε ενότητα έχει διαδραστικό κουίζ. Έχεις ολοκληρώσει ${siteContext.userProgress.quizScores} κουίζ. Μπορείς να κάνεις κουίζ από οποιαδήποτε ενότητα!`
                     : `Each module has an interactive quiz. You've completed ${siteContext.userProgress.quizScores} quizzes. You can take quizzes from any module!`;
             }
             
             if (lowerMessage.includes('certificate') ||
                 (isGreek && lowerMessage.includes('πιστοποιητικό'))) {
                 return isGreek
-                    ? `Για να κερδίσετε πιστοποιητικό, ολοκληρώστε όλες τις ενότητες ενός μαθήματος και περάστε τα κουίζ. Έχετε ολοκληρώσει ${completedModules.length} ενότητες μέχρι στιγμής!`
+                    ? `Για να κερδίσεις πιστοποιητικό, ολοκλήρωσε όλες τις ενότητες ενός μαθήματος και πέρασε τα κουίζ. Έχεις ολοκληρώσει ${completedModules.length} ενότητες μέχρι στιγμής!`
                     : `To earn a certificate, complete all modules in a course and pass the quizzes. You've completed ${completedModules.length} modules so far!`;
             }
             
             // Default intelligent response
             const responses = isGreek ? [
-                `Μπορώ να σας βοηθήσω με τα ${coursesList.length} διαθέσιμα μαθήματα, ${siteContext.userProgress.totalModules} ενότητες, κουίζ, και την πρόοδό σας. Τι θα θέλατε να μάθετε;`,
-                `Έχουμε ${coursesList.length} μαθήματα διαθέσιμα. Μπορώ να σας βοηθήσω να βρείτε το κατάλληλο μάθημα, να εξηγήσω ενότητες, ή να απαντήσω σε ερωτήσεις σχετικά με την πλατφόρμα.`,
-                `Είμαι εδώ για να βοηθήσω! Ρωτήστε με για συγκεκριμένα μαθήματα, ενότητες, ή οτιδήποτε άλλο σχετικό με την εμπειρία μάθησής σας.`
+                `Μπορώ να σε βοηθήσω με τα ${coursesList.length} διαθέσιμα μαθήματα, ${siteContext.userProgress.totalModules} ενότητες, κουίζ, και την πρόοδό σου. Τι θα θέλες να μάθεις;`,
+                `Έχουμε ${coursesList.length} μαθήματα διαθέσιμα. Μπορώ να σε βοηθήσω να βρεις το κατάλληλο μάθημα, να εξηγήσω ενότητες, ή να απαντήσω σε ερωτήσεις σχετικά με την πλατφόρμα.`,
+                `Είμαι εδώ για να βοηθήσω! Ρώτησέ με για συγκεκριμένα μαθήματα, ενότητες, ή οτιδήποτε άλλο σχετικό με την εμπειρία μάθησής σου.`
             ] : [
                 `I can help you with the ${coursesList.length} available courses, ${siteContext.userProgress.totalModules} modules, quizzes, and your progress. What would you like to know?`,
                 `We have ${coursesList.length} courses available. I can help you find the right course, explain modules, or answer questions about the platform.`,

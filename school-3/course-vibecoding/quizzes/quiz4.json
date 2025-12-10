@@ -1,0 +1,108 @@
+{
+  "title": "Module 4: Code Generation & Structure",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "Prompt engineering is:",
+      "options": [
+        "Writing code",
+        "Crafting instructions for AI",
+        "Testing code",
+        "Deploying code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Prompt engineering is the art and science of crafting instructions that guide AI to produce desired outputs."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "The IDEAL prompt structure includes:",
+      "options": [
+        "Intent, Details, Examples, Architecture, Limitations",
+        "Only intent",
+        "Only code",
+        "Only examples"
+      ],
+      "correctAnswer": 0,
+      "explanation": "IDEAL stands for Intent, Details, Examples, Architecture, and Limitations - a comprehensive prompt structure."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "Context in prompts helps AI:",
+      "options": [
+        "Generate faster code",
+        "Generate more accurate code",
+        "Skip validation",
+        "Ignore conventions"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Context helps AI understand your project, existing patterns, and requirements, leading to more accurate code generation."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "Complex features should be:",
+      "options": [
+        "Generated in one prompt",
+        "Broken into smaller steps",
+        "Skipped entirely",
+        "Copied from examples"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Breaking complex features into smaller steps helps AI handle tasks better and gives you more control."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "After generating code, you should:",
+      "options": [
+        "Use it immediately",
+        "Review and test it",
+        "Deploy it",
+        "Delete it"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Always review and test generated code before using it to ensure it works correctly and meets requirements."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "Iterative refinement means:",
+      "options": [
+        "Using first output",
+        "Improving prompts based on results",
+        "Giving up",
+        "Copying code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Iterative refinement means improving your prompts based on results to get better outputs."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "Why is context important in prompts?",
+      "sampleAnswer": "Context helps AI understand your project structure, existing patterns, conventions, and requirements. This leads to code that fits your project better and follows your established patterns."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "What are the benefits of breaking down complex features?",
+      "sampleAnswer": "Benefits include: AI handles smaller tasks better, you can review and refine each step, easier to debug issues, and more control over the generation process."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "What should you check when reviewing generated code?",
+      "sampleAnswer": "Check: functionality (does it work?), code quality (follows conventions?), integration (works with existing code?), security (no sensitive data exposed?), and whether it meets requirements."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "Explain the iterative refinement cycle.",
+      "sampleAnswer": "Start with initial prompt, add details, add style requirements, add technical details, then refine based on output. Each iteration improves the prompt and resulting code."
+    }
+  ]
+}
+

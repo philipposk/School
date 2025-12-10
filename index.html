@@ -1789,6 +1789,7 @@
     <script src="js/flashcards.js"></script>
     <script src="js/onboarding.js"></script>
     <script src="js/learner-analytics.js"></script>
+    <script src="js/ai-enhanced.js"></script>
     <script>
         // Configure marked
         marked.setOptions({
@@ -2699,8 +2700,11 @@
                         <div class="module-actions">
                             <button class="btn btn-primary" onclick="startQuiz(${moduleId})">Take Quiz</button>
                             <button class="btn btn-secondary" onclick="downloadModule(${moduleId})">Download PDF</button>
+                            <button class="btn" onclick="generateModuleSummary('${state.currentCourseId}', ${moduleId})" title="AI Summary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">📝 AI Summary</button>
+                            <button class="btn" onclick="generateModuleFlashcards('${state.currentCourseId}', ${moduleId})" title="Generate Flashcards" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">🃏 Generate Flashcards</button>
                         </div>
                     </div>
+                    <div id="moduleSummary-${moduleId}" class="module-summary" style="display: none; margin: 1rem 0; padding: 1.5rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 8px; border-left: 4px solid #667eea;"></div>
                     ${videoSection}
                     <div class="module-content">${html}</div>
                     <div id="forumContainer-${moduleId}" class="module-forum"></div>
@@ -2741,6 +2745,25 @@
                 document.querySelectorAll('pre code').forEach(block => {
                     hljs.highlightElement(block);
                 });
+                
+                // Auto-generate module summary if AI Enhanced is available
+                if (typeof AIEnhanced !== 'undefined' && AIEnhanced.generateModuleSummary) {
+                    setTimeout(async () => {
+                        const summary = await AIEnhanced.generateModuleSummary(state.currentCourseId, moduleId);
+                        if (summary) {
+                            const summaryDiv = document.getElementById(`moduleSummary-${moduleId}`);
+                            if (summaryDiv) {
+                                summaryDiv.style.display = 'block';
+                                summaryDiv.innerHTML = `
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-weight: 600; color: #667eea;">
+                                        🤖 AI-Generated Summary
+                                    </div>
+                                    <div style="color: var(--text); line-height: 1.6; white-space: pre-wrap;">${summary.summary}</div>
+                                `;
+                            }
+                        }
+                    }, 500);
+                }
 
                 updateProgress();
             } catch (error) {
@@ -2860,6 +2883,9 @@
             const total = currentQuiz.questions.length;
             const moduleKey = `${state.currentCourseId}-${moduleId}`;
             
+            // Process questions and generate AI explanations
+            const explanationPromises = [];
+            
             currentQuiz.questions.forEach((q, idx) => {
                 // Show explanation for this question
                 const explanation = document.getElementById(`explanation_${idx}`);
@@ -2869,9 +2895,16 @@
                     console.warn(`Explanation element not found for question ${idx + 1}`);
                 }
                 
+                let isCorrect = false;
+                let userAnswer = '';
+                let correctAnswer = '';
+                
                 if (q.type === 'multiple_choice') {
                     const selected = quizAnswers[idx];
                     const correct = q.correct_answer;
+                    userAnswer = selected !== undefined ? q.options[selected] : 'No answer';
+                    correctAnswer = q.options[correct];
+                    isCorrect = selected === correct;
                     
                     if (selected !== undefined) {
                         const optionEl = document.getElementById(`q${idx}_opt${selected}`);
@@ -2895,6 +2928,9 @@
                     const answerInput = document.getElementById(`answer_${idx}`);
                     if (answerInput) {
                         const answer = answerInput.value.toLowerCase().trim();
+                        userAnswer = answerInput.value;
+                        correctAnswer = q.acceptable_answers[0] || 'N/A';
+                        
                         // Disable input after submission to preserve answer
                         answerInput.disabled = true;
                         answerInput.style.backgroundColor = 'var(--hover-bg)';
@@ -2913,6 +2949,7 @@
                         const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
                         if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
                             score++;
+                            isCorrect = true;
                             if (answerInput) {
                                 answerInput.style.borderColor = 'var(--success)';
                             }
@@ -2922,6 +2959,19 @@
                             }
                         }
                     }
+                }
+                
+                // Generate AI explanation for this question
+                if (typeof AIEnhanced !== 'undefined' && AIEnhanced.generateQuizExplanation) {
+                    explanationPromises.push(
+                        AIEnhanced.generateQuizExplanation(q.question, userAnswer, correctAnswer, isCorrect)
+                            .then(explanation => {
+                                if (explanation) {
+                                    this.addAIExplanationToQuestion(idx, explanation);
+                                }
+                            })
+                            .catch(err => console.warn('Failed to generate AI explanation:', err))
+                    );
                 }
             });
             
@@ -2937,8 +2987,45 @@
             `;
             
             document.querySelector('.quiz-container').insertAdjacentHTML('beforeend', scoreHTML);
+            
+            // Wait for AI explanations to load
+            Promise.all(explanationPromises).then(() => {
+                console.log('All AI explanations generated');
+            });
+            
             renderCourseView();
             loadModule(moduleId);
+        }
+        
+        // Add AI explanation to question
+        function addAIExplanationToQuestion(questionIdx, explanationData) {
+            const questionContainer = document.querySelector(`#question_${questionIdx}`);
+            if (!questionContainer) return;
+            
+            // Check if AI explanation already exists
+            let aiExplanationDiv = questionContainer.querySelector('.ai-explanation');
+            if (!aiExplanationDiv) {
+                aiExplanationDiv = document.createElement('div');
+                aiExplanationDiv.className = 'ai-explanation';
+                aiExplanationDiv.style.cssText = 'margin-top: 1rem; padding: 1rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 8px; border-left: 4px solid #667eea;';
+                
+                const aiHeader = document.createElement('div');
+                aiHeader.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-weight: 600; color: #667eea;';
+                aiHeader.innerHTML = '🤖 AI Explanation';
+                aiExplanationDiv.appendChild(aiHeader);
+                
+                const aiContent = document.createElement('div');
+                aiContent.className = 'ai-explanation-content';
+                aiContent.style.cssText = 'color: var(--text); line-height: 1.6;';
+                aiExplanationDiv.appendChild(aiContent);
+                
+                questionContainer.appendChild(aiExplanationDiv);
+            }
+            
+            const contentDiv = aiExplanationDiv.querySelector('.ai-explanation-content');
+            if (contentDiv) {
+                contentDiv.innerHTML = explanationData.explanation.replace(/\n/g, '<br>');
+            }
         }
 
         function downloadResource(resourceName) {
@@ -3110,6 +3197,7 @@
                             <div class="profile-dropdown-item" onclick="viewMyProfile()">My Profile</div>
                             <div class="profile-dropdown-item" onclick="openProfileEditModal()">Edit Profile</div>
                             <div class="profile-dropdown-item" onclick="viewCertificates()">My Certificates</div>
+                            <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); generateStudyPlan();">📚 My Study Plan</div>
                             <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openMessaging === 'function') window.openMessaging(); else console.error('openMessaging not available'); }, 50);">Messages</div>
                             <div class="profile-dropdown-item" onclick="toggleProfileDropdown(); setTimeout(() => { if(typeof window.openAssignments === 'function') window.openAssignments(); else console.error('openAssignments not available'); }, 50);">Assignments</div>
                             <div class="profile-dropdown-item" onclick="openFriendsModal()">Friends</div>
@@ -4132,6 +4220,137 @@
         });
 
         // ESC key handler is now handled by the universal handler above (removed duplicate)
+        
+        // AI-Enhanced Functions
+        async function generateModuleSummary(courseId, moduleId) {
+            if (typeof AIEnhanced === 'undefined' || !AIEnhanced.generateModuleSummary) {
+                alert('AI features are loading... Please try again in a moment.');
+                return;
+            }
+            
+            const summaryDiv = document.getElementById(`moduleSummary-${moduleId}`);
+            if (summaryDiv) {
+                summaryDiv.style.display = 'block';
+                summaryDiv.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner"></div><p>Generating AI summary...</p></div>';
+            }
+            
+            try {
+                const summary = await AIEnhanced.generateModuleSummary(courseId, moduleId);
+                if (summary && summaryDiv) {
+                    summaryDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #667eea;">
+                                🤖 AI-Generated Summary
+                            </div>
+                            <button onclick="document.getElementById('moduleSummary-${moduleId}').style.display='none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+                        </div>
+                        <div style="color: var(--text); line-height: 1.6; white-space: pre-wrap;">${summary.summary}</div>
+                    `;
+                }
+            } catch (error) {
+                if (summaryDiv) {
+                    summaryDiv.innerHTML = '<div style="color: var(--error);">Failed to generate summary. Please try again.</div>';
+                }
+            }
+        }
+        
+        async function generateModuleFlashcards(courseId, moduleId) {
+            if (typeof AIEnhanced === 'undefined' || !AIEnhanced.generateFlashcardsFromModule) {
+                alert('AI features are loading... Please try again in a moment.');
+                return;
+            }
+            
+            if (typeof FlashcardManager === 'undefined') {
+                alert('Flashcard system not available.');
+                return;
+            }
+            
+            const button = event?.target;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Generating...';
+            }
+            
+            try {
+                const flashcards = await AIEnhanced.generateFlashcardsFromModule(courseId, moduleId, 10);
+                if (flashcards && flashcards.length > 0) {
+                    alert(`✅ Generated ${flashcards.length} flashcards! You can now study them in the Flashcards section.`);
+                } else {
+                    alert('No flashcards generated. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error generating flashcards:', error);
+                alert('Failed to generate flashcards. Please try again.');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '🃏 Generate Flashcards';
+                }
+            }
+        }
+        
+        async function generateStudyPlan() {
+            if (typeof AIEnhanced === 'undefined' || !AIEnhanced.generateStudyPlan) {
+                alert('AI features are loading... Please try again in a moment.');
+                return;
+            }
+            
+            showStudyPlan(null); // Show loading state
+        }
+        
+        async function showStudyPlan(existingPlan) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.id = 'studyPlanModal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h2>📚 Your Personalized Study Plan</h2>
+                        <button class="close-btn" onclick="closeStudyPlanModal()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="studyPlanContent">
+                        <div style="text-align: center; padding: 2rem;">
+                            <div class="spinner"></div>
+                            <p>Generating your personalized study plan...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            try {
+                const plan = existingPlan || await AIEnhanced.generateStudyPlan();
+                if (plan) {
+                    document.getElementById('studyPlanContent').innerHTML = `
+                        <div style="line-height: 1.8; white-space: pre-wrap; color: var(--text);">${plan.plan}</div>
+                        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <button class="btn btn-primary" onclick="downloadStudyPlan()">Download Plan</button>
+                            <button class="btn btn-secondary" onclick="closeStudyPlanModal()">Close</button>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('studyPlanContent').innerHTML = '<p>Failed to generate study plan. Please try again.</p>';
+                }
+            } catch (error) {
+                document.getElementById('studyPlanContent').innerHTML = `<p style="color: var(--error);">Error: ${error.message}</p>`;
+            }
+        }
+        
+        function closeStudyPlanModal() {
+            const modal = document.getElementById('studyPlanModal');
+            if (modal) modal.remove();
+        }
+        
+        function downloadStudyPlan() {
+            const planContent = document.querySelector('#studyPlanContent div')?.textContent || '';
+            const blob = new Blob([planContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `study-plan-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
         // Make functions global
         window.showCourses = showCourses;
@@ -4143,6 +4362,11 @@
         window.downloadResource = downloadResource;
         window.downloadModule = downloadModule;
         window.completeCourse = completeCourse;
+        window.generateModuleSummary = generateModuleSummary;
+        window.generateModuleFlashcards = generateModuleFlashcards;
+        window.generateStudyPlan = generateStudyPlan;
+        window.showStudyPlan = showStudyPlan;
+        window.addAIExplanationToQuestion = addAIExplanationToQuestion;
         window.toggleProfileDropdown = toggleProfileDropdown;
         window.openProfileModal = openProfileModal;
         window.closeProfileModal = closeProfileModal;
@@ -4150,6 +4374,13 @@
         window.viewCertificates = viewCertificates;
         window.openLoginModal = openLoginModal;
         window.toggleTheme = toggleTheme;
+        window.generateModuleSummary = generateModuleSummary;
+        window.generateModuleFlashcards = generateModuleFlashcards;
+        window.generateStudyPlan = generateStudyPlan;
+        window.showStudyPlan = showStudyPlan;
+        window.addAIExplanationToQuestion = addAIExplanationToQuestion;
+        window.closeStudyPlanModal = closeStudyPlanModal;
+        window.downloadStudyPlan = downloadStudyPlan;
         
         // Unified Settings Modal
         window.openSettings = function() {

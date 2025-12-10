@@ -1,0 +1,70 @@
+{
+  "module": "Module 4: The Optimist's Mindset",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Realistic optimism means:",
+      "options": ["Denying all problems", "Acknowledging challenges while maintaining hope", "Only seeing problems", "Ignoring reality"],
+      "correct_answer": 1,
+      "explanation": "Realistic optimism acknowledges challenges honestly while maintaining hope and positive expectations."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Optimism is:",
+      "options": ["Only a personality trait", "A skill that can be developed", "Impossible to change", "Only for some people"],
+      "correct_answer": 1,
+      "explanation": "Research shows optimism is a skill that can be developed through practice, not just a fixed personality trait."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Growth mindset believes:",
+      "options": ["People can't change", "Change and growth are possible", "Only genetics matter", "Effort is pointless"],
+      "correct_answer": 1,
+      "explanation": "Growth mindset believes that change and growth are possible through learning and effort."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Resilience is:",
+      "options": ["Never experiencing setbacks", "The ability to recover from difficulties", "Avoiding all challenges", "Only for strong people"],
+      "correct_answer": 1,
+      "explanation": "Resilience is the ability to recover from difficulties and bounce back from setbacks."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "Optimistic explanatory style sees setbacks as:",
+      "options": ["Permanent and global", "Temporary and specific", "Always your fault", "Proof you're a failure"],
+      "correct_answer": 1,
+      "explanation": "Optimistic explanatory style sees setbacks as temporary and specific rather than permanent and global."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "The optimistic view of human nature includes:",
+      "options": ["People can't change", "Growth and transformation are possible", "Only some people matter", "Understanding doesn't help"],
+      "correct_answer": 1,
+      "explanation": "The optimistic view recognizes that growth and transformation are possible for people."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Give one practice that helps cultivate optimism:",
+      "acceptable_answers": ["Gratitude practice", "Reframing challenges", "Future visualization", "Surrounding yourself with positive people", "Growth mindset practices"],
+      "explanation": "Practices like gratitude, reframing, visualization, and surrounding yourself with positive influences help cultivate optimism."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "How can you maintain optimism during difficult times?",
+      "acceptable_answers": ["Acknowledge difficulty honestly", "Look for small positive steps", "Focus on what you can control", "Seek support", "Remember past challenges overcome", "Find meaning in struggle"],
+      "explanation": "Maintain optimism by acknowledging difficulties honestly while looking for positive steps, focusing on what you can control, and seeking support."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

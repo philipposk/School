@@ -1,0 +1,76 @@
+{
+  "module": "Module 1: ASL Basics & Fingerspelling",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "ASL is:",
+      "options": ["English on the hands", "A complete language with its own grammar", "Just gestures", "Only for Deaf people"],
+      "correct_answer": 1,
+      "explanation": "ASL is a complete, natural language with its own grammar and syntax, not English translated into signs."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Non-manual markers include:",
+      "options": ["Only facial expressions", "Facial expressions, body movement, and eye gaze", "Only hand movements", "Only mouth movements"],
+      "correct_answer": 1,
+      "explanation": "Non-manual markers (NMMs) include facial expressions, body movements, eye gaze, and head movements - all are grammatical in ASL."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Fingerspelling should be:",
+      "options": ["As fast as possible", "Clear and steady", "Bouncy for emphasis", "Only used for names"],
+      "correct_answer": 1,
+      "explanation": "Fingerspelling should be clear and steady, maintaining consistent pace. Clarity is more important than speed."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Sign space refers to:",
+      "options": ["How much room you need", "The area in front of your body where you sign", "Personal space boundaries", "The distance between signers"],
+      "correct_answer": 1,
+      "explanation": "Sign space is the area in front of your body where you perform signs - typically in neutral space in front of your chest."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "The letter 'A' in ASL is:",
+      "options": ["Open hand", "Closed fist with thumb alongside", "Index finger up", "All fingers spread"],
+      "correct_answer": 1,
+      "explanation": "The letter A is formed with a closed fist, thumb alongside the fingers."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "Numbers 11-19 are formed by:",
+      "options": ["Starting with 1, then adding 0-9", "Starting with 10, then adding 1-9", "Using different handshapes", "Fingerspelling the number"],
+      "correct_answer": 1,
+      "explanation": "Numbers 11-19 start with the sign for 10, then add 1-9."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Name three uses of fingerspelling in ASL:",
+      "acceptable_answers": ["Names of people", "Names of places", "Words without established signs", "Technical terms", "Emphasis", "Proper nouns"],
+      "explanation": "Fingerspelling is used for names, places, words without signs, technical terms, and for emphasis."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why are facial expressions important in ASL?",
+      "acceptable_answers": [
+        "They are grammatical",
+        "They show meaning",
+        "They are required for questions",
+        "They convey emotions and grammar",
+        "They are part of the language structure"
+      ],
+      "explanation": "Facial expressions in ASL are grammatical markers, not just emotional expressions. They're required for questions, negation, and many other grammatical functions."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

@@ -1,0 +1,78 @@
+{
+  "module": "Module 1: SwiftUI Foundations",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "What is SwiftUI?",
+      "options": ["A programming language", "A declarative UI framework", "An IDE", "A database"],
+      "correct_answer": 1,
+      "explanation": "SwiftUI is Apple's declarative UI framework for building user interfaces across Apple platforms."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "What does a View protocol require?",
+      "options": ["A body property", "A render method", "A layout function", "An init method"],
+      "correct_answer": 0,
+      "explanation": "The View protocol requires a computed property called 'body' that returns some View."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "What does VStack arrange views in?",
+      "options": ["Horizontal line", "Vertical line", "Overlapping", "Grid"],
+      "correct_answer": 1,
+      "explanation": "VStack (Vertical Stack) arranges views vertically, one on top of another."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "What are modifiers?",
+      "options": ["Functions that modify views", "Variables", "Protocols", "Classes"],
+      "correct_answer": 0,
+      "explanation": "Modifiers are methods that return a new view with modified properties, allowing you to chain styling."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "How do you add padding in SwiftUI?",
+      "options": [".padding() modifier", "padding() function", "setPadding() method", "Padding property"],
+      "correct_answer": 0,
+      "explanation": "The .padding() modifier adds spacing around a view in SwiftUI."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "What is the preview canvas used for?",
+      "options": ["Writing code", "Seeing UI in real-time", "Debugging", "Testing"],
+      "correct_answer": 1,
+      "explanation": "The preview canvas in Xcode shows your SwiftUI views in real-time as you code."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "What is the difference between declarative and imperative programming?",
+      "acceptable_answers": [
+        "Declarative describes what you want, imperative describes how",
+        "Declarative focuses on desired state, imperative focuses on steps",
+        "SwiftUI is declarative, UIKit is imperative"
+      ],
+      "explanation": "Declarative programming describes what you want the UI to look like, while imperative programming describes step-by-step how to achieve it."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Name three common SwiftUI modifiers and what they do.",
+      "acceptable_answers": [
+        ".font() sets text size, .foregroundColor() sets color, .padding() adds spacing",
+        ".font() for text style, .background() for background, .cornerRadius() for rounded corners",
+        "Any three modifiers with correct descriptions"
+      ],
+      "explanation": "Common modifiers include .font() for text styling, .foregroundColor() for text color, .padding() for spacing, .background() for backgrounds, and .cornerRadius() for rounded corners."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

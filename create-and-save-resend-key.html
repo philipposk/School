@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create & Save Resend Key - Step by Step</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        h1 { color: #4CAF50; margin-bottom: 10px; }
+        .step {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .step-number {
+            background: #4CAF50;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #3e2723;
+            color: #ffcc80;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff9800;
+            margin: 20px 0;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover { background: #45a049; }
+        .success {
+            background: #1e4620;
+            color: #81c784;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #4CAF50;
+        }
+        code {
+            background: #0a0a0a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #4CAF50;
+            font-family: 'Courier New', monospace;
+        }
+        .command-box {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #333;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Create & Save Resend Key - Step by Step</h1>
+        
+        <div class="warning">
+            <strong>⚠️ CRITICAL:</strong> Resend only shows the key ONCE when you create it. Copy it IMMEDIATELY or you'll lose it forever!
+        </div>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Go to Resend Dashboard</strong><br>
+            <a href="https://resend.com/api-keys" target="_blank" style="color: #4CAF50;">https://resend.com/api-keys</a>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Click "+ Create API key"</strong><br>
+            (Top right button)
+        </div>
+        
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Name it:</strong> <code>school-backup</code><br>
+            Click "Create"
+        </div>
+        
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>🚨 IMMEDIATELY COPY THE KEY!</strong><br>
+            • Right-click on the key → Select All → Copy<br>
+            • Or click the "Copy" button if available<br>
+            • Or press Cmd+A then Cmd+C (Mac) / Ctrl+A then Ctrl+C (Windows)<br>
+            <strong>DO THIS BEFORE CLOSING THE PAGE!</strong>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">5</span>
+            <strong>Paste the key here:</strong><br>
+            <input type="text" id="resendKey" placeholder="re_..." autocomplete="off" spellcheck="false" />
+        </div>
+        
+        <button onclick="saveKey()">💾 Save Key & Generate Fly.io Command</button>
+        
+        <div id="result" style="display: none;"></div>
+    </div>
+    
+    <script>
+        function saveKey() {
+            const key = document.getElementById('resendKey').value.trim();
+            const result = document.getElementById('result');
+            
+            if (!key) {
+                alert('⚠️ Please paste your Resend API key first!');
+                return;
+            }
+            
+            if (!key.startsWith('re_')) {
+                alert('⚠️ Resend API keys must start with "re_"');
+                return;
+            }
+            
+            if (key.length < 30) {
+                alert('⚠️ The key seems too short. Make sure you copied the FULL key.');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('resend_api_key', key);
+            
+            // Generate command
+            const command = `flyctl secrets set RESEND_API_KEY="${key}" -a school-backend`;
+            
+            // Show result
+            result.style.display = 'block';
+            result.className = 'success';
+            result.innerHTML = `
+                <strong>✅ Key Saved Successfully!</strong><br><br>
+                
+                <strong>📋 Run this command to add it to Fly.io:</strong><br>
+                <div class="command-box">${command}</div>
+                
+                <button onclick="copyCommand()" style="background: #2196F3; margin-top: 10px;">📋 Copy Command</button>
+                <button onclick="copyKey()" style="background: #2196F3; margin-top: 10px;">📋 Copy Key Only</button>
+                
+                <br><br>
+                <strong>✅ What's saved:</strong><br>
+                • Key saved in browser localStorage<br>
+                • Ready to add to Fly.io<br>
+                • Command ready to run
+            `;
+            
+            // Store command for copying
+            window.savedCommand = command;
+            window.savedKey = key;
+        }
+        
+        function copyCommand() {
+            navigator.clipboard.writeText(window.savedCommand).then(() => {
+                alert('✅ Command copied! Now run it in your terminal.');
+            });
+        }
+        
+        function copyKey() {
+            navigator.clipboard.writeText(window.savedKey).then(() => {
+                alert('✅ Key copied to clipboard!');
+            });
+        }
+        
+        // Check for existing key
+        window.addEventListener('load', () => {
+            const existing = localStorage.getItem('resend_api_key');
+            if (existing && existing.startsWith('re_')) {
+                document.getElementById('resendKey').value = existing;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').className = 'success';
+                document.getElementById('result').innerHTML = `
+                    ℹ️ Found existing key in localStorage.<br>
+                    If you want to update it, paste the new key above and click Save.
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

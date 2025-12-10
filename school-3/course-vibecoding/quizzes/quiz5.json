@@ -1,0 +1,108 @@
+{
+  "title": "Module 5: Iterative Refinement",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "Iterative refinement is:",
+      "options": [
+        "Starting over",
+        "Improving code incrementally",
+        "Deleting code",
+        "Copying code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Iterative refinement is the process of improving code incrementally without starting from scratch."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "You should refine when:",
+      "options": [
+        "Making small changes",
+        "Changing architecture",
+        "Switching frameworks",
+        "Starting new project"
+      ],
+      "correctAnswer": 0,
+      "explanation": "Refine when making small changes, bug fixes, or adding features. Regenerate for major architecture changes."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "Targeted refinement updates:",
+      "options": [
+        "Everything",
+        "Specific components",
+        "All files",
+        "Nothing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Targeted refinement updates only specific components, preserving other working code."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "Before refining, you should:",
+      "options": [
+        "Delete old code",
+        "Understand existing code",
+        "Skip testing",
+        "Regenerate everything"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Before refining, understand the existing code to make informed improvements."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "Version control helps with:",
+      "options": [
+        "Only deployment",
+        "Tracking refinements",
+        "Only new features",
+        "Nothing"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Version control helps track refinements, maintain history, and manage incremental changes."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "Performance optimization should:",
+      "options": [
+        "Change functionality",
+        "Improve speed without changing behavior",
+        "Add features",
+        "Remove features"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Performance optimization should improve speed without changing functionality or behavior."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "What are the benefits of incremental refinement vs. full regeneration?",
+      "sampleAnswer": "Benefits include: preserves working code, faster development, better understanding of code, incremental progress, lower risk, and easier to test."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "How do you decide whether to refine or regenerate?",
+      "sampleAnswer": "Refine for: small changes, bug fixes, feature additions, styling updates. Regenerate for: major architecture changes, complete rewrites, technology stack changes."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "What should you check after each refinement?",
+      "sampleAnswer": "Check: functionality still works, no regressions introduced, code follows conventions, tests pass, and the change achieves the intended goal."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "Explain the bug-fixing workflow with AI assistance.",
+      "sampleAnswer": "Workflow: 1) Identify the bug, 2) Understand the code (ask AI to explain), 3) Find the issue, 4) Fix with AI (provide specific prompt), 5) Test the fix, 6) Verify no other features broke."
+    }
+  ]
+}
+

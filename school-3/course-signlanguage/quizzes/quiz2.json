@@ -1,0 +1,82 @@
+{
+  "module": "Module 2: Greetings & Introductions",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "To get someone's attention in Deaf culture, you should:",
+      "options": ["Yell their name", "Tap their shoulder lightly", "Throw something at them", "Ignore them until they notice"],
+      "correct_answer": 1,
+      "explanation": "In Deaf culture, you get attention by tapping the shoulder lightly, waving in their line of sight, or other respectful visual methods."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "The sign THANK YOU involves:",
+      "options": ["Hand moving from chin outward", "Hand moving from chest outward", "Circular motion on chest", "Waving hand"],
+      "correct_answer": 0,
+      "explanation": "THANK YOU is signed by touching fingertips to chin and moving the hand forward and down."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "When asking 'WHAT YOUR NAME?', your eyebrows should be:",
+      "options": ["Up", "Down", "Neutral", "Doesn't matter"],
+      "correct_answer": 1,
+      "explanation": "WH-questions like 'WHAT' require eyebrows to be down (furrowed) as a grammatical marker."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Eye contact in ASL conversation should be:",
+      "options": ["Avoided", "Maintained throughout", "Only at the beginning", "Only at the end"],
+      "correct_answer": 1,
+      "explanation": "Eye contact is essential in ASL conversations and should be maintained throughout, as you're watching the signer's face for meaning."
+    },
+    {
+      "id": 5,
+      "type": "multiple_choice",
+      "question": "The sign PLEASE involves:",
+      "options": ["Hand on chest, circular motion", "Hand moving forward", "Hand tapping chest", "Waving hand"],
+      "correct_answer": 0,
+      "explanation": "PLEASE is signed with a flat hand on the chest, moving in a circular clockwise motion."
+    },
+    {
+      "id": 6,
+      "type": "multiple_choice",
+      "question": "'NICE TO MEET YOU' includes:",
+      "options": ["NICE + MEET + YOU", "HELLO + NAME", "GOOD + MEET", "PLEASE + THANK YOU"],
+      "correct_answer": 0,
+      "explanation": "NICE TO MEET YOU combines the signs NICE, MEET, and YOU."
+    },
+    {
+      "id": 7,
+      "type": "short_answer",
+      "question": "Name three ways to get someone's attention in Deaf culture:",
+      "acceptable_answers": [
+        "Tap shoulder lightly",
+        "Wave in line of sight",
+        "Stomp foot",
+        "Flick lights",
+        "Visual signals"
+      ],
+      "explanation": "Common ways to get attention include tapping shoulder, waving, stomping foot (for vibrations), or flicking lights in group settings."
+    },
+    {
+      "id": 8,
+      "type": "short_answer",
+      "question": "Why is eye contact important in ASL conversations?",
+      "acceptable_answers": [
+        "Shows engagement",
+        "Required for understanding",
+        "Cultural norm",
+        "Shows respect",
+        "Needed to see facial expressions"
+      ],
+      "explanation": "Eye contact is essential because you need to watch the signer's face for grammatical markers, emotions, and meaning - not just their hands."
+    }
+  ],
+  "passing_score": 6,
+  "time_limit": 15
+}
+

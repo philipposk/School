@@ -1,0 +1,108 @@
+{
+  "title": "Module 2: CURSOR_RULES - Defining Your Tech Stack",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "question": "CURSOR_RULES.md should be placed:",
+      "options": [
+        "In any folder",
+        "In project root directory",
+        "In node_modules",
+        "In .git folder"
+      ],
+      "correctAnswer": 1,
+      "explanation": "CURSOR_RULES.md should be placed in the project root directory so Cursor AI can find and use it."
+    },
+    {
+      "id": 2,
+      "type": "multiple-choice",
+      "question": "The main purpose of CURSOR_RULES is to:",
+      "options": [
+        "Document code",
+        "Guide AI code generation",
+        "Test code",
+        "Deploy code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "CURSOR_RULES.md guides AI code generation by defining technology choices, code style, and project structure."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "question": "When choosing a frontend framework, you should:",
+      "options": [
+        "Always use React",
+        "Choose based on project needs",
+        "Use the newest framework",
+        "Avoid frameworks"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Choose frameworks based on your project's specific needs, not just popularity or trends."
+    },
+    {
+      "id": 4,
+      "type": "multiple-choice",
+      "question": "For a simple static site, you should:",
+      "options": [
+        "Use React",
+        "Use Next.js",
+        "Consider vanilla JavaScript",
+        "Use Angular"
+      ],
+      "correctAnswer": 2,
+      "explanation": "For simple static sites, consider vanilla JavaScript to avoid unnecessary framework overhead."
+    },
+    {
+      "id": 5,
+      "type": "multiple-choice",
+      "question": "CURSOR_RULES should be:",
+      "options": [
+        "Vague and flexible",
+        "Specific and detailed",
+        "Short and simple",
+        "Written in code"
+      ],
+      "correctAnswer": 1,
+      "explanation": "CURSOR_RULES should be specific and detailed to ensure AI generates code that matches your preferences."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "question": "State management should be chosen based on:",
+      "options": [
+        "Popularity",
+        "Project complexity needs",
+        "Latest trends",
+        "Personal preference only"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Choose state management based on your project's complexity needs, not just popularity."
+    },
+    {
+      "id": 7,
+      "type": "short-answer",
+      "question": "List three sections that should be in every CURSOR_RULES.md file.",
+      "sampleAnswer": "Essential sections include: Languages to use, Frontend framework preference, Styling approach, State management plan, Backend or data layer, Testing expectations, Security guidelines, Performance considerations, File organization conventions, Commit conventions."
+    },
+    {
+      "id": 8,
+      "type": "short-answer",
+      "question": "Why is it important to include examples in CURSOR_RULES?",
+      "sampleAnswer": "Examples help AI understand exactly what you want. They provide concrete patterns and clarify abstract concepts, leading to more accurate code generation."
+    },
+    {
+      "id": 9,
+      "type": "short-answer",
+      "question": "When should you update your CURSOR_RULES.md file?",
+      "sampleAnswer": "Update CURSOR_RULES when: adding new technologies, changing project requirements, learning better patterns, team preferences change, or when you need to refine your development approach."
+    },
+    {
+      "id": 10,
+      "type": "short-answer",
+      "question": "Explain the difference between choosing Tailwind CSS vs. CSS Modules for styling.",
+      "sampleAnswer": "Tailwind CSS is utility-first, speeds up development with pre-built classes, but can make HTML verbose. CSS Modules provide component-scoped styles, better for maintainability, but require more setup. Choose based on team preference and project needs."
+    }
+  ]
+}
+
