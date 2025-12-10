@@ -94,9 +94,9 @@ app.get('/health', (req, res) => {
 app.get('/api/config/supabase', (req, res) => {
     res.json({
         url: SUPABASE_URL || 'https://jmjezmfhygvazfunuujt.supabase.co',
-        // Note: Anon key should be set as environment variable SUPABASE_ANON_KEY
-        // If not set, frontend will need to configure it manually
-        anonKey: process.env.SUPABASE_ANON_KEY || null
+        // Anon key - safe to expose to frontend (it's public by design)
+        // Set SUPABASE_ANON_KEY environment variable, or use default
+        anonKey: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4i'
     });
 });
 
