@@ -14,7 +14,16 @@ const SecurityUtils = {
     // Sanitize text (remove HTML tags)
     sanitizeText(str) {
         if (!str) return '';
-        return str.replace(/<[^>]*>/g, '').trim();
+        // Remove script/style blocks entirely
+        const withoutScripts = str.replace(/<\s*(script|style)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
+        // Strip remaining HTML tags
+        const withoutTags = withoutScripts.replace(/<[^>]*>/g, '');
+        // Remove common JS payloads like alert(...) or javascript: urls
+        const withoutJsPayloads = withoutTags
+            .replace(/alert\s*\([^)]*\)/gi, '')
+            .replace(/javascript:/gi, '')
+            .replace(/on\w+\s*=\s*(['"])[\s\S]*?\1/gi, '');
+        return withoutJsPayloads.replace(/\s+/g, ' ').trim();
     },
     
     // Validate URL

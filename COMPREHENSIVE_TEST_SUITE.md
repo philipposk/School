@@ -570,6 +570,7 @@ async function initLibrary() {
 
 ### Input Validation
 - [ ] XSS attempt in bio blocked: `<script>alert('xss')</script>`
+- [ ] Sanitize text strips scripts/alerts (regression: sanitizeText alert removal)
 - [ ] XSS attempt in name blocked
 - [ ] SQL injection blocked: `'; DROP TABLE users; --`
 - [ ] Invalid email rejected
