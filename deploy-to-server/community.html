@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Join the School learning community - discuss courses, ask questions, share insights, and connect with fellow learners.">
+    <title>Community - School Learning Platform</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="css/messaging-assignments.css">
+    <script src="js/forum-system.js"></script>
+    <script src="js/security.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .community-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        .community-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .community-nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+        }
+        .community-nav a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .community-nav a:hover, .community-nav a.active {
+            background: #f7fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .community-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        #communityContent {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="community-header">
+        <h1>👥 Community</h1>
+        <p style="font-size: 1.2rem; opacity: 0.9;">Connect, Learn, and Grow Together</p>
+    </div>
+    
+    <div class="community-nav">
+        <a href="#" onclick="showAllDiscussions(); return false;" class="active" id="navAll">All Discussions</a>
+        <a href="#" onclick="showGeneralPosts(); return false;" id="navGeneral">General</a>
+        <a href="#" onclick="showStudyGroups(); return false;" id="navStudy">Study Groups</a>
+        <a href="#" onclick="showAnnouncements(); return false;" id="navAnnouncements">Announcements</a>
+        <a href="index.html">← Back to Courses</a>
+    </div>
+    
+    <div class="container">
+        <div class="community-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalThreads">0</div>
+                <div>Total Discussions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalPosts">0</div>
+                <div>Total Posts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeUsers">0</div>
+                <div>Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="todayPosts">0</div>
+                <div>Posts Today</div>
+            </div>
+        </div>
+        
+        <div id="communityContent">
+            <div style="text-align: center; padding: 3rem;">
+                <p>Loading community discussions...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load all discussions
+        async function showAllDiscussions() {
+            document.querySelectorAll('.community-nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('navAll').classList.add('active');
+            
+            if (typeof ForumManager === 'undefined') {
+                document.getElementById('communityContent').innerHTML = '<p>Forum system loading...</p>';
+                return;
+            }
+            
+            await ForumManager.init();
+            const allThreads = ForumManager.threads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            
+            updateStats();
+            
+            if (allThreads.length === 0) {
+                document.getElementById('communityContent').innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <h3>No discussions yet</h3>
+                        <p>Be the first to start a discussion!</p>
+                        <button class="btn btn-primary" onclick="window.location.href='index.html'">Browse Courses</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('communityContent').innerHTML = `
+                <div class="forum-section">
+                    <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2>All Discussions</h2>
+                        <button class="btn btn-primary" onclick="createGeneralPost()">+ New Post</button>
+                    </div>
+                    <div class="forum-threads">
+                        ${allThreads.map(thread => {
+                            const course = typeof courses !== 'undefined' ? courses.find(c => c.id === thread.courseId) : null;
+                            const courseTitle = course ? course.title : thread.courseId;
+                            return `
+                                <div class="thread-card" onclick="openThread('${thread.id}')">
+                                    <div class="thread-header">
+                                        <h3>${thread.title}</h3>
+                                        ${thread.isPinned ? '<span class="badge">📌 Pinned</span>' : ''}
+                                    </div>
+                                    <div class="thread-meta">
+                                        <span>By ${thread.authorName}</span>
+                                        <span>•</span>
+                                        <span>${courseTitle}</span>
+                                        <span>•</span>
+                                        <span>${getTimeAgo(new Date(thread.updatedAt))}</span>
+                                    </div>
+                                    <div class="thread-stats">
+                                        <span>💬 ${thread.postCount || 0} replies</span>
+                                        <span>👍 ${thread.upvotes || 0} upvotes</span>
+                                        <span>👁️ ${thread.viewCount || 0} views</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showGeneralPosts() {
+            document.querySelectorAll('.community-nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('navGeneral').classList.add('active');
+            showAllDiscussions(); // For now, same as all discussions
+        }
+        
+        function showStudyGroups() {
+            document.querySelectorAll('.community-nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('navStudy').classList.add('active');
+            document.getElementById('communityContent').innerHTML = '<p>Study Groups feature coming soon!</p>';
+        }
+        
+        function showAnnouncements() {
+            document.querySelectorAll('.community-nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('navAnnouncements').classList.add('active');
+            document.getElementById('communityContent').innerHTML = '<p>Announcements feature coming soon!</p>';
+        }
+        
+        function updateStats() {
+            if (typeof ForumManager === 'undefined') return;
+            
+            const threads = ForumManager.threads;
+            const posts = ForumManager.posts;
+            const today = new Date().toDateString();
+            const todayPosts = posts.filter(p => new Date(p.createdAt).toDateString() === today).length;
+            const uniqueUsers = new Set([...threads.map(t => t.authorId), ...posts.map(p => p.authorId)]).size;
+            
+            document.getElementById('totalThreads').textContent = threads.length;
+            document.getElementById('totalPosts').textContent = posts.length;
+            document.getElementById('activeUsers').textContent = uniqueUsers;
+            document.getElementById('todayPosts').textContent = todayPosts;
+        }
+        
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+        
+        function openThread(threadId) {
+            window.location.href = `index.html#thread-${threadId}`;
+        }
+        
+        function createGeneralPost() {
+            if (!user || !user.email) {
+                alert('Please sign in to create a post');
+                window.location.href = 'index.html';
+                return;
+            }
+            window.location.href = 'index.html#new-post';
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            showAllDiscussions();
+        });
+    </script>
+</body>
+</html>

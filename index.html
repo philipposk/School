@@ -6,6 +6,17 @@
     <meta name="description" content="A professional online learning platform offering master's-level courses in critical thinking, logic, finance, and software development.">
     <!-- Updated: 2025-01-06 -->
     <title>School - Enhanced Learning Platform</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID', {
+            page_path: window.location.pathname
+        });
+    </script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <link rel="stylesheet" href="css/enhanced-styles.css">
@@ -1683,6 +1694,9 @@
                 🎓 Learning Platform
             </div>
             <div class="header-right">
+                <a href="about.html" class="header-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">About</a>
+                <a href="pedagogy.html" class="header-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">How We Teach</a>
+                <a href="community.html" class="header-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Community</a>
                 <button class="header-btn" onclick="openAISearch()" title="AI Search">
                     🔍
                 </button>
@@ -1770,6 +1784,11 @@
     <script src="js/instructor-dashboard.js"></script>
     <script src="js/admin-dashboard.js"></script>
     <script src="js/payment-system.js"></script>
+    <script src="js/search-system.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/flashcards.js"></script>
+    <script src="js/onboarding.js"></script>
+    <script src="js/learner-analytics.js"></script>
     <script>
         // Configure marked
         marked.setOptions({

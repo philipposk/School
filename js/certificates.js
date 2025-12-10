@@ -76,6 +76,8 @@ const CertificateManager = {
                 <div class="certificate-actions">
                     <button class="btn btn-primary" onclick="downloadCertificate('${certificate.id}')">Download PDF</button>
                     <button class="btn btn-secondary" onclick="shareCertificate('${certificate.id}')">Share</button>
+                    <button class="btn btn-linkedin" onclick="shareToLinkedIn('${certificate.id}')" title="Share on LinkedIn">💼 LinkedIn</button>
+                    <button class="btn btn-twitter" onclick="shareToTwitter('${certificate.id}')" title="Share on Twitter/X">🐦 Twitter/X</button>
                 </div>
             </div>
         `;
@@ -217,6 +219,46 @@ function shareCertificate(certId) {
     }
 }
 
+function shareToLinkedIn(certId) {
+    const certificate = CertificateManager.getCertificateById(certId);
+    if (!certificate) return;
+    
+    const shareText = encodeURIComponent(`I just completed "${certificate.courseTitle}" on School Learning Platform! 🎓`);
+    const shareUrl = encodeURIComponent(window.location.href);
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}&summary=${shareText}`;
+    
+    window.open(linkedInUrl, '_blank', 'width=600,height=400');
+    
+    // Track analytics
+    if (typeof AnalyticsManager !== 'undefined') {
+        AnalyticsManager.trackEvent('certificate_shared', {
+            platform: 'linkedin',
+            course_id: certificate.courseId
+        });
+    }
+}
+
+function shareToTwitter(certId) {
+    const certificate = CertificateManager.getCertificateById(certId);
+    if (!certificate) return;
+    
+    const shareText = encodeURIComponent(`I just completed "${certificate.courseTitle}"! 🎓`);
+    const shareUrl = encodeURIComponent(window.location.href);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
+    
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+    
+    // Track analytics
+    if (typeof AnalyticsManager !== 'undefined') {
+        AnalyticsManager.trackEvent('certificate_shared', {
+            platform: 'twitter',
+            course_id: certificate.courseId
+        });
+    }
+}
+
 window.downloadCertificate = downloadCertificate;
 window.shareCertificate = shareCertificate;
+window.shareToLinkedIn = shareToLinkedIn;
+window.shareToTwitter = shareToTwitter;
 
