@@ -14,16 +14,26 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Add is_instructor column if it doesn't exist (for existing tables)
+-- Add is_instructor and is_admin columns if they don't exist (for existing tables)
 DO $$ 
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_schema = 'public' 
-        AND table_name = 'profiles' 
-        AND column_name = 'is_instructor'
-    ) THEN
-        ALTER TABLE public.profiles ADD COLUMN is_instructor BOOLEAN DEFAULT FALSE;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profiles') THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'profiles' 
+            AND column_name = 'is_instructor'
+        ) THEN
+            ALTER TABLE public.profiles ADD COLUMN is_instructor BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'profiles' 
+            AND column_name = 'is_admin'
+        ) THEN
+            ALTER TABLE public.profiles ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+        END IF;
     END IF;
 END $$;
 
@@ -161,12 +171,39 @@ CREATE TABLE IF NOT EXISTS public.courses (
   modules INTEGER DEFAULT 8,
   modules_data JSONB DEFAULT '[]'::jsonb,
   is_published BOOLEAN DEFAULT FALSE,
+  is_approved BOOLEAN DEFAULT FALSE,
+  approval_status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+  admin_notes TEXT,
+  approved_by TEXT,
+  approved_at TIMESTAMPTZ,
   enrollment_count INTEGER DEFAULT 0,
   rating DECIMAL(3, 2) DEFAULT 0,
   review_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add approval columns if table already exists
+DO $$ 
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'courses') THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'is_approved') THEN
+            ALTER TABLE public.courses ADD COLUMN is_approved BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'approval_status') THEN
+            ALTER TABLE public.courses ADD COLUMN approval_status TEXT DEFAULT 'pending';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'admin_notes') THEN
+            ALTER TABLE public.courses ADD COLUMN admin_notes TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'approved_by') THEN
+            ALTER TABLE public.courses ADD COLUMN approved_by TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'approved_at') THEN
+            ALTER TABLE public.courses ADD COLUMN approved_at TIMESTAMPTZ;
+        END IF;
+    END IF;
+END $$;
 
 -- Enable Row Level Security (idempotent - safe to run multiple times)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -301,6 +338,40 @@ CREATE POLICY "Instructors can update own courses" ON public.courses
 
 CREATE POLICY "Instructors can delete own courses" ON public.courses
   FOR DELETE USING (auth.uid()::text = instructor_id);
+
+-- Admin Actions Log Table
+CREATE TABLE IF NOT EXISTS public.admin_actions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id TEXT NOT NULL,
+  action_type TEXT NOT NULL, -- 'approve_course', 'reject_course', 'make_admin', 'make_instructor', etc.
+  target_id TEXT, -- course_id, user_id, etc.
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.admin_actions ENABLE ROW LEVEL SECURITY;
+
+-- Admin Actions Policies: Only admins can view/create
+DROP POLICY IF EXISTS "Admins can view admin actions" ON public.admin_actions;
+DROP POLICY IF EXISTS "Admins can create admin actions" ON public.admin_actions;
+
+CREATE POLICY "Admins can view admin actions" ON public.admin_actions
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE profiles.id::text = auth.uid()::text 
+      AND profiles.is_admin = TRUE
+    )
+  );
+
+CREATE POLICY "Admins can create admin actions" ON public.admin_actions
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE profiles.id::text = auth.uid()::text 
+      AND profiles.is_admin = TRUE
+    )
+  );
 
 -- Function to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

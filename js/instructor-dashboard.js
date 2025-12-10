@@ -75,6 +75,11 @@ const InstructorDashboard = {
             modules: courseData.modules || 8,
             modules_data: courseData.modules_data || [],
             isPublished: courseData.isPublished || false,
+            isApproved: false,
+            approvalStatus: 'pending',
+            adminNotes: '',
+            approvedBy: null,
+            approvedAt: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             enrollmentCount: 0,
@@ -118,6 +123,11 @@ const InstructorDashboard = {
         if (updates.modules !== undefined) course.modules = updates.modules;
         if (updates.modules_data !== undefined) course.modules_data = updates.modules_data;
         if (updates.isPublished !== undefined) course.isPublished = updates.isPublished;
+        if (updates.isApproved !== undefined) course.isApproved = updates.isApproved;
+        if (updates.approvalStatus !== undefined) course.approvalStatus = updates.approvalStatus;
+        if (updates.adminNotes !== undefined) course.adminNotes = updates.adminNotes;
+        if (updates.approvedBy !== undefined) course.approvedBy = updates.approvedBy;
+        if (updates.approvedAt !== undefined) course.approvedAt = updates.approvedAt;
         
         course.updatedAt = new Date().toISOString();
         
@@ -295,6 +305,11 @@ const InstructorDashboard = {
                     modules: course.modules,
                     modules_data: course.modules_data,
                     is_published: course.isPublished,
+                    is_approved: course.isApproved || false,
+                    approval_status: course.approvalStatus || 'pending',
+                    admin_notes: course.adminNotes || null,
+                    approved_by: course.approvedBy || null,
+                    approved_at: course.approvedAt || null,
                     enrollment_count: course.enrollmentCount,
                     rating: course.rating,
                     review_count: course.reviewCount,
@@ -359,6 +374,11 @@ const InstructorDashboard = {
                             modules: supabaseCourse.modules,
                             modules_data: supabaseCourse.modules_data,
                             isPublished: supabaseCourse.is_published,
+                            isApproved: supabaseCourse.is_approved,
+                            approvalStatus: supabaseCourse.approval_status,
+                            adminNotes: supabaseCourse.admin_notes,
+                            approvedBy: supabaseCourse.approved_by,
+                            approvedAt: supabaseCourse.approved_at,
                             enrollmentCount: supabaseCourse.enrollment_count,
                             rating: supabaseCourse.rating,
                             reviewCount: supabaseCourse.review_count,
@@ -461,13 +481,23 @@ function renderCourseCard(course) {
                 <div class="course-info">
                     <h3>${SecurityUtils.escapeHTML(course.title)}</h3>
                     <p class="course-meta">
-                        ${course.isPublished ? '<span class="badge badge-success">Published</span>' : '<span class="badge badge-warning">Draft</span>'}
+                        ${course.approvalStatus === 'approved' 
+                            ? '<span class="badge badge-success">✅ Approved</span>' 
+                            : course.approvalStatus === 'rejected' 
+                            ? '<span class="badge badge-danger">❌ Rejected</span>' 
+                            : '<span class="badge badge-warning">⏳ Pending Approval</span>'}
+                        ${course.isPublished ? '<span class="badge badge-info">Published</span>' : '<span class="badge badge-secondary">Draft</span>'}
                         <span>•</span>
                         <span>${course.modules || 0} modules</span>
                         <span>•</span>
                         <span>${course.enrollmentCount || 0} students</span>
                         ${course.rating > 0 ? `<span>•</span><span>⭐ ${course.rating.toFixed(1)}</span>` : ''}
                     </p>
+                    ${course.approvalStatus === 'rejected' && course.adminNotes ? `
+                        <div class="rejection-notice">
+                            <strong>Rejection Reason:</strong> ${SecurityUtils.escapeHTML(course.adminNotes)}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="course-actions">
                     <button class="btn btn-secondary" onclick="editCourse('${course.id}')">Edit</button>
@@ -922,7 +952,17 @@ function toggleCoursePublish(courseId) {
         return;
     }
     
-    InstructorDashboard.updateCourse(courseId, { isPublished: newStatus });
+    // If publishing, set status to pending approval
+    if (newStatus && course.approvalStatus !== 'approved') {
+        InstructorDashboard.updateCourse(courseId, { 
+            isPublished: newStatus,
+            approvalStatus: 'pending',
+            isApproved: false
+        });
+        alert('Course submitted for admin approval. You will be notified once it\'s reviewed.');
+    } else {
+        InstructorDashboard.updateCourse(courseId, { isPublished: newStatus });
+    }
     
     // Refresh editor
     renderCourseEditor(InstructorDashboard.courses.find(c => c.id === courseId));

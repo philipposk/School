@@ -2312,3 +2312,250 @@ header {
         padding: 0.5rem;
     }
 }
+
+/* Admin Dashboard Styles */
+.admin-dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.admin-onboarding {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.admin-dashboard {
+    padding: 2rem 0;
+}
+
+.admin-dashboard .dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.admin-tabs .tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+}
+
+.admin-tabs .tab-btn:hover {
+    color: var(--text);
+}
+
+.admin-tabs .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.admin-content {
+    min-height: 400px;
+}
+
+.admin-tab-content {
+    padding: 2rem 0;
+}
+
+.pending-courses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.pending-course-card {
+    background: var(--card);
+    border: 2px solid var(--warning);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.course-preview {
+    flex: 1;
+}
+
+.course-preview h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text);
+}
+
+.course-instructor {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.course-description {
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.course-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    flex-wrap: wrap;
+}
+
+.course-actions-admin {
+    min-width: 300px;
+}
+
+.approval-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.approval-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.approval-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.no-pending, .no-actions {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.rejection-notice {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 3px solid var(--error);
+    border-radius: 4px;
+    color: var(--text);
+}
+
+.user-management {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.make-admin-section, .make-instructor-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.make-admin-section h3, .make-instructor-section h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text);
+}
+
+.make-admin-section .form-group, .make-instructor-section .form-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.make-admin-section input, .make-instructor-section input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+}
+
+.actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.action-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.action-type {
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.action-date {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.action-details p {
+    margin: 0.5rem 0;
+    color: var(--text);
+}
+
+.badge-info {
+    background: var(--info);
+    color: white;
+}
+
+.badge-secondary {
+    background: var(--text-light);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pending-course-card {
+        flex-direction: column;
+    }
+    
+    .course-actions-admin {
+        min-width: 100%;
+    }
+    
+    .approval-buttons {
+        flex-direction: column;
+    }
+    
+    .make-admin-section .form-group, .make-instructor-section .form-group {
+        flex-direction: column;
+    }
+}
