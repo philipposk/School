@@ -1,0 +1,12 @@
+{
+  "title": "Quiz 1: Advanced Physics Pedagogy",
+  "questions": [
+    {
+      "question": "What is a key challenge when teaching calculus-based physics?",
+      "type": "multiple_choice",
+      "options": ["Students don't like math", "Balancing conceptual understanding with mathematical rigor", "Calculus is too hard", "There aren't enough problems"],
+      "correct_answer": 1,
+      "explanation": "A major challenge is maintaining both deep conceptual understanding and mathematical rigor simultaneously."
+    }
+  ]
+}

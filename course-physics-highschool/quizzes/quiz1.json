@@ -1,0 +1,12 @@
+{
+  "title": "Quiz 1: High School Physics Pedagogy",
+  "questions": [
+    {
+      "question": "What is a key benefit of inquiry-based learning in high school physics?",
+      "type": "multiple_choice",
+      "options": ["It's faster than lectures", "It develops critical thinking", "Students prefer it", "It requires less preparation"],
+      "correct_answer": 1,
+      "explanation": "Inquiry-based learning helps develop critical thinking skills and deeper understanding."
+    }
+  ]
+}

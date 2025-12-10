@@ -2674,6 +2674,12 @@
                     courseDir = 'course-minds';
                 } else if (state.currentCourseId === 'sign-language') {
                     courseDir = 'course-signlanguage';
+                } else if (state.currentCourseId === 'teaching-physics-elementary') {
+                    courseDir = 'course-physics-elementary';
+                } else if (state.currentCourseId === 'teaching-physics-high-school') {
+                    courseDir = 'course-physics-highschool';
+                } else if (state.currentCourseId === 'teaching-physics-advanced') {
+                    courseDir = 'course-physics-advanced';
                 }
                 const response = await fetch(`${courseDir}/modules/module${String(moduleId).padStart(2, '0')}.md`);
                 
@@ -3044,6 +3050,16 @@
                     courseDir = 'course-ios';
                 } else if (state.currentCourseId === 'vibecoding') {
                     courseDir = 'course-vibecoding';
+                } else if (state.currentCourseId === 'human-minds') {
+                    courseDir = 'course-minds';
+                } else if (state.currentCourseId === 'sign-language') {
+                    courseDir = 'course-signlanguage';
+                } else if (state.currentCourseId === 'teaching-physics-elementary') {
+                    courseDir = 'course-physics-elementary';
+                } else if (state.currentCourseId === 'teaching-physics-high-school') {
+                    courseDir = 'course-physics-highschool';
+                } else if (state.currentCourseId === 'teaching-physics-advanced') {
+                    courseDir = 'course-physics-advanced';
                 }
                 // Try to fetch the module markdown file
                 const response = await fetch(`${courseDir}/modules/module${String(moduleId).padStart(2, '0')}.md`);

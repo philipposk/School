@@ -1,0 +1,12 @@
+{
+  "title": "Quiz 1: Introduction to Teaching Physics",
+  "questions": [
+    {
+      "question": "At what cognitive stage are most elementary students (ages 8-11)?",
+      "type": "multiple_choice",
+      "options": ["Preoperational", "Concrete Operational", "Formal Operational", "Sensorimotor"],
+      "correct_answer": 1,
+      "explanation": "Elementary students are typically in the Concrete Operational stage, where they think logically about concrete events."
+    }
+  ]
+}
