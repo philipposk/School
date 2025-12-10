@@ -37,7 +37,7 @@ function warn(name, message) {
 console.log('\n📨 Testing Messaging System...');
 test('MessagingManager exists', () => typeof MessagingManager !== 'undefined');
 test('MessagingManager has conversations', () => Array.isArray(MessagingManager.conversations));
-test('MessagingManager has ConversationType', () => MessagingManager.ConversationType && MessagingManager.ConversationType.FRIEND);
+test('MessagingManager has ConversationType', () => !!(MessagingManager.ConversationType && MessagingManager.ConversationType.FRIEND));
 
 // Test 2: Assignment System
 console.log('\n📝 Testing Assignment System...');
@@ -55,14 +55,14 @@ test('CertificateManager.checkCourseCompletion is function', () => typeof Certif
 // Test 4: Payment System
 console.log('\n💳 Testing Payment System...');
 test('PaymentManager exists', () => typeof PaymentManager !== 'undefined');
-test('PaymentManager has plans', () => PaymentManager.plans && PaymentManager.plans.free);
+test('PaymentManager has plans', () => !!(PaymentManager.plans && PaymentManager.plans.free));
 test('PaymentManager.getSubscriptionStatus is function', () => typeof PaymentManager.getSubscriptionStatus === 'function');
 
 // Test 5: Reminder System
 console.log('\n🔔 Testing Reminder System...');
 test('ReminderManager exists', () => typeof ReminderManager !== 'undefined');
 test('ReminderManager has reminders', () => Array.isArray(ReminderManager.reminders));
-test('ReminderManager has ReminderType', () => ReminderManager.ReminderType && ReminderManager.ReminderType.MODULE_COMPLETION);
+test('ReminderManager has ReminderType', () => !!(ReminderManager.ReminderType && ReminderManager.ReminderType.MODULE_COMPLETION));
 
 // Test 6: Enhanced Authentication
 console.log('\n🔐 Testing Enhanced Authentication...');
