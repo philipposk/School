@@ -209,7 +209,7 @@ const AuthManager = {
         const supabaseKey = localStorage.getItem('supabase_anon_key');
         
         if (!supabaseUrl || !supabaseKey || typeof SupabaseManager === 'undefined') {
-            throw new Error('Supabase not configured. Please configure Supabase first.');
+            throw new Error('OAuth sign-in is coming soon. Please use email login for now.');
         }
         
         try {
@@ -235,7 +235,7 @@ const AuthManager = {
         const supabaseKey = localStorage.getItem('supabase_anon_key');
         
         if (!supabaseUrl || !supabaseKey || typeof SupabaseManager === 'undefined') {
-            throw new Error('Supabase not configured. Please configure Supabase first.');
+            throw new Error('OAuth sign-in is coming soon. Please use email login for now.');
         }
         
         try {
@@ -261,7 +261,7 @@ const AuthManager = {
         const supabaseKey = localStorage.getItem('supabase_anon_key');
         
         if (!supabaseUrl || !supabaseKey || typeof SupabaseManager === 'undefined') {
-            throw new Error('Supabase not configured. Please configure Supabase first.');
+            throw new Error('OAuth sign-in is coming soon. Please use email login for now.');
         }
         
         try {

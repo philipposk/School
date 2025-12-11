@@ -91,7 +91,11 @@ const PaymentManager = {
         
         const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
         if (!backendUrl) {
-            throw new Error('Backend not configured. Please configure backend URL.');
+            if (typeof showComingSoon === 'function') {
+                showComingSoon('Payments');
+                return { success: false, message: 'Payments coming soon' };
+            }
+            throw new Error('Backend not configured. Payments are coming soon.');
         }
         
         try {
@@ -115,7 +119,15 @@ const PaymentManager = {
             const data = await response.json();
             return data;
         } catch (error) {
-            throw new Error(`Payment setup failed: ${error.message}`);
+            const message = error && error.message ? error.message : 'Payment setup failed';
+            const isConfigIssue = message.toLowerCase().includes('not configured');
+            
+            if (isConfigIssue && typeof showComingSoon === 'function') {
+                showComingSoon('Payments');
+                return { success: false, message: 'Payments coming soon' };
+            }
+            
+            throw new Error(`Payment setup failed: ${message}`);
         }
     },
     

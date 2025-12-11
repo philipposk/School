@@ -276,6 +276,10 @@ async function initLibrary() {
 - [ ] User profile created from Apple data
 - [ ] Can sign out and sign back in with Apple
 
+### OAuth Unconfigured State (Regression)
+- [ ] OAuth buttons show "Coming soon" when Supabase/OAuth isn't set up (Regression test for disabled OAuth on GitHub Pages)
+- [ ] OAuth click without config returns user to previous page/closing login modal
+
 ### Email/Password Login
 - [ ] Sign in with correct credentials
 - [ ] Sign in with wrong password (should fail)
@@ -493,6 +497,10 @@ async function initLibrary() {
 - [ ] Test card accepted
 - [ ] Payment success redirects correctly
 - [ ] Payment cancel redirects correctly
+
+### Payment Not Configured (Regression)
+- [ ] If Stripe/backend not configured, show "Payments coming soon" instead of error
+- [ ] Payment click with missing config returns user to previous page or safely cancels
 
 ### Subscription Management
 - [ ] Active subscription shows in profile

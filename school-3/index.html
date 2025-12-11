@@ -3703,11 +3703,42 @@
             }
         }
 
+        // Coming soon helper (for unfinished integrations)
+        function showComingSoon(featureLabel) {
+            const message = `${featureLabel} is coming soon. Taking you back to where you were.`;
+            alert(message);
+            
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal && loginModal.classList.contains('show')) {
+                loginModal.classList.remove('show');
+            }
+            
+            if (window.history && window.history.length > 1) {
+                window.history.back();
+            }
+        }
+
+        function isOAuthConfigured() {
+            const supabaseUrl = localStorage.getItem('supabase_url');
+            const supabaseKey = localStorage.getItem('supabase_anon_key');
+            return !!(
+                supabaseUrl &&
+                supabaseKey &&
+                typeof SupabaseManager !== 'undefined' &&
+                typeof SupabaseManager.signInWithOAuth === 'function'
+            );
+        }
+
         // OAuth Sign In Handlers
         async function handleGoogleSignIn() {
             try {
                 if (typeof AuthManager === 'undefined') {
                     alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                if (!isOAuthConfigured()) {
+                    showComingSoon('OAuth sign-in');
                     return;
                 }
                 
@@ -3727,6 +3758,11 @@
                     return;
                 }
                 
+                if (!isOAuthConfigured()) {
+                    showComingSoon('OAuth sign-in');
+                    return;
+                }
+                
                 const result = await AuthManager.signInWithFacebook();
                 // OAuth redirects, so this may not execute
                 console.log('Facebook sign in initiated');
@@ -3740,6 +3776,11 @@
             try {
                 if (typeof AuthManager === 'undefined') {
                     alert('Authentication system not loaded. Please refresh the page.');
+                    return;
+                }
+                
+                if (!isOAuthConfigured()) {
+                    showComingSoon('OAuth sign-in');
                     return;
                 }
                 
@@ -3761,6 +3802,8 @@
         window.handleGoogleSignIn = handleGoogleSignIn;
         window.handleFacebookSignIn = handleFacebookSignIn;
         window.handleAppleSignIn = handleAppleSignIn;
+        window.showComingSoon = showComingSoon;
+        window.isOAuthConfigured = isOAuthConfigured;
         
         // Initialize test account (for development/testing)
         function initTestAccount() {
