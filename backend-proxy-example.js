@@ -344,6 +344,21 @@ function planFromPriceId(priceId) {
     return null;
 }
 
+// Stripe moved `current_period_*` from the subscription onto each subscription
+// item. Prefer the item field, fall back to the legacy top-level for older
+// accounts/events.
+function subscriptionPeriodEnd(sub) {
+    const item = sub?.items?.data?.[0];
+    const ts = item?.current_period_end ?? sub?.current_period_end ?? null;
+    return ts ? new Date(ts * 1000).toISOString() : null;
+}
+
+function subscriptionPeriodStart(sub) {
+    const item = sub?.items?.data?.[0];
+    const ts = item?.current_period_start ?? sub?.current_period_start ?? sub?.created ?? null;
+    return ts ? new Date(ts * 1000).toISOString() : null;
+}
+
 // ----------------------------------------------------------------------------
 // Root / health
 // ----------------------------------------------------------------------------
@@ -661,9 +676,7 @@ app.post('/api/payments/verify-payment', paymentLimiter, async (req, res) => {
                 stripeSubscriptionId: subscription.id,
                 stripeCustomerId: customer.id,
                 startDate: new Date(subscription.created * 1000).toISOString(),
-                endDate: subscription.current_period_end
-                    ? new Date(subscription.current_period_end * 1000).toISOString()
-                    : null
+                endDate: subscriptionPeriodEnd(subscription)
             }
         });
     } catch (error) {
@@ -719,7 +732,7 @@ app.get('/api/payments/subscription', paymentLimiter, async (req, res) => {
             plan,
             status: sub.status,
             active: true,
-            endDate: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
+            endDate: subscriptionPeriodEnd(sub),
             stripeSubscriptionId: sub.id,
             stripeCustomerId: customers.data[0].id,
             source: 'stripe'
@@ -786,9 +799,7 @@ async function handleStripeWebhook(req, res) {
                         stripeSubscriptionId: sub.id,
                         stripeCustomerId: sub.customer,
                         startDate: new Date(sub.created * 1000).toISOString(),
-                        endDate: sub.current_period_end
-                            ? new Date(sub.current_period_end * 1000).toISOString()
-                            : null
+                        endDate: subscriptionPeriodEnd(sub)
                     });
                 }
                 break;
@@ -808,9 +819,7 @@ async function handleStripeWebhook(req, res) {
                         stripeSubscriptionId: sub.id,
                         stripeCustomerId: sub.customer,
                         startDate: new Date(sub.created * 1000).toISOString(),
-                        endDate: sub.current_period_end
-                            ? new Date(sub.current_period_end * 1000).toISOString()
-                            : null
+                        endDate: subscriptionPeriodEnd(sub)
                     });
                 }
                 break;
