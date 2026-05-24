@@ -1,16 +1,32 @@
 // Supabase Client Configuration
 // This file initializes Supabase and provides helper functions
-// Version: 2.2 - Fixed library loading and ReferenceError issues
-console.log('🔧 Supabase Client v2.2 loaded');
+// Version: 2.3 - Migrated to new project, no hardcoded URL fallback
+console.log('🔧 Supabase Client v2.3 loaded');
+
+// One-time migration: the old (deleted) project ref must not stick around in
+// returning-user localStorage, otherwise they keep talking to a dead URL.
+(function migrateStaleSupabaseCredentials() {
+    try {
+        const dead = ['jmjezmfhygvazfunuujt'];
+        const url = localStorage.getItem('supabase_url') || '';
+        if (dead.some(ref => url.includes(ref))) {
+            localStorage.removeItem('supabase_url');
+            localStorage.removeItem('supabase_anon_key');
+            console.log('🧹 Cleared stale Supabase credentials (old project ref).');
+        }
+    } catch (_) { /* localStorage may be disabled */ }
+})();
 
 // Load Supabase JS library dynamically
 let supabaseClient = null;
 let supabaseLibPromise = null;
 
-// Helper function to get credentials dynamically (not at file load time)
+// Helper function to get credentials dynamically (not at file load time).
+// No hardcoded URL fallback — single source of truth is the backend
+// /api/config/supabase endpoint (which initSupabase() calls when missing).
 function getSupabaseCredentials() {
     return {
-        url: localStorage.getItem('supabase_url') || 'https://jmjezmfhygvazfunuujt.supabase.co',
+        url: localStorage.getItem('supabase_url') || '',
         key: localStorage.getItem('supabase_anon_key') || ''
     };
 }

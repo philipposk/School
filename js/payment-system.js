@@ -16,8 +16,8 @@ const PaymentManager = {
             name: 'Monthly Premium',
             price: 9.99,
             interval: 'month',
-            stripePriceId: (typeof process !== 'undefined' && process.env && process.env.STRIPE_MONTHLY_PRICE_ID) || 'price_1ScmrNCGeGVZZj1R43zF6LH6', // Monthly price ID
-            stripeProductId: 'prod_TZwkitF5vtHLjy', // Product ID
+            stripePriceId: (typeof process !== 'undefined' && process.env && process.env.STRIPE_MONTHLY_PRICE_ID) || 'price_1TaQr7CGeGVZZj1Rz1los9rz',
+            stripeProductId: 'prod_UZa1LFPUV6T1wj',
             features: ['All courses', 'AI tutor', 'Certificates', 'Priority support']
         },
         yearly: {
@@ -25,8 +25,8 @@ const PaymentManager = {
             name: 'Yearly Premium',
             price: 99.99,
             interval: 'year',
-            stripePriceId: (typeof process !== 'undefined' && process.env && process.env.STRIPE_YEARLY_PRICE_ID) || 'price_1ScmsGCGeGVZZj1RkODcyPOf', // Yearly price ID
-            stripeProductId: 'prod_TZwlP4UT0spyij', // Product ID
+            stripePriceId: (typeof process !== 'undefined' && process.env && process.env.STRIPE_YEARLY_PRICE_ID) || 'price_1TaQrbCGeGVZZj1RaDpAzf73',
+            stripeProductId: 'prod_UZa1VaNb4oQAe3',
             features: ['All courses', 'AI tutor', 'Certificates', 'Priority support', 'Save 17%']
         }
     },
