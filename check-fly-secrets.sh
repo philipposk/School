@@ -20,3 +20,4 @@ echo "   flyctl secrets set RESEND_API_KEY=\"your-key-here\" -a school-backend"
 echo ""
 echo "💡 To view all secrets (values hidden for security):"
 echo "   flyctl secrets list -a school-backend"
+

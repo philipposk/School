@@ -51,3 +51,4 @@ curl -X POST https://school-backend.fly.dev/api/notifications/email \
 ---
 
 **Ready? Go to resend.com/api-keys and create the key, then paste it here!**
+

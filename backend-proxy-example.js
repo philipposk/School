@@ -1,26 +1,30 @@
 // Complete Backend Server for School Platform
-// Includes: AI Proxy, Email Notifications, Supabase Integration
+// Includes: AI Proxy, Email Notifications, Supabase Integration, Stripe Payments
 // Deploy to Railway, Render, or Fly.io
 
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+
 const app = express();
+app.set('trust proxy', 1); // Fly.io / proxies
 
-// Middleware
-app.use(cors()); // Allow frontend to call this API
-app.use(express.json());
-
+// ----------------------------------------------------------------------------
 // Environment variables
+// ----------------------------------------------------------------------------
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'School Platform <onboarding@resend.dev>';
+
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
 
-// Facebook/Meta API (for Messenger, WhatsApp, Instagram)
 const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '';
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || '';
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || '';
@@ -29,23 +33,23 @@ const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
 const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN || '';
 const INSTAGRAM_BUSINESS_ACCOUNT_ID = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '';
 
-// Viber API
 const VIBER_AUTH_TOKEN = process.env.VIBER_AUTH_TOKEN || '';
-
-// Telegram Bot API
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-
-// Discord Webhook
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 
-// Stripe Payment System
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const STRIPE_MONTHLY_PRICE_ID = process.env.STRIPE_MONTHLY_PRICE_ID || '';
 const STRIPE_YEARLY_PRICE_ID = process.env.STRIPE_YEARLY_PRICE_ID || '';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://school.6x7.gr';
 
-// Stripe initialization
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://school.6x7.gr';
+// Comma-separated list of additional allowed origins (e.g. dev hosts)
+const EXTRA_ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+
+// ----------------------------------------------------------------------------
+// Stripe init
+// ----------------------------------------------------------------------------
 let Stripe = null;
 let stripe = null;
 try {
@@ -55,18 +59,302 @@ try {
     console.warn('Stripe module not installed. Run: npm install stripe');
 }
 
-// Root endpoint - API information
-app.get('/', (req, res) => {
+// ----------------------------------------------------------------------------
+// Supabase service-role client (for webhook writes; bypasses RLS)
+// ----------------------------------------------------------------------------
+let supabaseAdmin = null;
+try {
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+        const { createClient } = require('@supabase/supabase-js');
+        supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+            auth: { autoRefreshToken: false, persistSession: false }
+        });
+    }
+} catch (error) {
+    console.warn('Supabase admin client unavailable:', error.message);
+}
+
+// ----------------------------------------------------------------------------
+// Middleware: CORS restricted to known origins
+// ----------------------------------------------------------------------------
+const allowedOrigins = new Set([FRONTEND_URL, ...EXTRA_ALLOWED_ORIGINS]);
+app.use(cors({
+    origin(origin, cb) {
+        // Allow requests with no origin (curl, health checks, same-origin)
+        if (!origin) return cb(null, true);
+        if (allowedOrigins.has(origin)) return cb(null, true);
+        return cb(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true
+}));
+
+// Stripe webhook needs the raw body, so mount it BEFORE express.json()
+app.post('/api/payments/webhook',
+    express.raw({ type: 'application/json' }),
+    handleStripeWebhook
+);
+
+app.use(express.json({ limit: '1mb' }));
+
+// ----------------------------------------------------------------------------
+// Rate limiters (per IP) — protect paid AI / messaging endpoints from abuse
+// ----------------------------------------------------------------------------
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: Number(process.env.AI_RATE_LIMIT_PER_MIN) || 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many AI requests, slow down.' }
+});
+
+const notificationLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: Number(process.env.NOTIFY_RATE_LIMIT_PER_MIN) || 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many notification requests, slow down.' }
+});
+
+const paymentLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: Number(process.env.PAYMENT_RATE_LIMIT_PER_MIN) || 30,
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// ----------------------------------------------------------------------------
+// Internal helpers (no self-fetch — call these directly)
+// ----------------------------------------------------------------------------
+async function sendEmail({ to, subject, html, text }) {
+    if (!RESEND_API_KEY) {
+        return { ok: false, status: 500, error: 'Resend API key not configured' };
+    }
+    if (!to || !subject || !html) {
+        return { ok: false, status: 400, error: 'Missing required fields: to, subject, html' };
+    }
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${RESEND_API_KEY}`
+            },
+            body: JSON.stringify({
+                from: EMAIL_FROM,
+                to: Array.isArray(to) ? to : [to],
+                subject,
+                html,
+                text: text || html.replace(/<[^>]*>/g, '')
+            })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            return { ok: false, status: response.status, error: err.error?.message || 'Email sending failed' };
+        }
+        const data = await response.json();
+        return { ok: true, id: data.id };
+    } catch (err) {
+        console.error('sendEmail error:', err);
+        return { ok: false, status: 500, error: 'Internal email error' };
+    }
+}
+
+async function sendSMS({ to, message }) {
+    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
+        return { ok: false, status: 500, error: 'Twilio not configured' };
+    }
+    if (!to || !message) return { ok: false, status: 400, error: 'Missing to or message' };
+
+    const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
+    try {
+        const response = await fetch(
+            `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': `Basic ${auth}`
+                },
+                body: new URLSearchParams({ From: TWILIO_PHONE_NUMBER, To: to, Body: message })
+            }
+        );
+        if (!response.ok) {
+            const err = await response.text();
+            return { ok: false, status: response.status, error: err };
+        }
+        const data = await response.json();
+        return { ok: true, sid: data.sid };
+    } catch (err) {
+        console.error('sendSMS error:', err);
+        return { ok: false, status: 500, error: 'Internal SMS error' };
+    }
+}
+
+async function sendWhatsApp({ to, message }) {
+    if (!WHATSAPP_PHONE_NUMBER_ID || !WHATSAPP_ACCESS_TOKEN) {
+        return { ok: false, status: 500, error: 'WhatsApp not configured' };
+    }
+    if (!to || !message) return { ok: false, status: 400, error: 'Missing to or message' };
+    try {
+        const response = await fetch(
+            `https://graph.facebook.com/v18.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`
+                },
+                body: JSON.stringify({
+                    messaging_product: 'whatsapp',
+                    to, type: 'text', text: { body: message }
+                })
+            }
+        );
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            return { ok: false, status: response.status, error: err.error?.message || 'WhatsApp sending failed' };
+        }
+        const data = await response.json();
+        return { ok: true, messageId: data.messages?.[0]?.id };
+    } catch (err) {
+        return { ok: false, status: 500, error: 'Internal WhatsApp error' };
+    }
+}
+
+async function sendMessenger({ recipientId, message }) {
+    if (!FACEBOOK_PAGE_ACCESS_TOKEN) return { ok: false, status: 500, error: 'Messenger not configured' };
+    if (!recipientId || !message) return { ok: false, status: 400, error: 'Missing recipientId or message' };
+    try {
+        const response = await fetch(
+            `https://graph.facebook.com/v18.0/me/messages?access_token=${FACEBOOK_PAGE_ACCESS_TOKEN}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ recipient: { id: recipientId }, message: { text: message } })
+            }
+        );
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            return { ok: false, status: response.status, error: err.error?.message || 'Messenger sending failed' };
+        }
+        const data = await response.json();
+        return { ok: true, messageId: data.message_id };
+    } catch (err) {
+        return { ok: false, status: 500, error: 'Internal Messenger error' };
+    }
+}
+
+async function sendInstagram({ recipientId, message }) {
+    if (!INSTAGRAM_BUSINESS_ACCOUNT_ID || !FACEBOOK_PAGE_ACCESS_TOKEN)
+        return { ok: false, status: 500, error: 'Instagram not configured' };
+    if (!recipientId || !message) return { ok: false, status: 400, error: 'Missing recipientId or message' };
+    try {
+        const response = await fetch(
+            `https://graph.facebook.com/v18.0/${INSTAGRAM_BUSINESS_ACCOUNT_ID}/messages`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${FACEBOOK_PAGE_ACCESS_TOKEN}`
+                },
+                body: JSON.stringify({ recipient: { id: recipientId }, message: { text: message } })
+            }
+        );
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            return { ok: false, status: response.status, error: err.error?.message || 'Instagram sending failed' };
+        }
+        const data = await response.json();
+        return { ok: true, messageId: data.message_id };
+    } catch (err) {
+        return { ok: false, status: 500, error: 'Internal Instagram error' };
+    }
+}
+
+async function sendViber({ to, message }) {
+    if (!VIBER_AUTH_TOKEN) return { ok: false, status: 500, error: 'Viber not configured' };
+    if (!to || !message) return { ok: false, status: 400, error: 'Missing to or message' };
+    try {
+        const response = await fetch('https://chatapi.viber.com/pa/send_message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Viber-Auth-Token': VIBER_AUTH_TOKEN },
+            body: JSON.stringify({ receiver: to, type: 'text', text: message })
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            return { ok: false, status: response.status, error: err.error?.message || 'Viber sending failed' };
+        }
+        const data = await response.json();
+        return { ok: true, messageToken: data.message_token };
+    } catch (err) {
+        return { ok: false, status: 500, error: 'Internal Viber error' };
+    }
+}
+
+async function sendTelegram({ chatId, message }) {
+    if (!TELEGRAM_BOT_TOKEN) return { ok: false, status: 500, error: 'Telegram not configured' };
+    if (!chatId || !message) return { ok: false, status: 400, error: 'Missing chatId or message' };
+    try {
+        const response = await fetch(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+            }
+        );
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            return { ok: false, status: response.status, error: err.description || 'Telegram sending failed' };
+        }
+        const data = await response.json();
+        return { ok: true, messageId: data.result?.message_id };
+    } catch (err) {
+        return { ok: false, status: 500, error: 'Internal Telegram error' };
+    }
+}
+
+async function sendDiscord({ message, username, avatar_url }) {
+    if (!DISCORD_WEBHOOK_URL) return { ok: false, status: 500, error: 'Discord not configured' };
+    if (!message) return { ok: false, status: 400, error: 'Missing message' };
+    try {
+        const response = await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: message,
+                username: username || 'School Platform',
+                avatar_url: avatar_url || undefined
+            })
+        });
+        if (!response.ok) {
+            const err = await response.text();
+            return { ok: false, status: response.status, error: err || 'Discord sending failed' };
+        }
+        return { ok: true };
+    } catch (err) {
+        return { ok: false, status: 500, error: 'Internal Discord error' };
+    }
+}
+
+function planFromPriceId(priceId) {
+    if (priceId && STRIPE_YEARLY_PRICE_ID && priceId === STRIPE_YEARLY_PRICE_ID) return 'yearly';
+    if (priceId && STRIPE_MONTHLY_PRICE_ID && priceId === STRIPE_MONTHLY_PRICE_ID) return 'monthly';
+    // Unknown price — caller decides default
+    return null;
+}
+
+// ----------------------------------------------------------------------------
+// Root / health
+// ----------------------------------------------------------------------------
+app.get('/', (_req, res) => {
     res.json({
         name: 'School Platform Backend API',
-        version: '1.0.0',
+        version: '1.1.0',
         status: 'running',
         endpoints: {
             health: '/health',
-            ai: {
-                groq: '/api/ai/groq',
-                openai: '/api/ai/openai'
-            },
+            ai: { groq: '/api/ai/groq', openai: '/api/ai/openai' },
             notifications: {
                 email: '/api/notifications/email',
                 sms: '/api/notifications/sms',
@@ -75,57 +363,50 @@ app.get('/', (req, res) => {
             payments: {
                 createCheckout: '/api/payments/create-checkout',
                 verifyPayment: '/api/payments/verify-payment',
-                cancelSubscription: '/api/payments/cancel-subscription'
+                cancelSubscription: '/api/payments/cancel-subscription',
+                subscription: '/api/payments/subscription',
+                webhook: '/api/payments/webhook',
+                plans: '/api/payments/plans'
             },
-            config: {
-                supabase: '/api/config/supabase'
-            }
+            config: { supabase: '/api/config/supabase' }
         },
         timestamp: new Date().toISOString()
     });
 });
 
-// Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Supabase configuration endpoint (returns public config for frontend)
-app.get('/api/config/supabase', (req, res) => {
-    res.json({
-        url: SUPABASE_URL || 'https://jmjezmfhygvazfunuujt.supabase.co',
-        // Anon key - safe to expose to frontend (it's public by design)
-        // Set SUPABASE_ANON_KEY environment variable, or use default
-        anonKey: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4i'
-    });
+// ----------------------------------------------------------------------------
+// Supabase public config (anon key is safe to expose; no hardcoded fallback)
+// ----------------------------------------------------------------------------
+app.get('/api/config/supabase', (_req, res) => {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        return res.status(503).json({
+            error: 'Supabase not configured on server. Set SUPABASE_URL and SUPABASE_ANON_KEY.'
+        });
+    }
+    res.json({ url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY });
 });
 
-// Proxy endpoint for Groq API with automatic model fallback
-app.post('/api/ai/groq', async (req, res) => {
+// ----------------------------------------------------------------------------
+// AI proxies
+// ----------------------------------------------------------------------------
+app.post('/api/ai/groq', aiLimiter, async (req, res) => {
     try {
-        if (!GROQ_API_KEY) {
-            return res.status(500).json({ error: 'Groq API key not configured on server' });
-        }
+        if (!GROQ_API_KEY) return res.status(500).json({ error: 'Groq API key not configured on server' });
 
         const { messages, options = {} } = req.body;
-
         if (!messages || !Array.isArray(messages)) {
             return res.status(400).json({ error: 'Invalid messages format' });
         }
 
-        // Model fallback list (try primary first, then fallbacks)
-        const groqModels = options.model 
-            ? [options.model] 
-            : [
-                'llama-3.3-70b-versatile', // Primary
-                'llama-3.1-8b-instant',    // Fallback 1
-                'mixtral-8x7b-32768',      // Fallback 2
-                'gemma2-9b-it'              // Fallback 3
-            ];
+        const groqModels = options.model
+            ? [options.model]
+            : ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
 
         let lastError = null;
-
-        // Try each model until one works
         for (const model of groqModels) {
             try {
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -135,63 +416,46 @@ app.post('/api/ai/groq', async (req, res) => {
                         'Authorization': `Bearer ${GROQ_API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: model,
-                        messages: messages,
-                        temperature: options.temperature || 0.7,
-                        max_tokens: options.max_tokens || 1000,
+                        model, messages,
+                        temperature: options.temperature ?? 0.7,
+                        max_tokens: options.max_tokens ?? 1000,
                         stream: false
                     })
                 });
 
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-                    const errorMsg = error.error?.message || '';
-
-                    // If model is deprecated or unavailable, try next model
-                    if (errorMsg.includes('decommissioned') || errorMsg.includes('not available') || response.status === 400) {
-                        console.warn(`Groq model ${model} failed, trying next model...`);
-                        lastError = new Error(errorMsg);
-                        continue; // Try next model
+                    const msg = error.error?.message || '';
+                    if (msg.includes('decommissioned') || msg.includes('not available') || response.status === 400) {
+                        console.warn(`Groq model ${model} failed, trying next…`);
+                        lastError = new Error(msg);
+                        continue;
                     }
-
-                    return res.status(response.status).json({ error: errorMsg || 'API error' });
+                    return res.status(response.status).json({ error: msg || 'API error' });
                 }
-
                 const data = await response.json();
-                console.log(`✅ Groq API success with model: ${model}`);
                 return res.json(data);
             } catch (error) {
                 lastError = error;
-                // If it's a model-specific error, try next model
                 if (error.message && (error.message.includes('decommissioned') || error.message.includes('not available'))) {
-                    console.warn(`Groq model ${model} failed: ${error.message}, trying next model...`);
                     continue;
                 }
-                // Other errors: return immediately
                 console.error('Groq API error:', error);
                 return res.status(500).json({ error: 'Internal server error' });
             }
         }
-
-        // All models failed
-        return res.status(500).json({ 
-            error: lastError?.message || 'All Groq models failed. Please check API configuration.' 
-        });
+        return res.status(500).json({ error: lastError?.message || 'All Groq models failed.' });
     } catch (error) {
         console.error('Groq API error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// Proxy endpoint for OpenAI API
-app.post('/api/ai/openai', async (req, res) => {
+app.post('/api/ai/openai', aiLimiter, async (req, res) => {
     try {
-        if (!OPENAI_API_KEY) {
-            return res.status(500).json({ error: 'OpenAI API key not configured on server' });
-        }
+        if (!OPENAI_API_KEY) return res.status(500).json({ error: 'OpenAI API key not configured on server' });
 
         const { messages, options = {} } = req.body;
-
         if (!messages || !Array.isArray(messages)) {
             return res.status(400).json({ error: 'Invalid messages format' });
         }
@@ -204,9 +468,9 @@ app.post('/api/ai/openai', async (req, res) => {
             },
             body: JSON.stringify({
                 model: options.model || 'gpt-4o-mini',
-                messages: messages,
-                temperature: options.temperature || 0.7,
-                max_tokens: options.max_tokens || 2000,
+                messages,
+                temperature: options.temperature ?? 0.7,
+                max_tokens: options.max_tokens ?? 2000,
                 stream: false
             })
         });
@@ -224,597 +488,129 @@ app.post('/api/ai/openai', async (req, res) => {
     }
 });
 
-// Email notifications endpoint
-app.post('/api/notifications/email', async (req, res) => {
-    try {
-        if (!RESEND_API_KEY) {
-            return res.status(500).json({ error: 'Resend API key not configured' });
-        }
-
-        const { to, subject, html, text } = req.body;
-
-        if (!to || !subject || !html) {
-            return res.status(400).json({ error: 'Missing required fields: to, subject, html' });
-        }
-
-        const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${RESEND_API_KEY}`
-            },
-            body: JSON.stringify({
-                from: 'School Platform <onboarding@resend.dev>', // Update with your domain
-                to: Array.isArray(to) ? to : [to],
-                subject,
-                html,
-                text: text || html.replace(/<[^>]*>/g, '') // Strip HTML if no text provided
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.error?.message || 'Email sending failed' });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, id: data.id });
-    } catch (error) {
-        console.error('Email error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+// ----------------------------------------------------------------------------
+// Notifications
+// ----------------------------------------------------------------------------
+app.post('/api/notifications/email', notificationLimiter, async (req, res) => {
+    const result = await sendEmail(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, id: result.id });
 });
 
-// Send welcome email
-app.post('/api/notifications/welcome', async (req, res) => {
-    try {
-        const { email, name } = req.body;
-        
-        if (!email || !name) {
-            return res.status(400).json({ error: 'Missing email or name' });
-        }
+app.post('/api/notifications/welcome', notificationLimiter, async (req, res) => {
+    const { email, name } = req.body;
+    if (!email || !name) return res.status(400).json({ error: 'Missing email or name' });
 
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                    .content { background: #f7fafc; padding: 30px; border-radius: 0 0 10px 10px; }
-                    .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>🎓 Welcome to School Platform!</h1>
-                    </div>
-                    <div class="content">
-                        <h2>Hi ${name}!</h2>
-                        <p>Welcome to our learning platform! We're excited to have you join us.</p>
-                        <p>Get started by exploring our courses and begin your learning journey today.</p>
-                        <a href="${process.env.FRONTEND_URL || 'https://school.6x7.gr'}" class="button">Start Learning</a>
-                        <p style="margin-top: 30px; font-size: 12px; color: #666;">
-                            If you didn't sign up for this account, please ignore this email.
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `;
-
-        // Call email endpoint
-        const emailRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                to: email,
-                subject: 'Welcome to School Platform! 🎓',
-                html
-            })
-        });
-
-        const result = await emailRes.json();
-        res.json(result);
-    } catch (error) {
-        console.error('Welcome email error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    const html = welcomeEmailHtml(name);
+    const result = await sendEmail({
+        to: email,
+        subject: 'Welcome to School Platform! 🎓',
+        html
+    });
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, id: result.id });
 });
 
-// Send course completion email
-app.post('/api/notifications/course-completed', async (req, res) => {
-    try {
-        const { email, name, courseTitle } = req.body;
-        
-        if (!email || !name || !courseTitle) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                    .content { background: #f7fafc; padding: 30px; border-radius: 0 0 10px 10px; }
-                    .button { display: inline-block; padding: 12px 30px; background: #48bb78; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>🎉 Congratulations!</h1>
-                    </div>
-                    <div class="content">
-                        <h2>Hi ${name}!</h2>
-                        <p>Amazing work! You've completed the course: <strong>${courseTitle}</strong></p>
-                        <p>Your dedication and hard work have paid off. Keep up the great learning!</p>
-                        <a href="${process.env.FRONTEND_URL || 'https://school.6x7.gr'}" class="button">View Certificate</a>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `;
-
-        const emailRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                to: email,
-                subject: `🎉 Course Completed: ${courseTitle}`,
-                html
-            })
-        });
-
-        const result = await emailRes.json();
-        res.json(result);
-    } catch (error) {
-        console.error('Course completion email error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+app.post('/api/notifications/course-completed', notificationLimiter, async (req, res) => {
+    const { email, name, courseTitle } = req.body;
+    if (!email || !name || !courseTitle) {
+        return res.status(400).json({ error: 'Missing required fields' });
     }
+    const html = courseCompletedEmailHtml(name, courseTitle);
+    const result = await sendEmail({
+        to: email,
+        subject: `🎉 Course Completed: ${courseTitle}`,
+        html
+    });
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, id: result.id });
 });
 
-// SMS notifications endpoint (Twilio)
-app.post('/api/notifications/sms', async (req, res) => {
-    try {
-        if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
-            return res.status(500).json({ error: 'Twilio not configured' });
-        }
-
-        const { to, message } = req.body;
-
-        if (!to || !message) {
-            return res.status(400).json({ error: 'Missing to or message' });
-        }
-
-        const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
-        
-        const response = await fetch(
-            `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Basic ${auth}`
-                },
-                body: new URLSearchParams({
-                    From: TWILIO_PHONE_NUMBER,
-                    To: to,
-                    Body: message
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const error = await response.text();
-            return res.status(response.status).json({ error });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, sid: data.sid });
-    } catch (error) {
-        console.error('SMS error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/sms', notificationLimiter, async (req, res) => {
+    const result = await sendSMS(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, sid: result.sid });
 });
 
-// Facebook Messenger notifications endpoint
-app.post('/api/notifications/messenger', async (req, res) => {
-    try {
-        if (!FACEBOOK_PAGE_ACCESS_TOKEN) {
-            return res.status(500).json({ error: 'Facebook Messenger not configured' });
-        }
-
-        const { recipientId, message } = req.body;
-
-        if (!recipientId || !message) {
-            return res.status(400).json({ error: 'Missing recipientId or message' });
-        }
-
-        const response = await fetch(
-            `https://graph.facebook.com/v18.0/me/messages?access_token=${FACEBOOK_PAGE_ACCESS_TOKEN}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    recipient: { id: recipientId },
-                    message: { text: message }
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.error?.message || 'Messenger sending failed' });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, messageId: data.message_id });
-    } catch (error) {
-        console.error('Messenger error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/messenger', notificationLimiter, async (req, res) => {
+    const result = await sendMessenger(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, messageId: result.messageId });
 });
 
-// WhatsApp notifications endpoint (Meta WhatsApp Business API)
-app.post('/api/notifications/whatsapp', async (req, res) => {
-    try {
-        if (!WHATSAPP_PHONE_NUMBER_ID || !WHATSAPP_ACCESS_TOKEN) {
-            return res.status(500).json({ error: 'WhatsApp not configured' });
-        }
-
-        const { to, message } = req.body; // 'to' should be phone number with country code (e.g., "14155552671")
-
-        if (!to || !message) {
-            return res.status(400).json({ error: 'Missing to or message' });
-        }
-
-        const response = await fetch(
-            `https://graph.facebook.com/v18.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`
-                },
-                body: JSON.stringify({
-                    messaging_product: 'whatsapp',
-                    to: to,
-                    type: 'text',
-                    text: { body: message }
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.error?.message || 'WhatsApp sending failed' });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, messageId: data.messages[0]?.id });
-    } catch (error) {
-        console.error('WhatsApp error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/whatsapp', notificationLimiter, async (req, res) => {
+    const result = await sendWhatsApp(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, messageId: result.messageId });
 });
 
-// Instagram Direct Message notifications endpoint
-app.post('/api/notifications/instagram', async (req, res) => {
-    try {
-        if (!INSTAGRAM_BUSINESS_ACCOUNT_ID || !FACEBOOK_PAGE_ACCESS_TOKEN) {
-            return res.status(500).json({ error: 'Instagram not configured' });
-        }
-
-        const { recipientId, message } = req.body;
-
-        if (!recipientId || !message) {
-            return res.status(400).json({ error: 'Missing recipientId or message' });
-        }
-
-        // Instagram uses the same Graph API as Messenger
-        const response = await fetch(
-            `https://graph.facebook.com/v18.0/${INSTAGRAM_BUSINESS_ACCOUNT_ID}/messages`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${FACEBOOK_PAGE_ACCESS_TOKEN}`
-                },
-                body: JSON.stringify({
-                    recipient: { id: recipientId },
-                    message: { text: message }
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.error?.message || 'Instagram sending failed' });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, messageId: data.message_id });
-    } catch (error) {
-        console.error('Instagram error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/instagram', notificationLimiter, async (req, res) => {
+    const result = await sendInstagram(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, messageId: result.messageId });
 });
 
-// Viber notifications endpoint
-app.post('/api/notifications/viber', async (req, res) => {
-    try {
-        if (!VIBER_AUTH_TOKEN) {
-            return res.status(500).json({ error: 'Viber not configured' });
-        }
-
-        const { to, message } = req.body; // 'to' should be Viber user ID
-
-        if (!to || !message) {
-            return res.status(400).json({ error: 'Missing to or message' });
-        }
-
-        const response = await fetch('https://chatapi.viber.com/pa/send_message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Viber-Auth-Token': VIBER_AUTH_TOKEN
-            },
-            body: JSON.stringify({
-                receiver: to,
-                type: 'text',
-                text: message
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.error?.message || 'Viber sending failed' });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, messageToken: data.message_token });
-    } catch (error) {
-        console.error('Viber error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/viber', notificationLimiter, async (req, res) => {
+    const result = await sendViber(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, messageToken: result.messageToken });
 });
 
-// Telegram notifications endpoint
-app.post('/api/notifications/telegram', async (req, res) => {
-    try {
-        if (!TELEGRAM_BOT_TOKEN) {
-            return res.status(500).json({ error: 'Telegram not configured' });
-        }
-
-        const { chatId, message } = req.body; // 'chatId' should be Telegram user chat ID
-
-        if (!chatId || !message) {
-            return res.status(400).json({ error: 'Missing chatId or message' });
-        }
-
-        const response = await fetch(
-            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            }
-        );
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-            return res.status(response.status).json({ error: error.description || 'Telegram sending failed' });
-        }
-
-        const data = await response.json();
-        res.json({ success: true, messageId: data.result?.message_id });
-    } catch (error) {
-        console.error('Telegram error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/telegram', notificationLimiter, async (req, res) => {
+    const result = await sendTelegram(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true, messageId: result.messageId });
 });
 
-// Discord notifications endpoint (via Webhook)
-app.post('/api/notifications/discord', async (req, res) => {
-    try {
-        if (!DISCORD_WEBHOOK_URL) {
-            return res.status(500).json({ error: 'Discord not configured' });
-        }
-
-        const { message, username, avatar_url } = req.body;
-
-        if (!message) {
-            return res.status(400).json({ error: 'Missing message' });
-        }
-
-        const response = await fetch(DISCORD_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                content: message,
-                username: username || 'School Platform',
-                avatar_url: avatar_url || undefined
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            return res.status(response.status).json({ error: error || 'Discord sending failed' });
-        }
-
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Discord error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+app.post('/api/notifications/discord', notificationLimiter, async (req, res) => {
+    const result = await sendDiscord(req.body);
+    if (!result.ok) return res.status(result.status).json({ error: result.error });
+    res.json({ success: true });
 });
 
-// Multi-channel notification endpoint (sends to all configured channels)
-app.post('/api/notifications/send', async (req, res) => {
-    try {
-        const { 
-            email, 
-            phone, 
-            messengerId, 
-            whatsappNumber, 
-            instagramId, 
-            viberId, 
-            telegramChatId,
-            message,
-            subject,
-            html 
-        } = req.body;
+// Multi-channel fan-out (one rate-limit hit for the parent request)
+app.post('/api/notifications/send', notificationLimiter, async (req, res) => {
+    const {
+        email, phone, messengerId, whatsappNumber, instagramId,
+        viberId, telegramChatId, message, subject, html
+    } = req.body;
 
-        const results = {};
+    const results = {};
+    const tasks = [];
 
-        // Send email if configured
-        if (email && RESEND_API_KEY && (subject || message)) {
-            try {
-                const emailRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/email`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        to: email,
-                        subject: subject || 'Notification from School Platform',
-                        html: html || `<p>${message}</p>`,
-                        text: message
-                    })
-                });
-                results.email = await emailRes.json();
-            } catch (err) {
-                results.email = { error: err.message };
-            }
-        }
-
-        // Send SMS if configured
-        if (phone && TWILIO_ACCOUNT_SID && message) {
-            try {
-                const smsRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/sms`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to: phone, message })
-                });
-                results.sms = await smsRes.json();
-            } catch (err) {
-                results.sms = { error: err.message };
-            }
-        }
-
-        // Send WhatsApp if configured
-        if (whatsappNumber && WHATSAPP_PHONE_NUMBER_ID && message) {
-            try {
-                const whatsappRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/whatsapp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to: whatsappNumber, message })
-                });
-                results.whatsapp = await whatsappRes.json();
-            } catch (err) {
-                results.whatsapp = { error: err.message };
-            }
-        }
-
-        // Send Messenger if configured
-        if (messengerId && FACEBOOK_PAGE_ACCESS_TOKEN && message) {
-            try {
-                const messengerRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/messenger`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ recipientId: messengerId, message })
-                });
-                results.messenger = await messengerRes.json();
-            } catch (err) {
-                results.messenger = { error: err.message };
-            }
-        }
-
-        // Send Instagram if configured
-        if (instagramId && INSTAGRAM_BUSINESS_ACCOUNT_ID && message) {
-            try {
-                const instagramRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/instagram`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ recipientId: instagramId, message })
-                });
-                results.instagram = await instagramRes.json();
-            } catch (err) {
-                results.instagram = { error: err.message };
-            }
-        }
-
-        // Send Viber if configured
-        if (viberId && VIBER_AUTH_TOKEN && message) {
-            try {
-                const viberRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/viber`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to: viberId, message })
-                });
-                results.viber = await viberRes.json();
-            } catch (err) {
-                results.viber = { error: err.message };
-            }
-        }
-
-        // Send Telegram if configured
-        if (telegramChatId && TELEGRAM_BOT_TOKEN && message) {
-            try {
-                const telegramRes = await fetch(`${req.protocol}://${req.get('host')}/api/notifications/telegram`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatId: telegramChatId, message })
-                });
-                results.telegram = await telegramRes.json();
-            } catch (err) {
-                results.telegram = { error: err.message };
-            }
-        }
-
-        res.json({ success: true, results });
-    } catch (error) {
-        console.error('Multi-channel notification error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+    if (email && (subject || message)) {
+        tasks.push(sendEmail({
+            to: email,
+            subject: subject || 'Notification from School Platform',
+            html: html || `<p>${message}</p>`,
+            text: message
+        }).then(r => { results.email = r; }));
     }
+    if (phone && message) tasks.push(sendSMS({ to: phone, message }).then(r => { results.sms = r; }));
+    if (whatsappNumber && message) tasks.push(sendWhatsApp({ to: whatsappNumber, message }).then(r => { results.whatsapp = r; }));
+    if (messengerId && message) tasks.push(sendMessenger({ recipientId: messengerId, message }).then(r => { results.messenger = r; }));
+    if (instagramId && message) tasks.push(sendInstagram({ recipientId: instagramId, message }).then(r => { results.instagram = r; }));
+    if (viberId && message) tasks.push(sendViber({ to: viberId, message }).then(r => { results.viber = r; }));
+    if (telegramChatId && message) tasks.push(sendTelegram({ chatId: telegramChatId, message }).then(r => { results.telegram = r; }));
+
+    await Promise.all(tasks);
+    res.json({ success: true, results });
 });
 
-// Stripe Payment System (variables already declared at top of file)
-
-// Create Stripe checkout session
-app.post('/api/payments/create-checkout', async (req, res) => {
+// ----------------------------------------------------------------------------
+// Payments
+// ----------------------------------------------------------------------------
+app.post('/api/payments/create-checkout', paymentLimiter, async (req, res) => {
     try {
-        if (!STRIPE_SECRET_KEY) {
-            return res.status(500).json({ error: 'Stripe not configured' });
-        }
-
-        if (!stripe) {
-            return res.status(500).json({ error: 'Stripe module not installed. Run: npm install stripe' });
-        }
+        if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
 
         const { planId, userId, successUrl, cancelUrl } = req.body;
+        if (!planId) return res.status(400).json({ error: 'Missing planId' });
 
-        if (!planId) {
-            return res.status(400).json({ error: 'Missing planId' });
-        }
-
-        // Get price ID based on plan
         let priceId = '';
-        if (planId === 'monthly') {
-            priceId = STRIPE_MONTHLY_PRICE_ID || req.body.priceId;
-        } else if (planId === 'yearly') {
-            priceId = STRIPE_YEARLY_PRICE_ID || req.body.priceId;
-        } else {
-            return res.status(400).json({ error: 'Invalid planId. Use "monthly" or "yearly"' });
-        }
+        if (planId === 'monthly') priceId = STRIPE_MONTHLY_PRICE_ID || req.body.priceId;
+        else if (planId === 'yearly') priceId = STRIPE_YEARLY_PRICE_ID || req.body.priceId;
+        else return res.status(400).json({ error: 'Invalid planId. Use "monthly" or "yearly"' });
 
         if (!priceId) {
             return res.status(400).json({ error: 'Price ID not configured. Set STRIPE_MONTHLY_PRICE_ID or STRIPE_YEARLY_PRICE_ID' });
@@ -822,20 +618,12 @@ app.post('/api/payments/create-checkout', async (req, res) => {
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            line_items: [
-                {
-                    price: priceId,
-                    quantity: 1,
-                },
-            ],
+            line_items: [{ price: priceId, quantity: 1 }],
             mode: 'subscription',
             success_url: successUrl || `${FRONTEND_URL}?payment=success`,
             cancel_url: cancelUrl || `${FRONTEND_URL}?payment=cancel`,
-            customer_email: userId,
-            metadata: {
-                userId: userId,
-                planId: planId
-            }
+            customer_email: userId, // frontend passes email as userId
+            metadata: { userId: userId || '', planId }
         });
 
         res.json({ sessionId: session.id, url: session.url });
@@ -845,53 +633,35 @@ app.post('/api/payments/create-checkout', async (req, res) => {
     }
 });
 
-// Verify payment success
-app.post('/api/payments/verify-payment', async (req, res) => {
+app.post('/api/payments/verify-payment', paymentLimiter, async (req, res) => {
     try {
-        if (!STRIPE_SECRET_KEY || !stripe) {
-            return res.status(500).json({ error: 'Stripe not configured' });
-        }
-
+        if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
         const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'Missing userId (email)' });
 
-        // Get customer's subscriptions
-        const customers = await stripe.customers.list({
-            email: userId,
-            limit: 1
-        });
-
+        const customers = await stripe.customers.list({ email: userId, limit: 1 });
         if (customers.data.length === 0) {
             return res.json({ subscription: null, message: 'No subscription found' });
         }
-
         const customer = customers.data[0];
         const subscriptions = await stripe.subscriptions.list({
-            customer: customer.id,
-            status: 'active',
-            limit: 1
+            customer: customer.id, status: 'active', limit: 1
         });
-
         if (subscriptions.data.length === 0) {
             return res.json({ subscription: null, message: 'No active subscription found' });
         }
-
         const subscription = subscriptions.data[0];
-        
-        // Determine plan from price ID
         const priceId = subscription.items.data[0].price.id;
-        let planId = 'monthly';
-        if (priceId.includes('yearly') || priceId.includes('annual')) {
-            planId = 'yearly';
-        }
+        const plan = planFromPriceId(priceId) || 'monthly';
 
         res.json({
             subscription: {
-                plan: planId,
+                plan,
                 status: subscription.status,
                 stripeSubscriptionId: subscription.id,
                 stripeCustomerId: customer.id,
                 startDate: new Date(subscription.created * 1000).toISOString(),
-                endDate: subscription.current_period_end 
+                endDate: subscription.current_period_end
                     ? new Date(subscription.current_period_end * 1000).toISOString()
                     : null
             }
@@ -902,27 +672,81 @@ app.post('/api/payments/verify-payment', async (req, res) => {
     }
 });
 
-// Cancel subscription
-app.post('/api/payments/cancel-subscription', async (req, res) => {
+// Server-side premium gate: trust this over localStorage
+app.get('/api/payments/subscription', paymentLimiter, async (req, res) => {
     try {
-        if (!STRIPE_SECRET_KEY || !stripe) {
-            return res.status(500).json({ error: 'Stripe not configured' });
+        const userId = String(req.query.userId || '').trim();
+        if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+        // Prefer DB record (cheap), fall back to live Stripe check
+        if (supabaseAdmin) {
+            const { data, error } = await supabaseAdmin
+                .from('subscriptions')
+                .select('plan,status,stripe_subscription_id,stripe_customer_id,start_date,end_date')
+                .eq('user_email', userId)
+                .maybeSingle();
+            if (!error && data) {
+                const active = data.status === 'active'
+                    && (!data.end_date || new Date(data.end_date) > new Date());
+                return res.json({
+                    plan: data.plan,
+                    status: data.status,
+                    active,
+                    endDate: data.end_date,
+                    stripeSubscriptionId: data.stripe_subscription_id,
+                    stripeCustomerId: data.stripe_customer_id,
+                    source: 'db'
+                });
+            }
         }
 
+        if (!stripe) {
+            return res.json({ plan: 'free', status: 'inactive', active: false, source: 'none' });
+        }
+        const customers = await stripe.customers.list({ email: userId, limit: 1 });
+        if (customers.data.length === 0) {
+            return res.json({ plan: 'free', status: 'inactive', active: false, source: 'stripe' });
+        }
+        const subs = await stripe.subscriptions.list({
+            customer: customers.data[0].id, status: 'active', limit: 1
+        });
+        if (subs.data.length === 0) {
+            return res.json({ plan: 'free', status: 'inactive', active: false, source: 'stripe' });
+        }
+        const sub = subs.data[0];
+        const plan = planFromPriceId(sub.items.data[0].price.id) || 'monthly';
+        res.json({
+            plan,
+            status: sub.status,
+            active: true,
+            endDate: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
+            stripeSubscriptionId: sub.id,
+            stripeCustomerId: customers.data[0].id,
+            source: 'stripe'
+        });
+    } catch (error) {
+        console.error('Subscription lookup error:', error);
+        res.status(500).json({ error: error.message || 'Lookup failed' });
+    }
+});
+
+app.post('/api/payments/cancel-subscription', paymentLimiter, async (req, res) => {
+    try {
+        if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
         const { subscriptionId } = req.body;
-
-        if (!subscriptionId) {
-            return res.status(400).json({ error: 'Missing subscriptionId' });
-        }
+        if (!subscriptionId) return res.status(400).json({ error: 'Missing subscriptionId' });
 
         const subscription = await stripe.subscriptions.cancel(subscriptionId);
 
-        res.json({ 
-            success: true, 
-            subscription: {
-                status: subscription.status,
-                cancelledAt: new Date().toISOString()
-            }
+        if (supabaseAdmin) {
+            await supabaseAdmin.from('subscriptions')
+                .update({ status: subscription.status, cancelled_at: new Date().toISOString() })
+                .eq('stripe_subscription_id', subscriptionId);
+        }
+
+        res.json({
+            success: true,
+            subscription: { status: subscription.status, cancelledAt: new Date().toISOString() }
         });
     } catch (error) {
         console.error('Subscription cancellation error:', error);
@@ -930,16 +754,13 @@ app.post('/api/payments/cancel-subscription', async (req, res) => {
     }
 });
 
-// Stripe webhook handler (for subscription events)
-app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-
-    if (!STRIPE_WEBHOOK_SECRET) {
+// Stripe webhook (raw body — mounted at top, before express.json)
+async function handleStripeWebhook(req, res) {
+    if (!stripe || !STRIPE_WEBHOOK_SECRET) {
         return res.status(400).send('Webhook secret not configured');
     }
-
+    const sig = req.headers['stripe-signature'];
     let event;
-
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
     } catch (err) {
@@ -947,77 +768,192 @@ app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), asy
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
-    switch (event.type) {
-        case 'checkout.session.completed':
-            const session = event.data.object;
-            // Handle successful checkout
-            console.log('Checkout completed:', session.id);
-            break;
-        
-        case 'customer.subscription.created':
-        case 'customer.subscription.updated':
-            const subscription = event.data.object;
-            // Update subscription status in database
-            console.log('Subscription updated:', subscription.id);
-            break;
-        
-        case 'customer.subscription.deleted':
-            const deletedSubscription = event.data.object;
-            // Handle cancelled subscription
-            console.log('Subscription cancelled:', deletedSubscription.id);
-            break;
-        
-        default:
-            console.log(`Unhandled event type ${event.type}`);
+    try {
+        switch (event.type) {
+            case 'checkout.session.completed': {
+                const session = event.data.object;
+                const userEmail = session.customer_email || session.metadata?.userId;
+                const planFromMeta = session.metadata?.planId || null;
+                if (userEmail && session.subscription) {
+                    // Fetch subscription to get accurate price + period
+                    const sub = await stripe.subscriptions.retrieve(session.subscription);
+                    const priceId = sub.items.data[0].price.id;
+                    const plan = planFromPriceId(priceId) || planFromMeta || 'monthly';
+                    await upsertSubscription({
+                        userEmail,
+                        plan,
+                        status: sub.status,
+                        stripeSubscriptionId: sub.id,
+                        stripeCustomerId: sub.customer,
+                        startDate: new Date(sub.created * 1000).toISOString(),
+                        endDate: sub.current_period_end
+                            ? new Date(sub.current_period_end * 1000).toISOString()
+                            : null
+                    });
+                }
+                break;
+            }
+            case 'customer.subscription.created':
+            case 'customer.subscription.updated': {
+                const sub = event.data.object;
+                const customer = await stripe.customers.retrieve(sub.customer);
+                const userEmail = customer?.email;
+                if (userEmail) {
+                    const priceId = sub.items.data[0].price.id;
+                    const plan = planFromPriceId(priceId) || 'monthly';
+                    await upsertSubscription({
+                        userEmail,
+                        plan,
+                        status: sub.status,
+                        stripeSubscriptionId: sub.id,
+                        stripeCustomerId: sub.customer,
+                        startDate: new Date(sub.created * 1000).toISOString(),
+                        endDate: sub.current_period_end
+                            ? new Date(sub.current_period_end * 1000).toISOString()
+                            : null
+                    });
+                }
+                break;
+            }
+            case 'customer.subscription.deleted': {
+                const sub = event.data.object;
+                if (supabaseAdmin) {
+                    await supabaseAdmin.from('subscriptions')
+                        .update({
+                            status: 'cancelled',
+                            plan: 'free',
+                            cancelled_at: new Date().toISOString()
+                        })
+                        .eq('stripe_subscription_id', sub.id);
+                }
+                break;
+            }
+            default:
+                // Ignored event types are fine; Stripe needs a 200.
+                break;
+        }
+        res.json({ received: true });
+    } catch (err) {
+        console.error('Webhook handler error:', err);
+        res.status(500).json({ error: 'Webhook handler failed' });
     }
+}
 
-    res.json({ received: true });
-});
+async function upsertSubscription({
+    userEmail, plan, status, stripeSubscriptionId, stripeCustomerId, startDate, endDate
+}) {
+    if (!supabaseAdmin) {
+        console.warn('No Supabase admin client — subscription state cannot be persisted.');
+        return;
+    }
+    const { error } = await supabaseAdmin
+        .from('subscriptions')
+        .upsert({
+            user_email: userEmail,
+            plan,
+            status,
+            stripe_subscription_id: stripeSubscriptionId,
+            stripe_customer_id: stripeCustomerId,
+            start_date: startDate,
+            end_date: endDate,
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'user_email' });
+    if (error) console.error('Subscription upsert error:', error);
+}
 
-// Get subscription plans
-app.get('/api/payments/plans', (req, res) => {
+app.get('/api/payments/plans', (_req, res) => {
     res.json({
         plans: {
             free: {
-                id: 'free',
-                name: 'Free',
-                price: 0,
+                id: 'free', name: 'Free', price: 0,
                 features: ['Access to free courses', 'Basic features']
             },
             monthly: {
-                id: 'monthly',
-                name: 'Monthly Premium',
-                price: 9.99,
-                interval: 'month',
+                id: 'monthly', name: 'Monthly Premium', price: 9.99, interval: 'month',
                 features: ['All courses', 'AI tutor', 'Certificates', 'Priority support']
             },
             yearly: {
-                id: 'yearly',
-                name: 'Yearly Premium',
-                price: 99.99,
-                interval: 'year',
+                id: 'yearly', name: 'Yearly Premium', price: 99.99, interval: 'year',
                 features: ['All courses', 'AI tutor', 'Certificates', 'Priority support', 'Save 17%']
             }
         }
     });
 });
 
-// Start server
+// ----------------------------------------------------------------------------
+// Email templates
+// ----------------------------------------------------------------------------
+function welcomeEmailHtml(name) {
+    return `
+        <!DOCTYPE html>
+        <html><head><style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f7fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        </style></head>
+        <body><div class="container">
+            <div class="header"><h1>🎓 Welcome to School Platform!</h1></div>
+            <div class="content">
+                <h2>Hi ${escapeHtml(name)}!</h2>
+                <p>Welcome to our learning platform! We're excited to have you join us.</p>
+                <p>Get started by exploring our courses and begin your learning journey today.</p>
+                <a href="${FRONTEND_URL}" class="button">Start Learning</a>
+                <p style="margin-top: 30px; font-size: 12px; color: #666;">
+                    If you didn't sign up for this account, please ignore this email.
+                </p>
+            </div>
+        </div></body></html>`;
+}
+
+function courseCompletedEmailHtml(name, courseTitle) {
+    return `
+        <!DOCTYPE html>
+        <html><head><style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f7fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 12px 30px; background: #48bb78; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        </style></head>
+        <body><div class="container">
+            <div class="header"><h1>🎉 Congratulations!</h1></div>
+            <div class="content">
+                <h2>Hi ${escapeHtml(name)}!</h2>
+                <p>Amazing work! You've completed the course: <strong>${escapeHtml(courseTitle)}</strong></p>
+                <p>Your dedication and hard work have paid off. Keep up the great learning!</p>
+                <a href="${FRONTEND_URL}" class="button">View Certificate</a>
+            </div>
+        </div></body></html>`;
+}
+
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// ----------------------------------------------------------------------------
+// Start
+// ----------------------------------------------------------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Backend Server running on port ${PORT}`);
-    console.log(`📝 Groq API: ${GROQ_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`📝 OpenAI API: ${OPENAI_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`📧 Resend Email: ${RESEND_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`💬 Twilio SMS: ${TWILIO_ACCOUNT_SID ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`📱 Facebook Messenger: ${FACEBOOK_PAGE_ACCESS_TOKEN ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`💚 WhatsApp: ${WHATSAPP_PHONE_NUMBER_ID ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`📷 Instagram: ${INSTAGRAM_BUSINESS_ACCOUNT_ID ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`💜 Viber: ${VIBER_AUTH_TOKEN ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`✈️  Telegram: ${TELEGRAM_BOT_TOKEN ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`🎮 Discord: ${DISCORD_WEBHOOK_URL ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`💳 Stripe: ${STRIPE_SECRET_KEY ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`🗄️  Supabase: ${SUPABASE_URL ? '✅ Configured' : '❌ Not configured'}`);
+    console.log(`🌐 Allowed origins: ${[...allowedOrigins].join(', ') || '(none)'}`);
+    console.log(`📝 Groq API: ${GROQ_API_KEY ? '✅' : '❌'}`);
+    console.log(`📝 OpenAI API: ${OPENAI_API_KEY ? '✅' : '❌'}`);
+    console.log(`📧 Resend Email: ${RESEND_API_KEY ? '✅' : '❌'} (from: ${EMAIL_FROM})`);
+    console.log(`💬 Twilio SMS: ${TWILIO_ACCOUNT_SID ? '✅' : '❌'}`);
+    console.log(`📱 Messenger: ${FACEBOOK_PAGE_ACCESS_TOKEN ? '✅' : '❌'}`);
+    console.log(`💚 WhatsApp: ${WHATSAPP_PHONE_NUMBER_ID ? '✅' : '❌'}`);
+    console.log(`📷 Instagram: ${INSTAGRAM_BUSINESS_ACCOUNT_ID ? '✅' : '❌'}`);
+    console.log(`💜 Viber: ${VIBER_AUTH_TOKEN ? '✅' : '❌'}`);
+    console.log(`✈️  Telegram: ${TELEGRAM_BOT_TOKEN ? '✅' : '❌'}`);
+    console.log(`🎮 Discord: ${DISCORD_WEBHOOK_URL ? '✅' : '❌'}`);
+    console.log(`💳 Stripe: ${STRIPE_SECRET_KEY ? '✅' : '❌'} (webhook: ${STRIPE_WEBHOOK_SECRET ? '✅' : '❌'})`);
+    console.log(`🗄️  Supabase: ${SUPABASE_URL ? '✅' : '❌'} (admin: ${supabaseAdmin ? '✅' : '❌'})`);
 });
-

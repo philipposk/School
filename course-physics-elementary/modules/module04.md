@@ -3,3 +3,4 @@
 ## Interactive Experiments for Waves and Vibrations
 
 *Content coming soon - This module will cover teaching light and sound waves through engaging experiments suitable for elementary students.*
+

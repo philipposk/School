@@ -61,21 +61,49 @@ const PaymentManager = {
         return this.subscriptions[user.email];
     },
     
-    // Check if user has active premium subscription
+    // Check if user has active premium subscription.
+    // NOTE: this is a UI hint only. Anything that actually unlocks paid value
+    // (downloads, premium API calls) MUST re-check on the server. Use
+    // refreshPremiumFromServer() to keep this in sync.
     hasPremiumAccess() {
         const subscription = this.getCurrentSubscription();
         if (!subscription) return false;
-        
         if (subscription.plan === 'free') return false;
-        
-        // Check if subscription is still valid
+
         if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
-            // Subscription expired
             this.updateSubscriptionStatus('expired');
             return false;
         }
-        
+
         return subscription.status === 'active';
+    },
+
+    // Pull authoritative subscription state from backend (Supabase / Stripe).
+    // Mutates the local cache so subsequent hasPremiumAccess() calls reflect it.
+    async refreshPremiumFromServer() {
+        if (!user || !user.email) return null;
+        const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
+        try {
+            const url = `${backendUrl}/api/payments/subscription?userId=${encodeURIComponent(user.email)}`;
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            const data = await response.json();
+
+            const userId = user.email;
+            this.subscriptions[userId] = {
+                plan: data.plan || 'free',
+                status: data.active ? 'active' : (data.status || 'inactive'),
+                startDate: this.subscriptions[userId]?.startDate || new Date().toISOString(),
+                endDate: data.endDate || null,
+                stripeSubscriptionId: data.stripeSubscriptionId || null,
+                stripeCustomerId: data.stripeCustomerId || null
+            };
+            this.saveSubscriptions();
+            return this.subscriptions[userId];
+        } catch (err) {
+            console.warn('refreshPremiumFromServer failed:', err);
+            return null;
+        }
     },
 
     // Get subscription status summary for UI/tests
@@ -275,6 +303,10 @@ const PaymentManager = {
 if (typeof window !== 'undefined') {
     window.addEventListener('load', () => {
         PaymentManager.checkPaymentStatus();
+        // Sync premium state from server (don't trust localStorage alone)
+        if (typeof user !== 'undefined' && user && user.email) {
+            PaymentManager.refreshPremiumFromServer();
+        }
     });
 }
 

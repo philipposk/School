@@ -77,3 +77,4 @@ When creating API keys:
 ## 🆘 If Nothing Works
 
 Create a new key and I'll help you save it properly this time. The old key is lost forever (that's how Resend works for security).
+

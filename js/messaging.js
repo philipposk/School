@@ -240,27 +240,61 @@ Be conversational, encouraging, and helpful. Keep responses concise (2-3 sentenc
         }));
     },
     
-    // Handle instructor response (simulated)
+    // Forward the student's question to a real instructor.
+    // No more fake auto-reply — that misled students into thinking a human
+    // had answered. Instead: persist to Supabase if available, optionally
+    // email the configured instructor, and post a clear system notice.
     async handleInstructorResponse(conversationId, userMessage) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const instructorMessage = {
+        // Best-effort: persist to Supabase so an instructor dashboard can see it.
+        try {
+            if (typeof SupabaseManager !== 'undefined' && SupabaseManager.sendMessage) {
+                const supaConvId = localStorage.getItem(`supa_conv_${conversationId}`);
+                const senderId = (window.user && (user.id || user.email)) || null;
+                if (supaConvId && senderId) {
+                    await SupabaseManager.sendMessage(supaConvId, senderId, userMessage, 'instructor_question');
+                }
+            }
+        } catch (err) {
+            console.warn('Failed to persist instructor message to Supabase:', err);
+        }
+
+        // Best-effort: notify the instructor via email if configured.
+        try {
+            const instructorEmail = localStorage.getItem('instructor_email');
+            const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
+            if (instructorEmail && backendUrl) {
+                const courseTitle = (typeof currentCourse !== 'undefined' && currentCourse?.title) || 'course';
+                fetch(`${backendUrl}/api/notifications/email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: instructorEmail,
+                        subject: `New question from ${user?.name || 'a student'} (${courseTitle})`,
+                        html: `<p><strong>${user?.name || 'A student'}</strong> (${user?.email || 'unknown'}) asks:</p>
+                               <blockquote>${userMessage.replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;')}</blockquote>
+                               <p>Reply via the instructor dashboard.</p>`
+                    })
+                }).catch(err => console.warn('Instructor email notify failed:', err));
+            }
+        } catch (err) {
+            console.warn('Instructor notify error:', err);
+        }
+
+        // Honest system notice — not pretending to be the instructor.
+        const systemNotice = {
             id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             conversationId: conversationId,
-            senderEmail: 'instructor@school2.com',
-            senderName: 'Course Instructor',
-            content: `Thank you for your question! I'll get back to you within 24 hours. In the meantime, you might find the answer in Module ${state.currentModule || 1} of the course.`,
-            type: 'text',
+            senderEmail: 'system@school.6x7.gr',
+            senderName: 'System',
+            content: 'Your message has been sent to the instructor. They typically respond within 24 hours.',
+            type: 'system',
             timestamp: new Date().toISOString(),
             read: false
         };
-        
-        if (!this.messages[conversationId]) {
-            this.messages[conversationId] = [];
-        }
-        this.messages[conversationId].push(instructorMessage);
+        if (!this.messages[conversationId]) this.messages[conversationId] = [];
+        this.messages[conversationId].push(systemNotice);
         this.saveMessages();
-        
+
         if (window.updateChatMessages) {
             window.updateChatMessages(conversationId);
         }

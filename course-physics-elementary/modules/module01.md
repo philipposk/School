@@ -152,3 +152,4 @@ In the next module, we'll explore specific teaching strategies for forces and mo
 - NSTA (National Science Teaching Association) resources for elementary physics
 - Hands-on science activity collections
 - Children's science book recommendations
+

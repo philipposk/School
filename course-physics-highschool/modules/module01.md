@@ -279,3 +279,4 @@ In Module 2, we'll dive into teaching kinematics and vectors, exploring specific
 - Physics Education Research (PER) findings
 - Effective teaching strategy databases
 - Technology tool reviews
+

@@ -43,3 +43,4 @@ curl -X POST https://school-backend.fly.dev/api/notifications/email \
 ## ✅ Status:
 
 **Key is saved and will NOT be lost again!** It's in 3 different backup locations.
+

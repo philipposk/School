@@ -373,6 +373,34 @@ CREATE POLICY "Admins can create admin actions" ON public.admin_actions
     )
   );
 
+-- Stripe subscriptions (one row per user, keyed by email)
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  user_email TEXT PRIMARY KEY,
+  plan TEXT NOT NULL DEFAULT 'free',
+  status TEXT NOT NULL DEFAULT 'inactive',
+  stripe_subscription_id TEXT UNIQUE,
+  stripe_customer_id TEXT,
+  start_date TIMESTAMPTZ,
+  end_date TIMESTAMPTZ,
+  cancelled_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS subscriptions_stripe_sub_idx
+  ON public.subscriptions(stripe_subscription_id);
+
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Read-only: a user can read their own subscription via their auth email
+DROP POLICY IF EXISTS "Users read own subscription" ON public.subscriptions;
+CREATE POLICY "Users read own subscription" ON public.subscriptions
+  FOR SELECT USING (
+    user_email = (SELECT email FROM auth.users WHERE id = auth.uid())
+  );
+
+-- Writes happen only via the service-role webhook (bypasses RLS) — no INSERT/UPDATE policy.
+
 -- Function to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

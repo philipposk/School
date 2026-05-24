@@ -225,11 +225,45 @@ Provide a structured summary with:
         }
     },
     
-    // Get module content (placeholder - would load actual content)
+    // Fetch the actual module markdown so AI summaries/flashcards are grounded
+    // in real content instead of just the module title.
+    _moduleContentCache: {},
+
+    _getCourseDir(courseId) {
+        const map = {
+            'personal-finance': 'course-finance',
+            'ios-app-development': 'course-ios',
+            'vibecoding': 'course-vibecoding',
+            'human-minds': 'course-minds',
+            'sign-language': 'course-signlanguage',
+            'teaching-physics-elementary': 'course-physics-elementary',
+            'teaching-physics-high-school': 'course-physics-highschool',
+            'teaching-physics-advanced': 'course-physics-advanced'
+        };
+        return map[courseId] || 'course';
+    },
+
     async getModuleContent(courseId, moduleId) {
-        // In real implementation, this would fetch the actual module markdown/content
-        // For now, return null
-        return null;
+        const cacheKey = `${courseId}::${moduleId}`;
+        if (this._moduleContentCache[cacheKey] !== undefined) {
+            return this._moduleContentCache[cacheKey];
+        }
+        try {
+            const dir = this._getCourseDir(courseId);
+            const file = `module${String(moduleId).padStart(2, '0')}.md`;
+            const response = await fetch(`${dir}/modules/${file}`);
+            if (!response.ok) {
+                this._moduleContentCache[cacheKey] = null;
+                return null;
+            }
+            const text = await response.text();
+            this._moduleContentCache[cacheKey] = text;
+            return text;
+        } catch (err) {
+            console.warn('getModuleContent failed:', err);
+            this._moduleContentCache[cacheKey] = null;
+            return null;
+        }
     },
     
     // Generate flashcards from course content
@@ -241,12 +275,17 @@ Provide a structured summary with:
             const module = course.modules_data?.find(m => m.id === moduleId);
             if (!module) return [];
             
+            const moduleContent = await this.getModuleContent(courseId, moduleId);
+            const contentBlock = moduleContent
+                ? `\n\nModule Content (use this as the ground truth):\n${moduleContent.substring(0, 4000)}`
+                : '';
+
             const prompt = `Generate ${count} high-quality flashcards for this learning module. Each flashcard should have:
 - Front: A clear question or concept
 - Back: A concise, accurate answer
 
 Module: ${module.title}
-${module.subtitle ? `Subtitle: ${module.subtitle}` : ''}
+${module.subtitle ? `Subtitle: ${module.subtitle}` : ''}${contentBlock}
 
 Format your response as JSON array:
 [
@@ -254,7 +293,7 @@ Format your response as JSON array:
   ...
 ]
 
-Focus on the most important concepts that students need to remember.`;
+Focus on the most important concepts that students need to remember. Only use facts that appear in the Module Content above.`;
 
             const messages = [
                 { role: 'system', content: 'You are an expert at creating educational flashcards. Generate clear, concise flashcards that help with active recall and spaced repetition.' },

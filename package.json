@@ -8,13 +8,22 @@
     "dev": "nodemon backend-proxy-example.js",
     "test:features": "node run-playwright-tests.js"
   },
-  "keywords": ["ai", "proxy", "groq", "openai", "email", "sms", "supabase"],
+  "keywords": [
+    "ai",
+    "proxy",
+    "groq",
+    "openai",
+    "email",
+    "sms",
+    "supabase"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
     "@supabase/supabase-js": "^2.39.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.5.1",
     "stripe": "^14.21.0"
   },
   "devDependencies": {
@@ -25,4 +34,3 @@
     "node": ">=18.0.0"
   }
 }
-

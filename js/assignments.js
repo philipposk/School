@@ -73,16 +73,13 @@ const AssignmentManager = {
         submission.status = 'grading';
         this.saveSubmissions();
         
-        // Simulate AI grading (in production, call OpenAI/Claude API)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Generate AI feedback using OpenAI
-        const feedback = await this.generateAIFeedback(submission);
-        const grade = this.extractGradeFromFeedback(feedback);
-        
+        // AI grading. Returns { feedback, grade } — pulled from a structured
+        // JSON response when possible so the grade isn't scraped out of prose.
+        const result = await this.generateAIFeedback(submission);
+
         submission.status = 'graded';
-        submission.grade = grade;
-        submission.feedback = feedback;
+        submission.grade = result.grade;
+        submission.feedback = result.feedback;
         submission.gradedAt = new Date().toISOString();
         
         this.saveSubmissions();
@@ -119,82 +116,117 @@ const AssignmentManager = {
             }
             
             const currentLang = window.i18n ? window.i18n.currentLanguage : 'en';
-            const langInstruction = currentLang === 'el' ? 'Respond ONLY in Greek (Ελληνικά). Use Greek language for all feedback, comments, and explanations.' : 'Respond in English.';
-            
-            const systemPrompt = `You are an expert educator grading student assignments. Provide constructive, detailed feedback and assign a fair grade (0-100).
+            const langInstruction = currentLang === 'el'
+                ? 'Write the markdown feedback in Greek (Ελληνικά). JSON keys stay in English.'
+                : 'Write the markdown feedback in English.';
 
-IMPORTANT: ${langInstruction}
+            const systemPrompt = `You are an expert educator grading student assignments. Provide constructive, detailed feedback and a fair grade (0-100).
+
+${langInstruction}
 
 Assignment: ${assignmentContext.title || 'General Assignment'}
 Description: ${assignmentContext.description || 'N/A'}
 Module Context: ${moduleContent || 'N/A'}
 
-Student Submission:
-${content}
+You MUST respond with a single JSON object — no prose before or after — matching this exact shape:
 
-Provide feedback in this format:
-**Assignment Review**
+{
+  "grade": <integer 0-100>,
+  "feedback_markdown": "<markdown string with sections: **Strengths**, **Areas for Improvement**, **Overall Feedback**>"
+}
 
-**Strengths:**
-[List 2-3 specific strengths]
+Grade rubric:
+- 90-100: Excellent — demonstrates mastery, well-structured, original insight.
+- 75-89: Good — solid understanding, minor gaps.
+- 60-74: Adequate — meets baseline, notable gaps.
+- 40-59: Weak — significant misunderstandings.
+- 0-39: Did not meet the assignment.
 
-**Areas for Improvement:**
-[List 2-3 specific suggestions]
+Be encouraging but honest. Tailor feedback to the subject matter of the assignment.`;
 
-**Grade:** [Score out of 100]
-
-**Overall Feedback:**
-[1-2 sentence summary]
-
-Be encouraging but honest. Focus on learning outcomes and understanding.`;
-
-            const aiFeedback = await AIConfig.callOpenAIAPI([
+            const aiRaw = await AIConfig.callOpenAIAPI([
                 { role: 'system', content: systemPrompt },
-                { role: 'user', content: `Please grade this assignment and provide feedback:\n\n${content}` }
+                { role: 'user', content: `Grade this submission and return JSON only:\n\n${content}` }
             ], {
-                temperature: 0.7,
-                max_tokens: 800
+                temperature: 0.5,
+                max_tokens: 900
             });
-            
-            return aiFeedback.trim();
+
+            const parsed = this.parseGradingResponse(aiRaw);
+            if (parsed) return parsed;
+
+            // AI replied but JSON parse failed — salvage what we can.
+            return {
+                grade: this.extractGradeFromFeedback(aiRaw),
+                feedback: aiRaw.trim()
+            };
         } catch (error) {
             console.error('AI grading error:', error);
-            // Fallback to basic feedback
             return this.generateFallbackFeedback(submission);
         }
     },
+
+    // Pull JSON out of an AI response that may wrap it in ```json fences or prose.
+    parseGradingResponse(raw) {
+        if (!raw || typeof raw !== 'string') return null;
+        const cleaned = raw
+            .replace(/^```(?:json)?/i, '')
+            .replace(/```$/, '')
+            .trim();
+        const firstBrace = cleaned.indexOf('{');
+        const lastBrace = cleaned.lastIndexOf('}');
+        if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) return null;
+        try {
+            const obj = JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+            const grade = Number(obj.grade);
+            if (!Number.isFinite(grade)) return null;
+            const feedback = String(obj.feedback_markdown || obj.feedback || '').trim();
+            if (!feedback) return null;
+            return {
+                grade: Math.min(100, Math.max(0, Math.round(grade))),
+                feedback
+            };
+        } catch {
+            return null;
+        }
+    },
     
-    // Fallback feedback if API fails
+    // Course-agnostic fallback when AI is unavailable. Returns
+    // { grade, feedback } — same shape as the AI path.
     generateFallbackFeedback(submission) {
         const content = submission.content || '';
-        const wordCount = content.split(/\s+/).length;
-        
-        let feedback = `**Assignment Review**\n\n`;
-        
-        if (wordCount < 100) {
-            feedback += `⚠️ Your submission is quite brief (${wordCount} words). Consider expanding your thoughts.\n\n`;
-        } else if (wordCount > 500) {
-            feedback += `✅ Good length (${wordCount} words). Well-developed response.\n\n`;
+        const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+
+        let grade;
+        let lengthNote;
+        if (wordCount < 50) {
+            grade = 40;
+            lengthNote = `⚠️ Submission is very brief (${wordCount} words). Hard to assess understanding.`;
+        } else if (wordCount < 150) {
+            grade = 60;
+            lengthNote = `Submission is on the short side (${wordCount} words). Consider adding examples.`;
+        } else if (wordCount < 400) {
+            grade = 75;
+            lengthNote = `✅ Reasonable length (${wordCount} words).`;
         } else {
-            feedback += `✅ Adequate length (${wordCount} words).\n\n`;
+            grade = 80;
+            lengthNote = `✅ Detailed submission (${wordCount} words).`;
         }
-        
-        const keywords = ['argument', 'logic', 'reasoning', 'evidence', 'conclusion', 'premise'];
-        const foundKeywords = keywords.filter(kw => content.toLowerCase().includes(kw));
-        
-        if (foundKeywords.length > 0) {
-            feedback += `**Strengths:**\n`;
-            feedback += `- You've incorporated key concepts: ${foundKeywords.join(', ')}\n`;
-            feedback += `- Shows understanding of course material\n\n`;
-        }
-        
-        feedback += `**Suggestions for Improvement:**\n`;
-        feedback += `- Provide more specific examples\n`;
-        feedback += `- Connect concepts to real-world applications\n\n`;
-        
-        feedback += `**Overall:** Good effort! Keep practicing and applying the concepts you've learned.`;
-        
-        return feedback;
+
+        const feedback = [
+            `**Assignment Review** (offline grading — AI grader unavailable)`,
+            ``,
+            lengthNote,
+            ``,
+            `**Areas for Improvement:**`,
+            `- Tie your answer back to the specific module concepts.`,
+            `- Use concrete examples rather than general statements.`,
+            `- Re-read your submission for clarity and structure.`,
+            ``,
+            `**Overall:** This grade is a placeholder. An instructor can re-grade this submission for a more accurate score.`
+        ].join('\n');
+
+        return { grade, feedback };
     },
     
     // Extract grade from AI feedback

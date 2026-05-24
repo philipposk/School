@@ -301,3 +301,4 @@ In Module 2, we'll explore teaching AP Mechanics, focusing specifically on kinem
 - Physics Education Research on advanced courses
 - Problem-solving strategy resources
 - Technology integration guides
+

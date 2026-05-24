@@ -34,3 +34,4 @@ It will ask you to paste the key and do everything automatically.
 ---
 
 **No HTML files needed. Just one command. Done.**
+

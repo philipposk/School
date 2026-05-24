@@ -221,3 +221,4 @@ ALTER TABLE public.course_reviews ENABLE ROW LEVEL SECURITY;
 
 **What should I build next?** 🚀
 
+

@@ -60,3 +60,4 @@ localStorage.getItem('resend_api_key')
 ```
 
 I'm really sorry about this. Let me make sure it never happens again by creating a proper backup system.
+

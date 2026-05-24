@@ -65,3 +65,4 @@ If you have the key, you can also add it directly to your backend:
 ```bash
 flyctl secrets set RESEND_API_KEY="your-key-here" -a school-backend
 ```
+

@@ -151,28 +151,10 @@ const AuthManager = {
                     message: 'Email verified! Account created successfully.'
                 };
             } else {
-                // Fallback to localStorage (for development)
-                const user = {
-                    email: email,
-                    name: stored.name,
-                    verified: true,
-                    authMethod: 'email', // Track auth method
-                    createdAt: new Date().toISOString()
-                };
-                
-                localStorage.setItem('user', JSON.stringify(user));
-                
-                // Clean up confirmation code
-                delete this.confirmationCodes[email];
-                localStorage.setItem('confirmationCodes', JSON.stringify(this.confirmationCodes));
-                
-                return {
-                    success: true,
-                    user: user,
-                    verified: true,
-                    authMethod: 'email',
-                    message: 'Email verified! Account created successfully.'
-                };
+                // No Supabase configured — refuse to create a phantom account
+                // (we can't securely store the password client-side, and a
+                // localStorage-only user lets anyone sign in as that email).
+                throw new Error('Account creation requires the authentication backend. Please contact the administrator.');
             }
         } catch (error) {
             throw new Error(`Account creation failed: ${error.message}`);
@@ -294,17 +276,15 @@ const AuthManager = {
             } catch (error) {
                 throw new Error(`Sign in failed: ${error.message}`);
             }
-        } else {
-            // Fallback to localStorage
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                const user = JSON.parse(storedUser);
-                if (user.email === email) {
-                    return { user: user };
-                }
-            }
-            throw new Error('Invalid email or password');
         }
+
+        // No Supabase configured: refuse sign-in. The localStorage path can't
+        // verify passwords (we never store them), so accepting a known email
+        // with any password is a critical bypass. Force real auth instead.
+        throw new Error(
+            'Sign-in is unavailable: authentication backend is not configured. ' +
+            'Please contact the administrator.'
+        );
     },
     
     // Sign out

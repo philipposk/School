@@ -4,14 +4,18 @@ const CertificateManager = {
     certificates: JSON.parse(localStorage.getItem('certificates') || '[]'),
     
     generateCertificate(courseId, courseTitle) {
+        const uuid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
         const certificate = {
-            id: `cert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `cert_${uuid}`,
             courseId: courseId,
             courseTitle: courseTitle,
             studentName: user ? user.name : 'Student',
             studentEmail: user ? user.email : '',
             issueDate: new Date().toISOString(),
-            certificateNumber: `CT-${Date.now()}`,
+            // UUID-based cert number (not Date.now — that was guessable & could collide)
+            certificateNumber: `CT-${uuid.replace(/-/g, '').slice(0, 12).toUpperCase()}`,
             verified: true
         };
         
@@ -106,97 +110,150 @@ const CertificateManager = {
     }
 };
 
-// Certificate download function
-function downloadCertificate(certId) {
+// Lazy-load jsPDF from CDN on first download (avoids bundle bloat for users
+// who never download a certificate).
+function loadJsPDF() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if (window._jsPDFPromise) return window._jsPDFPromise;
+
+    window._jsPDFPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        s.onload = () => {
+            if (window.jspdf && window.jspdf.jsPDF) resolve(window.jspdf.jsPDF);
+            else reject(new Error('jsPDF loaded but constructor missing'));
+        };
+        s.onerror = () => reject(new Error('Failed to load jsPDF from CDN'));
+        document.head.appendChild(s);
+    });
+    return window._jsPDFPromise;
+}
+
+async function downloadCertificate(certId) {
     const certificate = CertificateManager.getCertificateById(certId);
     if (!certificate) return;
-    
-    // Create a printable certificate
+
+    let jsPDF;
+    try {
+        jsPDF = await loadJsPDF();
+    } catch (err) {
+        console.error('jsPDF load failed, falling back to print:', err);
+        return downloadCertificatePrintFallback(certificate);
+    }
+
+    // A4 landscape, mm units
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const W = doc.internal.pageSize.getWidth();   // 297
+    const H = doc.internal.pageSize.getHeight();  // 210
+
+    // Background tint
+    doc.setFillColor(247, 250, 252);
+    doc.rect(0, 0, W, H, 'F');
+
+    // Gold border
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(3);
+    doc.rect(10, 10, W - 20, H - 20);
+    doc.setLineWidth(0.5);
+    doc.rect(13, 13, W - 26, H - 26);
+
+    // Header
+    doc.setFont('times', 'bold');
+    doc.setTextColor(45, 55, 72);
+    doc.setFontSize(36);
+    doc.text('Certificate of Completion', W / 2, 45, { align: 'center' });
+
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(1);
+    doc.line(W / 2 - 60, 52, W / 2 + 60, 52);
+
+    // Body
+    doc.setFont('times', 'normal');
+    doc.setFontSize(16);
+    doc.setTextColor(74, 85, 104);
+    doc.text('This is to certify that', W / 2, 75, { align: 'center' });
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(30);
+    doc.setTextColor(102, 126, 234);
+    doc.text(certificate.studentName || 'Student', W / 2, 95, { align: 'center' });
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(16);
+    doc.setTextColor(74, 85, 104);
+    doc.text('has successfully completed the course', W / 2, 113, { align: 'center' });
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(118, 75, 162);
+    const courseTitle = certificate.courseTitle || 'Course';
+    const courseLines = doc.splitTextToSize(courseTitle, W - 60);
+    doc.text(courseLines, W / 2, 130, { align: 'center' });
+
+    // Footer details
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(113, 128, 150);
+    const issueDate = new Date(certificate.issueDate).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+    doc.text(`Certificate Number: ${certificate.certificateNumber}`, W / 2, 170, { align: 'center' });
+    doc.text(`Issue Date: ${issueDate}`, W / 2, 178, { align: 'center' });
+    if (certificate.studentEmail) {
+        doc.text(`Issued to: ${certificate.studentEmail}`, W / 2, 186, { align: 'center' });
+    }
+
+    if (certificate.verified) {
+        doc.setTextColor(72, 187, 120);
+        doc.setFont('helvetica', 'bold');
+        doc.text('✓ Verified', W / 2, 196, { align: 'center' });
+    }
+
+    const safe = (certificate.courseTitle || 'certificate')
+        .replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    doc.save(`certificate-${safe}-${certificate.certificateNumber}.pdf`);
+
+    if (typeof AnalyticsManager !== 'undefined') {
+        AnalyticsManager.trackEvent('certificate_downloaded', {
+            course_id: certificate.courseId,
+            cert_number: certificate.certificateNumber
+        });
+    }
+}
+
+function downloadCertificatePrintFallback(certificate) {
     const printWindow = window.open('', '_blank');
-    const certificateHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Certificate - ${certificate.courseTitle}</title>
-            <style>
-                @page { size: landscape; margin: 0; }
-                body {
-                    font-family: 'Georgia', serif;
-                    margin: 0;
-                    padding: 2rem;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    min-height: 100vh;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .certificate-container {
-                    background: white;
-                    padding: 3rem;
-                    border: 10px solid #d4af37;
-                    box-shadow: 0 0 30px rgba(0,0,0,0.3);
-                    max-width: 900px;
-                    text-align: center;
-                }
-                .certificate-header {
-                    border-bottom: 3px solid #d4af37;
-                    padding-bottom: 1rem;
-                    margin-bottom: 2rem;
-                }
-                .certificate-header h1 {
-                    color: #2d3748;
-                    font-size: 2.5rem;
-                    margin: 0;
-                }
-                .certificate-body {
-                    padding: 2rem 0;
-                }
-                .certificate-name {
-                    font-size: 2rem;
-                    color: #667eea;
-                    margin: 1rem 0;
-                    font-weight: bold;
-                }
-                .certificate-course {
-                    font-size: 1.5rem;
-                    color: #764ba2;
-                    margin: 1rem 0;
-                }
-                .certificate-details {
-                    margin-top: 2rem;
-                    padding-top: 1rem;
-                    border-top: 2px solid #e2e8f0;
-                    font-size: 0.9rem;
-                    color: #718096;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="certificate-container">
-                <div class="certificate-header">
-                    <h1>🎓 Certificate of Completion</h1>
-                </div>
-                <div class="certificate-body">
-                    <p style="font-size: 1.2rem;">This is to certify that</p>
-                    <div class="certificate-name">${certificate.studentName}</div>
-                    <p style="font-size: 1.2rem;">has successfully completed the course</p>
-                    <div class="certificate-course">${certificate.courseTitle}</div>
-                    <div class="certificate-details">
-                        <p><strong>Certificate Number:</strong> ${certificate.certificateNumber}</p>
-                        <p><strong>Issue Date:</strong> ${new Date(certificate.issueDate).toLocaleDateString()}</p>
-                    </div>
-                </div>
+    if (!printWindow) {
+        alert('Could not open print window. Please allow pop-ups and try again.');
+        return;
+    }
+    const issueDate = new Date(certificate.issueDate).toLocaleDateString();
+    printWindow.document.write(`
+        <!DOCTYPE html><html><head><title>Certificate - ${certificate.courseTitle}</title>
+        <style>
+            @page { size: landscape; margin: 0; }
+            body { font-family: Georgia, serif; margin: 0; padding: 2rem; background: linear-gradient(135deg,#667eea,#764ba2); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+            .c { background:white; padding:3rem; border:10px solid #d4af37; max-width:900px; text-align:center; }
+            h1 { color:#2d3748; font-size:2.5rem; }
+            .name { font-size:2rem; color:#667eea; font-weight:bold; margin:1rem 0; }
+            .course { font-size:1.5rem; color:#764ba2; margin:1rem 0; }
+            .details { margin-top:2rem; border-top:2px solid #e2e8f0; padding-top:1rem; color:#718096; }
+        </style></head>
+        <body><div class="c">
+            <h1>🎓 Certificate of Completion</h1>
+            <p>This is to certify that</p>
+            <div class="name">${certificate.studentName}</div>
+            <p>has successfully completed the course</p>
+            <div class="course">${certificate.courseTitle}</div>
+            <div class="details">
+                <p><strong>Certificate Number:</strong> ${certificate.certificateNumber}</p>
+                <p><strong>Issue Date:</strong> ${issueDate}</p>
             </div>
-        </body>
-        </html>
-    `;
-    
-    printWindow.document.write(certificateHTML);
+        </div></body></html>
+    `);
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-    }, 250);
+    setTimeout(() => printWindow.print(), 250);
 }
 
 function shareCertificate(certId) {

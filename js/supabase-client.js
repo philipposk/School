@@ -175,13 +175,7 @@ async function initSupabase() {
             }
         } catch (error) {
             console.warn('Failed to fetch Supabase config from backend:', error);
-            // Fallback: Use default anon key if backend fails
-            if (!credentials.key) {
-                const defaultKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptamV6bWZoeWd2YXpmdW51dWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNDczODUsImV4cCI6MjA4MDYyMzM4NX0.dG9FxpOE8t1dcAkXCBxTQiiEKlfRvKTszuOoJ_PVOM4i';
-                localStorage.setItem('supabase_anon_key', defaultKey);
-                credentials.key = defaultKey;
-                console.log('✅ Using default Supabase anon key');
-            }
+            // No hardcoded fallback — backend is the single source of truth.
         }
     }
     

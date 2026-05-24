@@ -38,3 +38,4 @@ if [ $? -eq 0 ]; then
 else
     echo "❌ Failed to set key. Make sure flyctl is installed and you're logged in."
 fi
+
