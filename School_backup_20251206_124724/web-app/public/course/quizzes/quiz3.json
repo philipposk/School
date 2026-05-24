@@ -1,0 +1,63 @@
+{
+  "module": "Module 3: Induction, Evidence & Strength",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Induction aims for:",
+      "options": ["certainty", "probability", "truth", "persuasion"],
+      "correct_answer": 1,
+      "explanation": "Induction provides probable conclusions based on evidence, not absolute certainty."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Correlation ≠ causation emphasizes:",
+      "options": ["statistical significance", "causal relationships", "sample size", "data collection"],
+      "correct_answer": 1,
+      "explanation": "Correlation shows relationships, but causation requires demonstrating that one thing causes another."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Anecdotes are considered:",
+      "options": ["high-quality evidence", "low-quality evidence", "statistical evidence", "expert testimony"],
+      "correct_answer": 1,
+      "explanation": "Anecdotes are individual cases and provide weak evidence compared to systematic data."
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "question": "Larger sample size generally leads to:",
+      "options": ["weaker induction", "stronger induction", "no change", "biased results"],
+      "correct_answer": 1,
+      "explanation": "Larger, representative samples provide stronger inductive conclusions."
+    },
+    {
+      "id": 5,
+      "type": "short_answer",
+      "question": "Give example of analogical reasoning:",
+      "acceptable_answers": [
+        "comparing two similar situations",
+        "using past experience to predict future",
+        "drawing parallels between cases",
+        "inferring from similar examples"
+      ],
+      "explanation": "Analogical reasoning draws conclusions based on similarities between cases."
+    },
+    {
+      "id": 6,
+      "type": "short_answer",
+      "question": "Why do explanatory mechanisms matter in evidence evaluation?",
+      "acceptable_answers": [
+        "they explain why the relationship exists",
+        "they provide causal understanding",
+        "they strengthen the evidence",
+        "they show how things work"
+      ],
+      "explanation": "Mechanisms explain why relationships exist, making evidence more credible and reliable."
+    }
+  ],
+  "passing_score": 4,
+  "time_limit": 10
+}

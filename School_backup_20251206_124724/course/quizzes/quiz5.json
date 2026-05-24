@@ -1,0 +1,57 @@
+{
+  "module": "Module 5: Cognitive Biases & Debiasing",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Seeking disconfirming evidence reduces:",
+      "options": ["anchoring", "confirmation bias", "availability", "overconfidence"],
+      "correct_answer": 1,
+      "explanation": "Actively looking for disconfirming evidence helps overcome confirmation bias."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "Pre-mortem analysis prevents:",
+      "options": ["planning errors", "memory biases", "social biases", "perceptual errors"],
+      "correct_answer": 0,
+      "explanation": "Pre-mortem analysis helps identify potential problems before they occur, preventing planning errors."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Availability heuristic uses:",
+      "options": ["statistical data", "vivid examples", "expert opinion", "historical patterns"],
+      "correct_answer": 1,
+      "explanation": "Availability heuristic relies on how easily examples come to mind, often favoring vivid cases."
+    },
+    {
+      "id": 4,
+      "type": "short_answer",
+      "question": "Give one common cognitive bias:",
+      "acceptable_answers": [
+        "confirmation bias",
+        "anchoring",
+        "availability heuristic",
+        "overconfidence",
+        "hindsight bias"
+      ],
+      "explanation": "Common biases include confirmation bias, anchoring, availability heuristic, and many others."
+    },
+    {
+      "id": 5,
+      "type": "short_answer",
+      "question": "Describe one practical debiasing technique:",
+      "acceptable_answers": [
+        "seek disconfirming evidence",
+        "pre-mortem analysis",
+        "slow thinking",
+        "independent checks",
+        "probabilistic framing"
+      ],
+      "explanation": "Debiasing techniques help overcome systematic errors in thinking."
+    }
+  ],
+  "passing_score": 4,
+  "time_limit": 10
+}

@@ -185,83 +185,39 @@ const AuthManager = {
         return { success: true, message: 'Confirmation code resent to your email.' };
     },
     
-    // Sign in with Google (OAuth - no email verification needed)
-    async signInWithGoogle() {
-        const supabaseUrl = localStorage.getItem('supabase_url');
-        const supabaseKey = localStorage.getItem('supabase_anon_key');
-        
-        if (!supabaseUrl || !supabaseKey || typeof SupabaseManager === 'undefined') {
-            throw new Error('OAuth sign-in is coming soon. Please use email login for now.');
+    // OAuth providers already verify emails — no confirmation flow needed.
+    // We rely on SupabaseManager.init() to fetch credentials from the backend
+    // /api/config/supabase endpoint, so we don't pre-check localStorage.
+    async _signInWithProvider(provider) {
+        if (typeof SupabaseManager === 'undefined') {
+            throw new Error('Authentication system not loaded. Refresh the page and try again.');
         }
-        
+        const client = await SupabaseManager.init();
+        if (!client) {
+            throw new Error(
+                'Authentication backend is not available. ' +
+                'Please contact the administrator.'
+            );
+        }
         try {
-            const { data, error } = await SupabaseManager.signInWithOAuth('google');
+            const { data, error } = await SupabaseManager.signInWithOAuth(provider);
             if (error) throw error;
-            
-            // OAuth providers already verify email, so no confirmation needed
-            // User is automatically logged in after OAuth flow
-            return { 
-                ...data, 
-                verified: true, 
-                oauthProvider: 'google',
-                skipVerification: true 
+            return {
+                ...data,
+                verified: true,
+                oauthProvider: provider,
+                skipVerification: true
             };
         } catch (error) {
-            throw new Error(`Google sign in failed: ${error.message}`);
+            // Surface the underlying Supabase error verbatim so admins can
+            // diagnose "provider not enabled" vs "invalid redirect URL" etc.
+            throw new Error(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign in failed: ${error.message}`);
         }
     },
-    
-    // Sign in with Facebook (OAuth - no email verification needed)
-    async signInWithFacebook() {
-        const supabaseUrl = localStorage.getItem('supabase_url');
-        const supabaseKey = localStorage.getItem('supabase_anon_key');
-        
-        if (!supabaseUrl || !supabaseKey || typeof SupabaseManager === 'undefined') {
-            throw new Error('OAuth sign-in is coming soon. Please use email login for now.');
-        }
-        
-        try {
-            const { data, error } = await SupabaseManager.signInWithOAuth('facebook');
-            if (error) throw error;
-            
-            // OAuth providers already verify email, so no confirmation needed
-            // User is automatically logged in after OAuth flow
-            return { 
-                ...data, 
-                verified: true, 
-                oauthProvider: 'facebook',
-                skipVerification: true 
-            };
-        } catch (error) {
-            throw new Error(`Facebook sign in failed: ${error.message}`);
-        }
-    },
-    
-    // Sign in with Apple (OAuth - no email verification needed)
-    async signInWithApple() {
-        const supabaseUrl = localStorage.getItem('supabase_url');
-        const supabaseKey = localStorage.getItem('supabase_anon_key');
-        
-        if (!supabaseUrl || !supabaseKey || typeof SupabaseManager === 'undefined') {
-            throw new Error('OAuth sign-in is coming soon. Please use email login for now.');
-        }
-        
-        try {
-            const { data, error } = await SupabaseManager.signInWithOAuth('apple');
-            if (error) throw error;
-            
-            // OAuth providers already verify email, so no confirmation needed
-            // User is automatically logged in after OAuth flow
-            return { 
-                ...data, 
-                verified: true, 
-                oauthProvider: 'apple',
-                skipVerification: true 
-            };
-        } catch (error) {
-            throw new Error(`Apple sign in failed: ${error.message}`);
-        }
-    },
+
+    async signInWithGoogle()   { return this._signInWithProvider('google'); },
+    async signInWithFacebook() { return this._signInWithProvider('facebook'); },
+    async signInWithApple()    { return this._signInWithProvider('apple'); },
     
     // Sign in with email and password
     async signInWithEmail(email, password) {

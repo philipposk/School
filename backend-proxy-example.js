@@ -78,12 +78,23 @@ try {
 // Middleware: CORS restricted to known origins
 // ----------------------------------------------------------------------------
 const allowedOrigins = new Set([FRONTEND_URL, ...EXTRA_ALLOWED_ORIGINS]);
+
+// Pre-CORS guard: reject disallowed browser origins with a clean JSON 403
+// before the cors() middleware throws and produces an HTML stack trace.
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && !allowedOrigins.has(origin)) {
+        return res.status(403).json({ error: 'Origin not allowed' });
+    }
+    next();
+});
+
 app.use(cors({
     origin(origin, cb) {
-        // Allow requests with no origin (curl, health checks, same-origin)
         if (!origin) return cb(null, true);
         if (allowedOrigins.has(origin)) return cb(null, true);
-        return cb(new Error(`Origin ${origin} not allowed by CORS`));
+        // Should be unreachable thanks to the guard above, but stay safe.
+        return cb(null, false);
     },
     credentials: true
 }));

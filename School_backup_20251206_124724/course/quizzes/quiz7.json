@@ -1,0 +1,49 @@
+{
+  "module": "Module 7: Constructing Strong Arguments",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Argument maps primarily show:",
+      "options": ["emotional appeal", "reasoning structure", "writing style", "audience reaction"],
+      "correct_answer": 1,
+      "explanation": "Argument maps visually represent the structure of reasoning and relationships between claims."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "A rebuttal should:",
+      "options": ["ignore counterarguments", "address counterarguments", "attack the opponent", "change the subject"],
+      "correct_answer": 1,
+      "explanation": "Effective rebuttals acknowledge and respond to counterarguments directly."
+    },
+    {
+      "id": 3,
+      "type": "short_answer",
+      "question": "Describe one technique to strengthen an argument:",
+      "acceptable_answers": [
+        "provide evidence",
+        "address counterarguments",
+        "use clear structure",
+        "define key terms",
+        "use examples"
+      ],
+      "explanation": "Strong arguments use evidence, address counterarguments, have clear structure, and define terms."
+    },
+    {
+      "id": 4,
+      "type": "short_answer",
+      "question": "What makes writing clear and persuasive?",
+      "acceptable_answers": [
+        "simple sentences",
+        "defined terms",
+        "concrete examples",
+        "logical flow",
+        "clear structure"
+      ],
+      "explanation": "Clear writing uses simple sentences, defined terms, concrete examples, and logical flow."
+    }
+  ],
+  "passing_score": 3,
+  "time_limit": 10
+}

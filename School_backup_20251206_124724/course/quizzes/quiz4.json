@@ -1,0 +1,55 @@
+{
+  "module": "Module 4: Probabilistic Thinking & Bayes",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice",
+      "question": "Base-rate neglect involves:",
+      "options": ["ignoring background frequency", "overestimating probability", "misunderstanding statistics", "trusting experts too much"],
+      "correct_answer": 0,
+      "explanation": "Base-rate neglect occurs when people ignore general probabilities in favor of specific information."
+    },
+    {
+      "id": 2,
+      "type": "multiple_choice",
+      "question": "P(A|B) means:",
+      "options": ["probability of A and B", "probability of A given B", "probability of B given A", "probability of A or B"],
+      "correct_answer": 1,
+      "explanation": "P(A|B) represents conditional probability - the probability of A occurring given that B has occurred."
+    },
+    {
+      "id": 3,
+      "type": "multiple_choice",
+      "question": "Posterior probability considers:",
+      "options": ["only new evidence", "prior + evidence", "only prior belief", "expert opinion"],
+      "correct_answer": 1,
+      "explanation": "Posterior probability combines prior beliefs with new evidence using Bayesian reasoning."
+    },
+    {
+      "id": 4,
+      "type": "short_answer",
+      "question": "Why do rare events distort intuitive probability judgments?",
+      "acceptable_answers": [
+        "they are memorable and seem more likely",
+        "availability heuristic makes them stand out",
+        "people ignore base rates",
+        "vivid examples override statistics"
+      ],
+      "explanation": "Rare but memorable events feel more probable than they actually are due to the availability heuristic."
+    },
+    {
+      "id": 5,
+      "type": "short_answer",
+      "question": "Give simple Bayes example using everyday situation:",
+      "acceptable_answers": [
+        "medical test interpretation",
+        "weather prediction",
+        "diagnostic reasoning",
+        "updating beliefs with evidence"
+      ],
+      "explanation": "Bayesian reasoning helps update probabilities when new information becomes available."
+    }
+  ],
+  "passing_score": 3,
+  "time_limit": 10
+}

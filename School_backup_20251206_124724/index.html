@@ -1,0 +1,3941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Platform - Master New Skills</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" onerror="console.warn('Three.js failed to load, 3D effects disabled')"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d3748;
+            --secondary: #667eea;
+            --accent: #764ba2;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --error: #f56565;
+        }
+
+        /* Light Mode */
+        :root, [data-theme="light"] {
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --hover-bg: #f7fafc;
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] {
+            --bg: #1a202c;
+            --card: #2d3748;
+            --text: #e2e8f0;
+            --text-light: #a0aec0;
+            --border: #4a5568;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --hover-bg: #374151;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .user-email {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--card);
+            color: var(--text);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            display: none;
+            z-index: 1001;
+            border: 1px solid var(--border);
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Certificate Styles */
+        .certificate-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: 8px solid #667eea;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            position: relative;
+        }
+
+        [data-theme="dark"] .certificate-container {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            border-color: #764ba2;
+        }
+
+        .certificate-header {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .certificate-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 1.5rem 0;
+            color: var(--text);
+        }
+
+        .certificate-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+
+        .certificate-date {
+            color: var(--text-light);
+            margin-top: 2rem;
+        }
+
+        .certificate-id {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 1rem;
+            font-family: monospace;
+        }
+
+        /* Profile Page Styles */
+        .profile-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .profile-cover {
+            height: 200px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+            border-radius: 12px 12px 0 0;
+            margin: -3rem -3rem 2rem -3rem;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .profile-avatar-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid var(--card);
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 700;
+            color: white;
+            margin-top: -75px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-avatar-large:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-name-large {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        /* Inline Editing Styles */
+        .editable-field {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            margin: -0.25rem -0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .editable-field:hover {
+            background: var(--hover-bg);
+        }
+
+        .editable-field.editing {
+            background: transparent;
+            cursor: default;
+        }
+
+        .edit-icon {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .editable-field:hover .edit-icon {
+            opacity: 1;
+        }
+
+        .inline-input {
+            background: var(--card);
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: inherit;
+            font-weight: inherit;
+            color: var(--text);
+            width: 100%;
+            min-width: 200px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .inline-input:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .inline-edit-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            align-items: center;
+        }
+
+        .inline-btn {
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .inline-btn-save {
+            background: var(--success);
+            color: white;
+        }
+
+        .inline-btn-save:hover {
+            background: #38a169;
+            transform: translateY(-1px);
+        }
+
+        .inline-btn-cancel {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .inline-btn-cancel:hover {
+            background: var(--hover-bg);
+        }
+
+        .email-field {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-bio {
+            color: var(--text-light);
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+
+        .profile-social-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--hover-bg);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .social-link:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--hover-bg);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .profile-tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .profile-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .profile-tab.active {
+            color: var(--secondary);
+            border-bottom-color: var(--secondary);
+        }
+
+        .profile-tab:hover {
+            color: var(--text);
+        }
+
+        .certificates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .certificate-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .certificate-card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .certificate-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .certificate-card-date {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Friends Section */
+        .friends-section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .friend-card {
+            text-align: center;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .friend-card-clickable {
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .friend-card:hover .friend-card-clickable {
+            transform: translateY(-5px);
+        }
+
+        .friend-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 0.5rem;
+            border: 3px solid var(--border);
+        }
+
+        .friend-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .add-friend-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .add-friend-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .add-friend-btn.friends {
+            background: var(--text-light);
+        }
+
+        /* Profile Picture Upload */
+        .profile-picture-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-picture-upload input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--secondary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .profile-avatar-large:hover .upload-overlay {
+            opacity: 1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--hover-bg);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Course Listing Page */
+        .courses-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .course-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .course-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .course-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        /* Course View */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            border: 1px solid var(--border);
+        }
+
+        .course-title-sidebar {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .module-item:hover {
+            background: var(--hover-bg);
+            transform: translateX(5px);
+        }
+
+        .module-item.active {
+            background: var(--hover-bg);
+            border-left-color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .sidebar-nav-item:hover {
+            background: var(--hover-bg);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav-item.active {
+            background: var(--hover-bg);
+            border-left-color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item-icon {
+            font-size: 1.2rem;
+        }
+
+        .module-number {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .module-name {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .module-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-in-progress {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        [data-theme="dark"] .status-completed {
+            background: #22543d;
+            color: #c6f6d5;
+        }
+
+        [data-theme="dark"] .status-in-progress {
+            background: #7c2d12;
+            color: #feebc8;
+        }
+
+        .content-area {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            min-height: 600px;
+            border: 1px solid var(--border);
+        }
+
+        .module-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .module-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .module-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-light);
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .module-content {
+            font-size: 1.0625rem;
+            line-height: 1.8;
+        }
+
+        .module-content h1 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+
+        .module-content h2 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .module-content h3 {
+            font-size: 1.25rem;
+            margin: 1.25rem 0 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .module-content h4 {
+            font-size: 1.125rem;
+            margin: 1rem 0 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .module-content p {
+            margin: 1rem 0;
+        }
+
+        .module-content ul, .module-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .module-content li {
+            margin: 0.5rem 0;
+        }
+
+        .module-content code {
+            background: var(--hover-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--error);
+        }
+
+        .module-content pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .module-content pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .module-content blockquote {
+            border-left: 4px solid var(--secondary);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .module-content strong {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--hover-bg);
+            color: var(--secondary);
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: all 0.2s;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .resource-link:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .resource-link:focus {
+            outline: 2px solid var(--secondary);
+            outline-offset: 2px;
+        }
+
+        .quiz-container {
+            background: var(--hover-bg);
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .quiz-question {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            color: var(--text);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quiz-option {
+            padding: 1rem;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--secondary);
+            background: var(--hover-bg);
+        }
+
+        .quiz-option.selected {
+            background: var(--hover-bg);
+            border-color: var(--secondary);
+        }
+
+        .quiz-option.correct {
+            background: #c6f6d5;
+            border-color: var(--success);
+        }
+
+        .quiz-option.incorrect {
+            background: #fed7d7;
+            border-color: var(--error);
+        }
+
+        .quiz-explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--card);
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+            display: none;
+            color: var(--text);
+        }
+
+        .quiz-explanation.show {
+            display: block;
+        }
+
+        .short-answer-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--card);
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .score-pass {
+            color: var(--success);
+        }
+
+        .score-fail {
+            color: var(--error);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container, .courses-container {
+                padding: 1rem;
+            }
+
+            .content-area {
+                padding: 1.5rem;
+            }
+
+            .module-title {
+                font-size: 1.5rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 3D Hero Section */
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        [data-theme="dark"] .hero-section {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-3d-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.125rem, 3vw, 1.5rem);
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .hero-btn {
+            padding: 1.25rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .hero-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-btn-primary {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+        }
+
+        .hero-btn-primary:hover {
+            background: white;
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatShape 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 10s;
+        }
+
+        @keyframes floatShape {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        /* Modern Course Cards */
+        .modern-courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 4rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .modern-course-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .modern-course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .modern-course-card:hover::before {
+            opacity: 1;
+        }
+
+        .modern-course-card:nth-child(1) { animation-delay: 0.1s; }
+        .modern-course-card:nth-child(2) { animation-delay: 0.2s; }
+        .modern-course-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .modern-course-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .modern-course-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            animation: bounceGentle 3s infinite;
+        }
+
+        .modern-course-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .modern-course-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .modern-course-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .modern-course-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary);
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .modern-course-card:hover .modern-course-arrow {
+            transform: translateX(5px);
+        }
+
+        /* AI Chatbot Bubble */
+        .chatbot-bubble {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s infinite;
+        }
+
+        .chatbot-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .chatbot-bubble.active {
+            transform: scale(0.9);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), 0 0 0 10px rgba(102, 126, 234, 0.1);
+            }
+        }
+
+        .chatbot-icon {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .chatbot-window {
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 400px;
+            max-width: calc(100vw - 4rem);
+            height: 600px;
+            max-height: calc(100vh - 120px);
+            background: var(--card);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            animation: slideUpFade 0.3s ease-out;
+        }
+
+        .chatbot-window.show {
+            display: flex;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chatbot-header-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chatbot-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chatbot-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chatbot-message {
+            display: flex;
+            gap: 0.75rem;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .chatbot-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .chatbot-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chatbot-message .chatbot-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .chatbot-message.user .chatbot-avatar {
+            background: var(--hover-bg);
+            color: var(--text);
+        }
+
+        .chatbot-text {
+            background: var(--hover-bg);
+            padding: 0.875rem 1.125rem;
+            border-radius: 18px;
+            max-width: 75%;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .chatbot-message.user .chatbot-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .chatbot-input-container {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 0.875rem 1.125rem;
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chatbot-input:focus {
+            border-color: var(--secondary);
+        }
+
+        .chatbot-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-send:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .modern-courses-grid {
+                grid-template-columns: 1fr;
+                padding: 2rem 1rem;
+            }
+
+            .chatbot-window {
+                width: calc(100vw - 2rem);
+                height: calc(100vh - 100px);
+                bottom: 80px;
+                right: 1rem;
+            }
+
+            .chatbot-bubble {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+
+        /* Messaging System Styles */
+        .message-window {
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 400px;
+            max-width: calc(100vw - 4rem);
+            height: 600px;
+            max-height: calc(100vh - 120px);
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            flex-direction: column;
+            z-index: 10000;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            animation: slideUpFade 0.3s ease-out;
+        }
+
+        .message-window.show {
+            display: flex;
+        }
+
+        .message-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .message-header-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .message-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .message-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .message-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message-item {
+            display: flex;
+            gap: 0.75rem;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .message-item.sent {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .message-item.sent .message-avatar {
+            background: var(--hover-bg);
+            color: var(--text);
+        }
+
+        .message-content {
+            background: var(--hover-bg);
+            padding: 0.875rem 1.125rem;
+            border-radius: 18px;
+            max-width: 75%;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .message-item.sent .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .message-item.sent .message-time {
+            text-align: left;
+        }
+
+        .message-input-container {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.875rem 1.125rem;
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .message-input:focus {
+            border-color: var(--secondary);
+        }
+
+        .message-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+
+        .message-send:hover {
+            transform: scale(1.1);
+        }
+
+        .message-send:active {
+            transform: scale(0.95);
+        }
+
+        .message-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .message-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .message-window {
+                width: calc(100vw - 2rem);
+                height: calc(100vh - 100px);
+                bottom: 80px;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Welcome to Learning Platform</h2>
+                <p style="color: var(--text-light); margin-top: 0.5rem;">Sign in to track your progress</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="loginName" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Start Learning</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Your Profile</h2>
+            </div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label class="form-label">Profile Picture</label>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="profile-avatar-large" style="width: 80px; height: 80px; font-size: 2rem; margin: 0;">
+                            <span id="profileAvatarPreview"></span>
+                        </div>
+                        <input type="file" class="form-input" id="profilePicture" accept="image/*" style="flex: 1;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="profileName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="profileEmail" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bio</label>
+                    <textarea class="form-input" id="profileBio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" class="form-input" id="profileWebsite" placeholder="https://yourwebsite.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">LinkedIn</label>
+                    <input type="url" class="form-input" id="profileLinkedIn" placeholder="https://linkedin.com/in/yourprofile">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">GitHub</label>
+                    <input type="url" class="form-input" id="profileGitHub" placeholder="https://github.com/yourusername">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Twitter/X</label>
+                    <input type="url" class="form-input" id="profileTwitter" placeholder="https://twitter.com/yourusername">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Instagram</label>
+                    <input type="url" class="form-input" id="profileInstagram" placeholder="https://instagram.com/yourusername">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Facebook</label>
+                    <input type="url" class="form-input" id="profileFacebook" placeholder="https://facebook.com/yourprofile">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Profile Modal -->
+    <div id="viewProfileModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div id="viewProfileContent">
+                <!-- Profile content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificates Modal -->
+    <div id="certificatesModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2 class="modal-title">My Certificates</h2>
+                <p style="color: var(--text-light); margin-top: 0.5rem;">Your earned certificates and achievements</p>
+            </div>
+            <div id="certificatesContent">
+                <!-- Certificates will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Friends Modal -->
+    <div id="friendsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2 class="modal-title">Find Friends</h2>
+                <p style="color: var(--text-light); margin-top: 0.5rem;">Connect with other learners</p>
+            </div>
+            <div id="friendsContent">
+                <!-- Friends will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo" onclick="showCourses()">
+                🎓 Learning Platform
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark/light theme">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <div id="userProfileContainer" style="position: relative;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AI Chatbot Bubble -->
+    <div class="chatbot-bubble" id="chatbotBubble" onclick="toggleChatbot()" role="button" aria-label="Open AI assistant chatbot" tabindex="0">
+        <div class="chatbot-icon" aria-hidden="true">🤖</div>
+    </div>
+
+    <!-- AI Chatbot Window -->
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <div class="chatbot-header-title">
+                <span>🤖</span>
+                <span>AI Assistant</span>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Close chatbot">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="chatbot-message">
+                <div class="chatbot-avatar">🤖</div>
+                <div class="chatbot-text">
+                    Hi! I'm your AI learning assistant. How can I help you today? Ask me about courses, modules, or anything related to your learning journey!
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input-container">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Ask me anything..." onkeypress="handleChatbotKeyPress(event)">
+            <button class="chatbot-send" onclick="sendChatbotMessage()">→</button>
+        </div>
+    </div>
+
+    <!-- Messaging Window -->
+    <div class="message-window" id="messageWindow">
+        <div class="message-header">
+            <div class="message-header-title">
+                <span id="messageFriendName">Friend</span>
+            </div>
+            <button class="message-close" onclick="closeMessageWindow()">✕</button>
+        </div>
+        <div class="message-messages" id="messageMessages">
+            <!-- Messages will be loaded here -->
+        </div>
+        <div class="message-input-container">
+            <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." onkeypress="handleMessageKeyPress(event)">
+            <button class="message-send" onclick="sendMessage()">→</button>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- Content will be loaded here -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        // Configure marked
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (err) {}
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            breaks: true,
+            gfm: true
+        });
+
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            document.getElementById('themeIcon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Watch for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                updateThemeIcon(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // Courses Data
+        const courses = [
+            {
+                id: 'critical-thinking',
+                title: 'Critical Thinking',
+                description: 'Master clear reasoning and practical logic. Learn to think better and decide smarter.',
+                icon: '🧠',
+                modules: 8,
+                duration: '8 weeks',
+                level: 'Intermediate',
+                modules_data: [
+                    { id: 1, title: 'Foundations of Critical Thinking', subtitle: 'What Is an Argument? Validity, Soundness, and Structure' },
+                    { id: 2, title: 'Deduction: Propositional Logic & Syllogisms', subtitle: 'Guaranteed Truth Through Structure' },
+                    { id: 3, title: 'Induction, Evidence & Strength', subtitle: 'From Specific to General' },
+                    { id: 4, title: 'Probabilistic Thinking & Bayes', subtitle: 'Navigating Uncertainty' },
+                    { id: 5, title: 'Cognitive Biases & Debiasing', subtitle: 'Overcoming Mental Shortcuts' },
+                    { id: 6, title: 'Fallacies & Rhetoric', subtitle: 'Recognizing Faulty Reasoning' },
+                    { id: 7, title: 'Constructing Strong Arguments', subtitle: 'Building Robust Reasoning' },
+                    { id: 8, title: 'Decision-Making & Final Project', subtitle: 'Applying Critical Thinking' }
+                ]
+            }
+            // More courses can be added here
+        ];
+
+        // User state
+        let user = JSON.parse(localStorage.getItem('user') || 'null');
+        let allUsers = JSON.parse(localStorage.getItem('allUsers') || '{}');
+        let currentCourse = null;
+        let currentQuiz = null;
+        let quizAnswers = {};
+        let friends = JSON.parse(localStorage.getItem('friends') || '{}');
+        let certificates = JSON.parse(localStorage.getItem('certificates') || '{}');
+        let messages = JSON.parse(localStorage.getItem('messages') || '{}');
+        let currentMessageFriend = null;
+
+        // Course state
+        const state = {
+            currentCourseId: null,
+            currentModule: 1,
+            completedModules: JSON.parse(localStorage.getItem('completedModules') || '[]'),
+            quizScores: JSON.parse(localStorage.getItem('quizScores') || '{}'),
+            totalModules: 0,
+            sidebarView: null // 'messages', 'assignments', or null for modules
+        };
+
+        // Initialize
+        function init() {
+            initTheme();
+            
+            // Initialize user data if needed
+            if (user && !allUsers[user.email]) {
+                allUsers[user.email] = user;
+                localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            }
+            
+            if (user) {
+                updateUserDisplay();
+            } else {
+                showSignInButton();
+            }
+            showCourses();
+        }
+
+        // Show courses listing with 3D hero
+        function showCourses() {
+            state.currentCourseId = null;
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="hero-section">
+                    <div class="floating-shapes">
+                        <div class="shape"></div>
+                        <div class="shape"></div>
+                        <div class="shape"></div>
+                    </div>
+                    <div class="hero-3d-container" id="hero3D"></div>
+                    <div class="hero-content">
+                        <h1 class="hero-title">Master Critical Thinking</h1>
+                        <p class="hero-subtitle">Transform your reasoning skills with our comprehensive 8-week course</p>
+                        <div class="hero-cta">
+                            <button class="hero-btn hero-btn-primary" onclick="scrollToCourses()">Explore Courses</button>
+                            <button class="hero-btn" onclick="openLoginModal()">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modern-courses-grid" id="coursesSection">
+                    ${courses.map(course => `
+                        <div class="modern-course-card" onclick="loadCourse('${course.id}')">
+                            <div class="modern-course-icon">${course.icon}</div>
+                            <h2 class="modern-course-title">${course.title}</h2>
+                            <p class="modern-course-description">${course.description}</p>
+                            <div class="modern-course-meta">
+                                <span>📚 ${course.modules} modules</span>
+                                <span>⏱️ ${course.duration}</span>
+                                <span>📊 ${course.level}</span>
+                            </div>
+                            <div class="modern-course-arrow">
+                                Start Learning →
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Initialize 3D scene
+            init3DScene();
+        }
+
+        // Initialize 3D scene for hero
+        function init3DScene() {
+            const container = document.getElementById('hero3D');
+            if (!container || typeof THREE === 'undefined') {
+                // Fallback if Three.js didn't load
+                container.style.background = 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)';
+                return;
+            }
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Create floating geometric shapes
+            const geometries = [
+                new THREE.IcosahedronGeometry(1, 0),
+                new THREE.OctahedronGeometry(1, 0),
+                new THREE.TetrahedronGeometry(1, 0)
+            ];
+
+            const shapes = [];
+            geometries.forEach((geo, i) => {
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    metalness: 0.7,
+                    roughness: 0.3,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const mesh = new THREE.Mesh(geo, material);
+                mesh.position.set(
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10
+                );
+                mesh.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                scene.add(mesh);
+                shapes.push(mesh);
+            });
+
+            // Add ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            // Add directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            camera.position.z = 5;
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                shapes.forEach((shape, i) => {
+                    shape.rotation.x += 0.005 * (i + 1);
+                    shape.rotation.y += 0.008 * (i + 1);
+                    shape.position.y += Math.sin(Date.now() * 0.001 + i) * 0.01;
+                });
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        function scrollToCourses() {
+            const coursesSection = document.getElementById('coursesSection');
+            if (coursesSection) {
+                coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Load course
+        function loadCourse(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            if (!course) return;
+
+            currentCourse = course;
+            state.currentCourseId = courseId;
+            state.currentModule = 1;
+            state.totalModules = course.modules_data.length;
+
+            renderCourseView();
+            loadModule(1);
+        }
+
+        // Render course view
+        function renderCourseView() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="container">
+                    <aside class="sidebar">
+                        <div class="course-title-sidebar">${currentCourse.title}</div>
+                        <div class="sidebar-nav-item ${state.sidebarView === 'messages' ? 'active' : ''}" onclick="viewSidebarMessages()" style="margin-bottom: 1rem;">
+                            <span class="sidebar-nav-item-icon">💬</span>
+                            <span>Messages</span>
+                        </div>
+                        <div class="sidebar-nav-item ${state.sidebarView === 'assignments' ? 'active' : ''}" onclick="viewSidebarAssignments()" style="margin-bottom: 1rem;">
+                            <span class="sidebar-nav-item-icon">📝</span>
+                            <span>Assignments</span>
+                        </div>
+                        <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem;">
+                            <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.75rem; font-weight: 600;">Modules</div>
+                            <ul class="module-list" id="moduleList">
+                                ${currentCourse.modules_data.map((module, index) => {
+                                    const isActive = module.id === state.currentModule && !state.sidebarView;
+                                    const moduleKey = `${state.currentCourseId}-${module.id}`;
+                                    const isCompleted = state.completedModules.includes(moduleKey);
+                                    const hasQuiz = state.quizScores[moduleKey];
+                                    
+                                    return `
+                                        <li class="module-item ${isActive ? 'active' : ''}" onclick="loadModule(${module.id})">
+                                            <div class="module-number">Module ${module.id}</div>
+                                            <div class="module-name">${module.title}</div>
+                                            <div class="module-status">
+                                                ${isCompleted ? '<span class="status-badge status-completed">✓ Completed</span>' : ''}
+                                                ${hasQuiz ? `<span class="status-badge status-in-progress">Quiz: ${hasQuiz.score}/${hasQuiz.total}</span>` : ''}
+                                            </div>
+                                        </li>
+                                    `;
+                                }).join('')}
+                            </ul>
+                        </div>
+                    </aside>
+
+                    <main class="content-area">
+                        <div id="content">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <p>Loading module...</p>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            `;
+        }
+
+        // Load module content
+        async function loadModule(moduleId) {
+            // Check if user is logged in when accessing course content
+            if (!user && state.currentCourseId) {
+                alert('Please sign in to access course modules.');
+                showCourses();
+                return;
+            }
+            
+            state.currentModule = moduleId;
+            state.sidebarView = null; // Clear sidebar view when loading module
+            renderCourseView();
+            
+            const contentArea = document.getElementById('content');
+            if (!contentArea) {
+                // If content area doesn't exist, we're not in course view - redirect
+                showCourses();
+                return;
+            }
+            
+            contentArea.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading module...</p></div>';
+
+            try {
+                if (!currentCourse || !currentCourse.modules_data) {
+                    throw new Error('Course data not available');
+                }
+                
+                const module = currentCourse.modules_data[moduleId - 1];
+                if (!module) {
+                    throw new Error(`Module ${moduleId} not found in course data`);
+                }
+                
+                const response = await fetch(`course/modules/module${String(moduleId).padStart(2, '0')}.md`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Module file not found. Module ${moduleId} may not be available yet.`);
+                    }
+                    throw new Error(`Failed to load module: ${response.status} ${response.statusText}`);
+                }
+
+                const markdown = await response.text();
+                if (!markdown || markdown.trim().length === 0) {
+                    throw new Error('Module file is empty');
+                }
+                
+                let html = marked.parse(markdown);
+
+                // Process markdown to hide answers and make resources clickable
+                html = processModuleContent(html, moduleId);
+
+                contentArea.innerHTML = `
+                    <div class="module-header">
+                        <h1 class="module-title">${module.title}</h1>
+                        <p class="module-subtitle">${module.subtitle}</p>
+                        <div class="module-actions">
+                            <button class="btn btn-primary" onclick="startQuiz(${moduleId})" aria-label="Take quiz for ${module.title}">Take Quiz</button>
+                            <button class="btn btn-secondary" onclick="downloadModule(${moduleId})" aria-label="Download ${module.title} as PDF">Download PDF</button>
+                        </div>
+                    </div>
+                    <div class="module-content">${html}</div>
+                    <div class="nav-buttons">
+                        ${moduleId > 1 ? `<button class="btn btn-secondary" onclick="loadModule(${moduleId - 1})" aria-label="Go to previous module">← Previous Module</button>` : '<div></div>'}
+                        ${moduleId < state.totalModules ? `<button class="btn btn-primary" onclick="loadModule(${moduleId + 1})" aria-label="Go to next module">Next Module →</button>` : '<button class="btn btn-success" onclick="completeCourse()" aria-label="Mark course as complete">Complete Course ✓</button>'}
+                    </div>
+                `;
+
+                // Highlight code blocks
+                document.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block);
+                });
+
+                updateProgress();
+            } catch (error) {
+                console.error('Error loading module:', error);
+                contentArea.innerHTML = `
+                    <div class="module-header">
+                        <h1 class="module-title">Error Loading Module</h1>
+                    </div>
+                    <div style="background: var(--card); border-radius: 12px; padding: 2rem; border: 1px solid var(--border); margin-top: 1rem;">
+                        <p style="color: var(--error); font-weight: 600; margin-bottom: 1rem;">⚠️ Could not load module content</p>
+                        <p style="color: var(--text-light); margin-bottom: 1rem;">${error.message}</p>
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button class="btn btn-primary" onclick="loadModule(${moduleId})" aria-label="Retry loading module">🔄 Retry</button>
+                            <button class="btn btn-secondary" onclick="showCourses()" aria-label="Return to courses">← Back to Courses</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Process module content
+        function processModuleContent(html, moduleId) {
+            html = html.replace(/✓/g, '');
+            html = html.replace(/\(Answer:.*?\)/gi, '');
+            // Fix resource links - use proper button instead of broken href="#"
+            html = html.replace(/("Basics of Arguments"|"Introduction to Propositional Logic"|PDF|worksheet|template|cheat sheet)/gi, 
+                '<button type="button" class="resource-link" onclick="downloadResource(\'$1\')" aria-label="Download $1 resource">📄 $1</button>');
+            return html;
+        }
+
+        // Quiz functionality
+        async function startQuiz(moduleId) {
+            try {
+                const response = await fetch(`course/quizzes/quiz${moduleId}.json`);
+                if (!response.ok) {
+                    alert('Quiz not available for this module yet.');
+                    return;
+                }
+                
+                currentQuiz = await response.json();
+                quizAnswers = {};
+                
+                const moduleKey = `${state.currentCourseId}-${moduleId}`;
+                
+                const quizHTML = `
+                    <div class="quiz-container">
+                        <div class="quiz-header">
+                            <h2 class="quiz-title">${currentQuiz.module} - Quiz</h2>
+                            <span style="color: var(--text-light);">${currentQuiz.questions.length} questions</span>
+                        </div>
+                        ${currentQuiz.questions.map((q, idx) => {
+                            if (q.type === 'multiple_choice') {
+                                return `
+                                    <div class="quiz-question">
+                                        <div class="question-text">${idx + 1}. ${q.question}</div>
+                                        <div class="quiz-options">
+                                            ${q.options.map((opt, optIdx) => `
+                                                <div class="quiz-option" onclick="selectAnswer(${idx}, ${optIdx})" id="q${idx}_opt${optIdx}">
+                                                    ${String.fromCharCode(65 + optIdx)}) ${opt}
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        <div class="quiz-explanation" id="explanation_${idx}">
+                                            <strong>Explanation:</strong> ${q.explanation}
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                return `
+                                    <div class="quiz-question">
+                                        <div class="question-text">${idx + 1}. ${q.question}</div>
+                                        <input type="text" class="short-answer-input" id="answer_${idx}" placeholder="Type your answer here">
+                                        <div class="quiz-explanation" id="explanation_${idx}">
+                                            <strong>Explanation:</strong> ${q.explanation}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }).join('')}
+                        <div class="quiz-actions">
+                            <button class="btn btn-primary" onclick="submitQuiz(${moduleId})">Submit Quiz</button>
+                            <button class="btn btn-secondary" onclick="loadModule(${moduleId})">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('content').innerHTML = quizHTML;
+            } catch (error) {
+                alert('Error loading quiz: ' + error.message);
+            }
+        }
+
+        function selectAnswer(questionIdx, optionIdx) {
+            const question = currentQuiz.questions[questionIdx];
+            if (question.type !== 'multiple_choice') return;
+            
+            document.querySelectorAll(`#q${questionIdx}_opt${optionIdx}`).forEach(el => {
+                el.parentElement.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            });
+            
+            const selectedOption = document.getElementById(`q${questionIdx}_opt${optionIdx}`);
+            selectedOption.classList.add('selected');
+            quizAnswers[questionIdx] = optionIdx;
+        }
+
+        async function submitQuiz(moduleId) {
+            if (!currentQuiz) return;
+            
+            let score = 0;
+            const total = currentQuiz.questions.length;
+            const moduleKey = `${state.currentCourseId}-${moduleId}`;
+            
+            currentQuiz.questions.forEach((q, idx) => {
+                const explanation = document.getElementById(`explanation_${idx}`);
+                explanation.classList.add('show');
+                
+                if (q.type === 'multiple_choice') {
+                    const selected = quizAnswers[idx];
+                    const correct = q.correct_answer;
+                    const optionEl = document.getElementById(`q${idx}_opt${selected}`);
+                    
+                    if (selected === correct) {
+                        score++;
+                        if (optionEl) {
+                            optionEl.classList.add('correct');
+                        }
+                    } else {
+                        if (optionEl) {
+                            optionEl.classList.add('incorrect');
+                        }
+                        const correctEl = document.getElementById(`q${idx}_opt${correct}`);
+                        if (correctEl) {
+                            correctEl.classList.add('correct');
+                        }
+                    }
+                } else {
+                    const answer = document.getElementById(`answer_${idx}`).value.toLowerCase().trim();
+                    const acceptable = q.acceptable_answers.map(a => a.toLowerCase().trim());
+                    if (acceptable.some(a => answer.includes(a) || a.includes(answer))) {
+                        score++;
+                    }
+                }
+            });
+            
+            state.quizScores[moduleKey] = { score, total };
+            localStorage.setItem('quizScores', JSON.stringify(state.quizScores));
+            
+            const passed = score >= currentQuiz.passing_score;
+            const scoreHTML = `
+                <div class="quiz-score ${passed ? 'score-pass' : 'score-fail'}">
+                    ${passed ? '✓ ' : '✗ '}You scored ${score}/${total} 
+                    ${passed ? '- Passed!' : `- Need ${currentQuiz.passing_score} to pass`}
+                </div>
+            `;
+            
+            document.querySelector('.quiz-container').insertAdjacentHTML('beforeend', scoreHTML);
+            renderCourseView();
+            loadModule(moduleId);
+        }
+
+        function downloadResource(resourceName) {
+            // Map resource names to actual file paths
+            const resourceMap = {
+                'PDF': 'course/resources/worksheets/module01_worksheet.md',
+                'Basics of Arguments': 'course/resources/worksheets/module01_worksheet.md',
+                'template': 'course/resources/worksheets/module01_worksheet.md',
+                'cheat sheet': 'course/resources/worksheets/module01_worksheet.md',
+                'worksheet': 'course/resources/worksheets/module01_worksheet.md'
+            };
+            
+            const filePath = resourceMap[resourceName] || `course/resources/${resourceName.toLowerCase().replace(/\s+/g, '_')}.pdf`;
+            
+            // Try to download the file
+            fetch(filePath)
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    }
+                    throw new Error('File not found');
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = resourceName.replace(/\s+/g, '_') + (filePath.endsWith('.md') ? '.md' : '.pdf');
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.warn(`Resource ${resourceName} not found at ${filePath}`);
+                    alert(`Resource "${resourceName}" is not yet available.\n\nWe're working on adding this resource. Please check back soon!`);
+                });
+        }
+
+        function downloadModule(moduleId) {
+            const module = currentCourse.modules_data[moduleId - 1];
+            alert(`Downloading ${module.title} as PDF...\n(PDF generation feature coming soon!)`);
+        }
+
+        function completeCourse() {
+            const moduleKey = `${state.currentCourseId}-${state.currentModule}`;
+            if (!state.completedModules.includes(moduleKey)) {
+                state.completedModules.push(moduleKey);
+                localStorage.setItem('completedModules', JSON.stringify(state.completedModules));
+            }
+            
+            // Check if all modules completed and generate certificate
+            if (user) {
+                const cert = generateCertificate(state.currentCourseId);
+                if (cert) {
+                    alert(`🎉 Congratulations! You have completed ${currentCourse.title}!\n\nYour certificate has been generated and is available in your profile.`);
+                    viewCertificates();
+                } else {
+                    alert('🎉 Congratulations! You have completed this course!\n\nComplete all modules to earn your certificate.');
+                }
+            } else {
+                alert('🎉 Congratulations! You have completed this course!\n\nSign in to track your progress and earn certificates.');
+            }
+        }
+
+        function updateProgress() {
+            // Progress tracking can be added here
+        }
+
+        // User Management
+        function updateUserDisplay() {
+            const container = document.getElementById('userProfileContainer');
+            if (user) {
+                container.innerHTML = `
+                    <div class="user-profile" onclick="toggleProfileDropdown()">
+                        <div class="user-avatar" id="userAvatar">${user.name.charAt(0).toUpperCase()}</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">${user.name}</div>
+                            <div class="user-email" id="userEmail">${user.email}</div>
+                        </div>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-dropdown-item" onclick="viewMyProfile()" role="menuitem" aria-label="View my profile">My Profile</div>
+                            <div class="profile-dropdown-item" onclick="openProfileModal()" role="menuitem" aria-label="Edit my profile">Edit Profile</div>
+                            <div class="profile-dropdown-item" onclick="viewCertificates()" role="menuitem" aria-label="View my certificates">My Certificates</div>
+                            <div class="profile-dropdown-item" onclick="viewFriends()" role="menuitem" aria-label="View friends">Friends</div>
+                            <div class="profile-dropdown-item" onclick="logout()" role="menuitem" aria-label="Sign out">Sign Out</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                showSignInButton();
+            }
+        }
+
+        function showSignInButton() {
+            const container = document.getElementById('userProfileContainer');
+            container.innerHTML = `
+                <button class="btn btn-secondary" onclick="openLoginModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem;">
+                    Sign In
+                </button>
+            `;
+        }
+
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.add('show');
+            document.getElementById('profileName').value = user.name || '';
+            document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profileBio').value = user.bio || '';
+            document.getElementById('profileWebsite').value = user.website || '';
+            document.getElementById('profileLinkedIn').value = user.linkedin || '';
+            document.getElementById('profileGitHub').value = user.github || '';
+            document.getElementById('profileTwitter').value = user.twitter || '';
+            document.getElementById('profileInstagram').value = user.instagram || '';
+            document.getElementById('profileFacebook').value = user.facebook || '';
+            document.getElementById('profileAvatarPreview').textContent = user.name ? user.name.charAt(0).toUpperCase() : '?';
+            document.getElementById('profileDropdown').classList.remove('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        function logout() {
+            user = null;
+            localStorage.removeItem('user');
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            // Clear course state
+            state.currentCourseId = null;
+            currentCourse = null;
+            currentQuiz = null;
+            currentMessageFriend = null;
+            // Redirect to home page
+            showSignInButton();
+            showCourses();
+        }
+
+        // Certificate Functions
+        function generateCertificate(courseId) {
+            if (!user) return;
+            
+            const course = courses.find(c => c.id === courseId);
+            if (!course) return;
+            
+            const userId = user.email;
+            const courseKey = `${userId}-${courseId}`;
+            
+            // Check if all modules completed
+            const courseModules = course.modules_data.map(m => `${courseId}-${m.id}`);
+            const completed = courseModules.every(key => state.completedModules.includes(key));
+            
+            if (!completed) {
+                alert('Complete all modules to earn your certificate!');
+                return;
+            }
+            
+            // Generate certificate
+            const certificate = {
+                id: `cert-${Date.now()}`,
+                courseId: courseId,
+                courseName: course.title,
+                userName: user.name,
+                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                certificateId: `CT-${courseId.toUpperCase()}-${Date.now()}`
+            };
+            
+            if (!certificates[userId]) {
+                certificates[userId] = [];
+            }
+            
+            // Check if certificate already exists
+            const exists = certificates[userId].some(c => c.courseId === courseId);
+            if (!exists) {
+                certificates[userId].push(certificate);
+                localStorage.setItem('certificates', JSON.stringify(certificates));
+            }
+            
+            return certificate;
+        }
+
+        function viewCertificates() {
+            if (!user) {
+                alert('Please sign in to view certificates');
+                return;
+            }
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            
+            const userId = user.email;
+            const userCerts = certificates[userId] || [];
+            
+            // Check for new certificates
+            courses.forEach(course => {
+                const courseModules = course.modules_data.map(m => `${course.id}-${m.id}`);
+                const completed = courseModules.every(key => state.completedModules.includes(key));
+                if (completed && !userCerts.some(c => c.courseId === course.id)) {
+                    generateCertificate(course.id);
+                }
+            });
+            
+            const updatedCerts = certificates[userId] || [];
+            
+            const modal = document.getElementById('certificatesModal');
+            const content = document.getElementById('certificatesContent');
+            
+            if (updatedCerts.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 4rem;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📜</div>
+                        <h3 style="margin-bottom: 1rem; color: var(--text);">No Certificates Yet</h3>
+                        <p style="color: var(--text-light);">Complete courses to earn certificates!</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="certificates-grid">
+                        ${updatedCerts.map(cert => `
+                            <div class="certificate-card" onclick="showCertificate('${cert.id}')">
+                                <div class="certificate-card-icon">🏆</div>
+                                <h3 class="certificate-card-title">${cert.courseName}</h3>
+                                <p class="certificate-card-date">Earned: ${cert.date}</p>
+                                <p style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.5rem;">ID: ${cert.certificateId}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function showCertificate(certId) {
+            if (!user) return;
+            
+            const userId = user.email;
+            const cert = certificates[userId]?.find(c => c.id === certId);
+            if (!cert) return;
+            
+            const course = courses.find(c => c.id === cert.courseId);
+            
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="profile-page">
+                    <div class="certificate-container">
+                        <div class="certificate-header">🎓 Certificate of Completion</div>
+                        <div class="certificate-title">This is to certify that</div>
+                        <div class="certificate-name">${cert.userName}</div>
+                        <div class="certificate-title">has successfully completed the course</div>
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--accent); margin: 1.5rem 0;">
+                            ${cert.courseName}
+                        </div>
+                        <div class="certificate-date">Date: ${cert.date}</div>
+                        <div class="certificate-id">Certificate ID: ${cert.certificateId}</div>
+                        <div style="margin-top: 2rem;">
+                            <button class="btn btn-primary" onclick="downloadCertificate('${cert.id}')">Download PDF</button>
+                            <button class="btn btn-secondary" onclick="shareCertificate('${cert.id}')">Share</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('certificatesModal').classList.remove('show');
+        }
+
+        function downloadCertificate(certId) {
+            alert('Certificate PDF download feature coming soon!\n\nFor now, you can take a screenshot of your certificate.');
+        }
+
+        function shareCertificate(certId) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'I earned a certificate!',
+                    text: `Check out my ${certificates[user.email].find(c => c.id === certId).courseName} certificate!`,
+                });
+            } else {
+                alert('Share feature available on mobile devices. Copy the certificate link to share!');
+            }
+        }
+
+        // Profile Functions
+        function viewMyProfile() {
+            if (!user) {
+                alert('Please sign in to view your profile');
+                return;
+            }
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            
+            showProfilePage(user.email);
+        }
+
+        function showProfilePage(userEmail) {
+            const profileUser = userEmail === user?.email ? user : allUsers[userEmail];
+            if (!profileUser) {
+                alert('Profile not found');
+                return;
+            }
+            
+            const isOwnProfile = userEmail === user?.email;
+            const userId = userEmail;
+            const userCerts = certificates[userId] || [];
+            const userFriends = friends[userId] || [];
+            const isFriend = user && user.email !== userEmail && userFriends.includes(user.email);
+            
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="profile-page">
+                    <div class="profile-header">
+                        <div class="profile-cover"></div>
+                        <div class="profile-info">
+                            <div class="profile-picture-upload">
+                                <div class="profile-avatar-large" ${isOwnProfile ? 'onclick="document.getElementById(\'profilePicture\').click()"' : ''}>
+                                    ${profileUser.profilePicture ? 
+                                        `<img src="${profileUser.profilePicture}" alt="${profileUser.name}">` : 
+                                        `<span>${profileUser.name.charAt(0).toUpperCase()}</span>`
+                                    }
+                                    ${isOwnProfile ? '<div class="upload-overlay">📷</div>' : ''}
+                                </div>
+                                ${isOwnProfile ? '<input type="file" id="profilePicture" accept="image/*" style="display: none;" onchange="handleProfilePictureUpload(event)">' : ''}
+                            </div>
+                            <div class="profile-details">
+                                ${isOwnProfile ? `
+                                    <div class="editable-field" id="nameField" onclick="startEditName()">
+                                        <h1 class="profile-name-large" id="nameDisplay">${profileUser.name}</h1>
+                                        <span class="edit-icon">✏️</span>
+                                    </div>
+                                    <div id="nameEditContainer" style="display: none; margin-bottom: 0.5rem;">
+                                        <input type="text" class="inline-input" id="nameInput" value="${profileUser.name}" style="font-size: 2rem; font-weight: 700;">
+                                        <div class="inline-edit-actions">
+                                            <button class="inline-btn inline-btn-save" onclick="saveName()">💾 Save</button>
+                                            <button class="inline-btn inline-btn-cancel" onclick="cancelEditName()">✕ Cancel</button>
+                                        </div>
+                                    </div>
+                                    <div class="editable-field email-field" id="emailField" onclick="startEditEmail()">
+                                        <p id="emailDisplay" style="margin: 0;">${profileUser.email}</p>
+                                        <span class="edit-icon">✏️</span>
+                                    </div>
+                                    <div id="emailEditContainer" style="display: none; margin-bottom: 1rem;">
+                                        <input type="email" class="inline-input" id="emailInput" value="${profileUser.email}" style="font-size: 1rem;">
+                                        <div class="inline-edit-actions">
+                                            <button class="inline-btn inline-btn-save" onclick="saveEmail()">💾 Save</button>
+                                            <button class="inline-btn inline-btn-cancel" onclick="cancelEditEmail()">✕ Cancel</button>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <h1 class="profile-name-large">${profileUser.name}</h1>
+                                    <p style="color: var(--text-light); margin-bottom: 1rem;">${profileUser.email}</p>
+                                `}
+                                ${profileUser.bio ? `<p class="profile-bio">${profileUser.bio}</p>` : ''}
+                                <div class="profile-social-links">
+                                    ${profileUser.website ? `<a href="${profileUser.website}" target="_blank" class="social-link">🌐 Website</a>` : ''}
+                                    ${profileUser.linkedin ? `<a href="${profileUser.linkedin}" target="_blank" class="social-link">💼 LinkedIn</a>` : ''}
+                                    ${profileUser.github ? `<a href="${profileUser.github}" target="_blank" class="social-link">💻 GitHub</a>` : ''}
+                                    ${profileUser.twitter ? `<a href="${profileUser.twitter}" target="_blank" class="social-link">🐦 Twitter</a>` : ''}
+                                    ${profileUser.instagram ? `<a href="${profileUser.instagram}" target="_blank" class="social-link">📷 Instagram</a>` : ''}
+                                    ${profileUser.facebook ? `<a href="${profileUser.facebook}" target="_blank" class="social-link">👥 Facebook</a>` : ''}
+                                </div>
+                                ${!isOwnProfile ? `
+                                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                                        <button class="add-friend-btn ${isFriend ? 'friends' : ''}" onclick="toggleFriend('${userEmail}')">
+                                            ${isFriend ? '✓ Friends' : '+ Add Friend'}
+                                        </button>
+                                        ${isFriend ? `
+                                            <button class="message-btn" onclick="openMessageWindow('${userEmail}')">
+                                                💬 Message
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${userCerts.length}</div>
+                                <div class="stat-label">Certificates</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${userFriends.length}</div>
+                                <div class="stat-label">Friends</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${Object.keys(state.completedModules).filter(k => k.startsWith(userId)).length}</div>
+                                <div class="stat-label">Modules Completed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-tabs">
+                        <button class="profile-tab active" onclick="showProfileTab('certificates', '${userEmail}')">Certificates</button>
+                        <button class="profile-tab" onclick="showProfileTab('friends', '${userEmail}')">Friends</button>
+                        <button class="profile-tab" onclick="showProfileTab('activity', '${userEmail}')">Activity</button>
+                    </div>
+                    
+                    <div id="profileTabContent">
+                        <!-- Tab content will be loaded here -->
+                    </div>
+                </div>
+            `;
+            
+            showProfileTab('certificates', userEmail);
+        }
+
+        function showProfileTab(tab, userEmail) {
+            const tabs = document.querySelectorAll('.profile-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const content = document.getElementById('profileTabContent');
+            const userId = userEmail;
+            
+            if (tab === 'certificates') {
+                const userCerts = certificates[userId] || [];
+                content.innerHTML = `
+                    <div class="certificates-grid">
+                        ${userCerts.length > 0 ? userCerts.map(cert => `
+                            <div class="certificate-card" onclick="showCertificate('${cert.id}')">
+                                <div class="certificate-card-icon">🏆</div>
+                                <h3 class="certificate-card-title">${cert.courseName}</h3>
+                                <p class="certificate-card-date">Earned: ${cert.date}</p>
+                            </div>
+                        `).join('') : '<p style="text-align: center; padding: 2rem; color: var(--text-light);">No certificates yet</p>'}
+                    </div>
+                `;
+            } else if (tab === 'friends') {
+                const userFriends = friends[userId] || [];
+                content.innerHTML = `
+                    <div class="friends-section">
+                        <h3 style="margin-bottom: 1rem;">Friends (${userFriends.length})</h3>
+                        <div class="friends-grid">
+                            ${userFriends.length > 0 ? userFriends.map(friendEmail => {
+                                const friend = allUsers[friendEmail] || { name: friendEmail.split('@')[0], email: friendEmail };
+                                return `
+                                    <div class="friend-card">
+                                        <div class="friend-card-clickable" onclick="showProfilePage('${friendEmail}')">
+                                            <div class="friend-avatar">${friend.name.charAt(0).toUpperCase()}</div>
+                                            <div class="friend-name">${friend.name}</div>
+                                        </div>
+                                        <button class="message-btn" style="margin-top: 0.5rem; width: 100%;" onclick="event.stopPropagation(); openMessageWindow('${friendEmail}')">
+                                            💬 Message
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('') : '<p style="text-align: center; padding: 2rem; color: var(--text-light);">No friends yet</p>'}
+                        </div>
+                    </div>
+                `;
+            } else if (tab === 'activity') {
+                content.innerHTML = `
+                    <div style="background: var(--card); border-radius: 12px; padding: 2rem; border: 1px solid var(--border);">
+                        <h3 style="margin-bottom: 1rem;">Recent Activity</h3>
+                        <p style="color: var(--text-light);">Activity tracking coming soon!</p>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleFriend(userEmail) {
+            if (!user) return;
+            
+            const userId = user.email;
+            if (!friends[userId]) {
+                friends[userId] = [];
+            }
+            
+            const index = friends[userId].indexOf(userEmail);
+            if (index > -1) {
+                friends[userId].splice(index, 1);
+            } else {
+                friends[userId].push(userEmail);
+            }
+            
+            localStorage.setItem('friends', JSON.stringify(friends));
+            showProfilePage(userEmail);
+        }
+
+        // Inline Editing Functions
+        function startEditName() {
+            const nameField = document.getElementById('nameField');
+            const nameEditContainer = document.getElementById('nameEditContainer');
+            const nameInput = document.getElementById('nameInput');
+            
+            if (!nameField || !nameEditContainer) return;
+            
+            nameField.style.display = 'none';
+            nameEditContainer.style.display = 'block';
+            nameInput.focus();
+            nameInput.select();
+            
+            // Handle Enter key
+            nameInput.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    saveName();
+                } else if (e.key === 'Escape') {
+                    cancelEditName();
+                }
+            };
+        }
+
+        function cancelEditName() {
+            const nameField = document.getElementById('nameField');
+            const nameEditContainer = document.getElementById('nameEditContainer');
+            const nameInput = document.getElementById('nameInput');
+            
+            if (!nameField || !nameEditContainer) return;
+            
+            nameInput.value = user.name;
+            nameField.style.display = 'inline-flex';
+            nameEditContainer.style.display = 'none';
+        }
+
+        function saveName() {
+            const nameInput = document.getElementById('nameInput');
+            const nameDisplay = document.getElementById('nameDisplay');
+            const nameField = document.getElementById('nameField');
+            const nameEditContainer = document.getElementById('nameEditContainer');
+            
+            if (!nameInput || !nameDisplay) return;
+            
+            const newName = nameInput.value.trim();
+            if (!newName) {
+                alert('Name cannot be empty');
+                return;
+            }
+            
+            // Update user object
+            user.name = newName;
+            allUsers[user.email] = user;
+            
+            // Save to localStorage
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            
+            // Update display
+            nameDisplay.textContent = newName;
+            nameField.style.display = 'inline-flex';
+            nameEditContainer.style.display = 'none';
+            
+            // Update header display
+            updateUserDisplay();
+            
+            // Update avatar if it exists
+            const avatar = document.querySelector('.profile-avatar-large span');
+            if (avatar) {
+                avatar.textContent = newName.charAt(0).toUpperCase();
+            }
+        }
+
+        function startEditEmail() {
+            const emailField = document.getElementById('emailField');
+            const emailEditContainer = document.getElementById('emailEditContainer');
+            const emailInput = document.getElementById('emailInput');
+            
+            if (!emailField || !emailEditContainer) return;
+            
+            emailField.style.display = 'none';
+            emailEditContainer.style.display = 'block';
+            emailInput.focus();
+            emailInput.select();
+            
+            // Handle Enter key
+            emailInput.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    saveEmail();
+                } else if (e.key === 'Escape') {
+                    cancelEditEmail();
+                }
+            };
+        }
+
+        function cancelEditEmail() {
+            const emailField = document.getElementById('emailField');
+            const emailEditContainer = document.getElementById('emailEditContainer');
+            const emailInput = document.getElementById('emailInput');
+            
+            if (!emailField || !emailEditContainer) return;
+            
+            emailInput.value = user.email;
+            emailField.style.display = 'inline-flex';
+            emailEditContainer.style.display = 'none';
+        }
+
+        function saveEmail() {
+            const emailInput = document.getElementById('emailInput');
+            const emailDisplay = document.getElementById('emailDisplay');
+            const emailField = document.getElementById('emailField');
+            const emailEditContainer = document.getElementById('emailEditContainer');
+            
+            if (!emailInput || !emailDisplay) return;
+            
+            const newEmail = emailInput.value.trim().toLowerCase();
+            if (!newEmail || !newEmail.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Check if email already exists (if different from current)
+            if (newEmail !== user.email && allUsers[newEmail]) {
+                alert('This email is already registered');
+                return;
+            }
+            
+            // Update user object
+            const oldEmail = user.email;
+            user.email = newEmail;
+            
+            // Update allUsers object
+            delete allUsers[oldEmail];
+            allUsers[newEmail] = user;
+            
+            // Update friends references
+            Object.keys(friends).forEach(friendUserId => {
+                const friendList = friends[friendUserId];
+                const index = friendList.indexOf(oldEmail);
+                if (index > -1) {
+                    friendList[index] = newEmail;
+                }
+            });
+            
+            // Update certificates
+            if (certificates[oldEmail]) {
+                certificates[newEmail] = certificates[oldEmail];
+                delete certificates[oldEmail];
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            localStorage.setItem('friends', JSON.stringify(friends));
+            localStorage.setItem('certificates', JSON.stringify(certificates));
+            
+            // Update display
+            emailDisplay.textContent = newEmail;
+            emailField.style.display = 'inline-flex';
+            emailEditContainer.style.display = 'none';
+            
+            // Update header display
+            updateUserDisplay();
+            
+            // Refresh profile page to show updated email
+            showProfilePage(newEmail);
+        }
+
+        function viewFriends() {
+            if (!user) {
+                alert('Please sign in to view friends');
+                return;
+            }
+            
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            
+            // Get all users except current user
+            const allUserEmails = Object.keys(allUsers).filter(email => email !== user.email);
+            const currentFriends = friends[user.email] || [];
+            
+            const modal = document.getElementById('friendsModal');
+            const content = document.getElementById('friendsContent');
+            
+            content.innerHTML = `
+                <div class="friends-section">
+                    <h3 style="margin-bottom: 1rem;">Discover Learners</h3>
+                    <div class="friends-grid">
+                        ${allUserEmails.length > 0 ? allUserEmails.map(friendEmail => {
+                            const friend = allUsers[friendEmail];
+                            const isFriend = currentFriends.includes(friendEmail);
+                            return `
+                                <div class="friend-card">
+                                    <div class="friend-avatar" onclick="showProfilePage('${friendEmail}')">${friend.name.charAt(0).toUpperCase()}</div>
+                                    <div class="friend-name">${friend.name}</div>
+                                    <button class="add-friend-btn ${isFriend ? 'friends' : ''}" onclick="toggleFriend('${friendEmail}'); viewFriends();">
+                                        ${isFriend ? '✓ Friends' : '+ Add Friend'}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('') : '<p style="text-align: center; padding: 2rem; color: var(--text-light);">No other users found</p>'}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function handleProfilePictureUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (!user.profilePicture) {
+                        user.profilePicture = {};
+                    }
+                    user.profilePicture = e.target.result;
+                    allUsers[user.email] = user;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    localStorage.setItem('allUsers', JSON.stringify(allUsers));
+                    updateUserDisplay();
+                    if (state.currentCourseId) {
+                        showProfilePage(user.email);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('loginName').value;
+            const email = document.getElementById('loginEmail').value;
+            
+            user = { 
+                name, 
+                email,
+                bio: '',
+                website: '',
+                linkedin: '',
+                github: '',
+                twitter: '',
+                instagram: '',
+                facebook: '',
+                profilePicture: null
+            };
+            
+            // Save to all users
+            allUsers[email] = user;
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            
+            localStorage.setItem('user', JSON.stringify(user));
+            document.getElementById('loginModal').classList.remove('show');
+            updateUserDisplay();
+            if (state.currentCourseId) {
+                renderCourseView();
+            }
+        });
+
+        // Profile Form
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            user.name = document.getElementById('profileName').value;
+            user.email = document.getElementById('profileEmail').value;
+            user.bio = document.getElementById('profileBio').value;
+            user.website = document.getElementById('profileWebsite').value;
+            user.linkedin = document.getElementById('profileLinkedIn').value;
+            user.github = document.getElementById('profileGitHub').value;
+            user.twitter = document.getElementById('profileTwitter').value;
+            user.instagram = document.getElementById('profileInstagram').value;
+            user.facebook = document.getElementById('profileFacebook').value;
+            
+            // Update all users
+            allUsers[user.email] = user;
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            
+            localStorage.setItem('user', JSON.stringify(user));
+            updateUserDisplay();
+            closeProfileModal();
+            
+            // Refresh profile page if viewing
+            if (document.querySelector('.profile-page')) {
+                showProfilePage(user.email);
+            }
+        });
+
+        // Sidebar navigation functions
+        function viewSidebarMessages() {
+            if (!user) {
+                alert('Please sign in to view messages');
+                return;
+            }
+            
+            if (!state.currentCourseId) {
+                alert('Please select a course first');
+                return;
+            }
+            
+            state.sidebarView = 'messages';
+            renderCourseView();
+            
+            // Get all conversations
+            const allConversations = [];
+            const currentUserEmail = user.email;
+            
+            Object.keys(messages).forEach(conversationId => {
+                const [user1, user2] = conversationId.split('_');
+                if (user1 === currentUserEmail || user2 === currentUserEmail) {
+                    const otherUserEmail = user1 === currentUserEmail ? user2 : user1;
+                    const otherUser = allUsers[otherUserEmail] || { name: otherUserEmail.split('@')[0], email: otherUserEmail };
+                    const conversationMessages = messages[conversationId] || [];
+                    const lastMessage = conversationMessages[conversationMessages.length - 1];
+                    
+                    allConversations.push({
+                        friendEmail: otherUserEmail,
+                        friendName: otherUser.name,
+                        lastMessage: lastMessage ? lastMessage.text : 'No messages yet',
+                        lastMessageTime: lastMessage ? lastMessage.timestamp : null,
+                        unreadCount: 0 // Could add unread tracking later
+                    });
+                }
+            });
+            
+            // Sort by last message time
+            allConversations.sort((a, b) => {
+                if (!a.lastMessageTime) return 1;
+                if (!b.lastMessageTime) return -1;
+                return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+            });
+            
+            const contentArea = document.getElementById('content');
+            contentArea.innerHTML = `
+                <div class="module-header">
+                    <h1 class="module-title">💬 Messages</h1>
+                    <p class="module-subtitle">Your conversations</p>
+                </div>
+                <div class="module-content">
+                    ${allConversations.length > 0 ? `
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            ${allConversations.map(conv => `
+                                <div class="friend-card" style="cursor: pointer; padding: 1rem; border: 1px solid var(--border); border-radius: 8px;" onclick="openMessageWindow('${conv.friendEmail}')">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div class="friend-avatar">${conv.friendName.charAt(0).toUpperCase()}</div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; margin-bottom: 0.25rem;">${conv.friendName}</div>
+                                            <div style="font-size: 0.875rem; color: var(--text-light);">${conv.lastMessage.substring(0, 50)}${conv.lastMessage.length > 50 ? '...' : ''}</div>
+                                        </div>
+                                        ${conv.lastMessageTime ? `<div style="font-size: 0.75rem; color: var(--text-light);">${formatTimestamp(conv.lastMessageTime)}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">No messages yet</p>
+                            <p>Start a conversation by messaging a friend from your Friends list!</p>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function viewSidebarAssignments() {
+            if (!user) {
+                alert('Please sign in to view assignments');
+                return;
+            }
+            
+            if (!state.currentCourseId) {
+                alert('Please select a course first');
+                return;
+            }
+            
+            state.sidebarView = 'assignments';
+            renderCourseView();
+            
+            // Get assignments from modules
+            const assignments = [];
+            currentCourse.modules_data.forEach((module, index) => {
+                // Check if module has assignment (most modules do)
+                const moduleKey = `${state.currentCourseId}-${module.id}`;
+                const isCompleted = state.completedModules.includes(moduleKey);
+                
+                assignments.push({
+                    moduleId: module.id,
+                    moduleTitle: module.title,
+                    title: `Module ${module.id} Assignment`,
+                    description: `Complete the assignment for ${module.title}`,
+                    dueDate: null, // Could add due dates later
+                    status: isCompleted ? 'completed' : 'pending',
+                    moduleKey: moduleKey
+                });
+            });
+            
+            const contentArea = document.getElementById('content');
+            contentArea.innerHTML = `
+                <div class="module-header">
+                    <h1 class="module-title">📝 Assignments</h1>
+                    <p class="module-subtitle">Your course assignments</p>
+                </div>
+                <div class="module-content">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        ${assignments.map(assignment => `
+                            <div class="friend-card" style="padding: 1.5rem; border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">${assignment.title}</h3>
+                                        <p style="margin: 0; color: var(--text-light); font-size: 0.9rem;">${assignment.description}</p>
+                                    </div>
+                                    <span class="status-badge ${assignment.status === 'completed' ? 'status-completed' : 'status-in-progress'}" style="white-space: nowrap;">
+                                        ${assignment.status === 'completed' ? '✓ Completed' : 'Pending'}
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                                    <button class="btn btn-primary" onclick="loadModule(${assignment.moduleId})" style="flex: 1;">
+                                        ${assignment.status === 'completed' ? 'Review Module' : 'Start Assignment'}
+                                    </button>
+                                    ${assignment.status === 'completed' ? `
+                                        <button class="btn btn-secondary" onclick="showCertificate('${assignment.moduleKey}')" style="flex: 1;">
+                                            View Certificate
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown && !e.target.closest('.user-profile')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Make functions global
+        window.showCourses = showCourses;
+        window.loadCourse = loadCourse;
+        window.loadModule = loadModule;
+        window.startQuiz = startQuiz;
+        window.selectAnswer = selectAnswer;
+        window.submitQuiz = submitQuiz;
+        window.downloadResource = downloadResource;
+        window.downloadModule = downloadModule;
+        window.completeCourse = completeCourse;
+        window.toggleProfileDropdown = toggleProfileDropdown;
+        window.openProfileModal = openProfileModal;
+        window.closeProfileModal = closeProfileModal;
+        window.logout = logout;
+        window.viewCertificates = viewCertificates;
+        window.viewMyProfile = viewMyProfile;
+        window.viewFriends = viewFriends;
+        window.showProfilePage = showProfilePage;
+        window.showProfileTab = showProfileTab;
+        window.toggleFriend = toggleFriend;
+        window.viewSidebarMessages = viewSidebarMessages;
+        window.viewSidebarAssignments = viewSidebarAssignments;
+        window.showCertificate = showCertificate;
+        window.downloadCertificate = downloadCertificate;
+        window.shareCertificate = shareCertificate;
+        window.handleProfilePictureUpload = handleProfilePictureUpload;
+        window.openLoginModal = openLoginModal;
+        window.toggleTheme = toggleTheme;
+        window.startEditName = startEditName;
+        window.cancelEditName = cancelEditName;
+        window.saveName = saveName;
+        window.startEditEmail = startEditEmail;
+        window.cancelEditEmail = cancelEditEmail;
+        window.saveEmail = saveEmail;
+
+        // Messaging functionality
+        function openMessageWindow(friendEmail) {
+            if (!user) {
+                alert('Please sign in to send messages');
+                return;
+            }
+            
+            currentMessageFriend = friendEmail;
+            const friend = allUsers[friendEmail] || { name: friendEmail.split('@')[0], email: friendEmail };
+            document.getElementById('messageFriendName').textContent = friend.name;
+            
+            loadMessages(friendEmail);
+            
+            const messageWindow = document.getElementById('messageWindow');
+            messageWindow.classList.add('show');
+            document.getElementById('messageInput').focus();
+        }
+
+        function closeMessageWindow() {
+            const messageWindow = document.getElementById('messageWindow');
+            messageWindow.classList.remove('show');
+            currentMessageFriend = null;
+        }
+
+        function loadMessages(friendEmail) {
+            if (!user) return;
+            
+            const userId = user.email;
+            const conversationId = [userId, friendEmail].sort().join('_');
+            const conversationMessages = messages[conversationId] || [];
+            
+            const messagesContainer = document.getElementById('messageMessages');
+            messagesContainer.innerHTML = '';
+            
+            if (conversationMessages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div style="text-align: center; color: var(--text-light); padding: 2rem;">
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            conversationMessages.forEach(msg => {
+                const isSent = msg.from === userId;
+                const sender = allUsers[msg.from] || { name: msg.from.split('@')[0] };
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message-item ${isSent ? 'sent' : ''}`;
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${sender.name.charAt(0).toUpperCase()}</div>
+                    <div>
+                        <div class="message-content">${escapeHtml(msg.text)}</div>
+                        <div class="message-time">${formatMessageTime(msg.timestamp)}</div>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            if (!user || !currentMessageFriend) return;
+            
+            const input = document.getElementById('messageInput');
+            const messageText = input.value.trim();
+            
+            if (!messageText) return;
+            
+            const userId = user.email;
+            const conversationId = [userId, currentMessageFriend].sort().join('_');
+            
+            if (!messages[conversationId]) {
+                messages[conversationId] = [];
+            }
+            
+            const newMessage = {
+                from: userId,
+                to: currentMessageFriend,
+                text: messageText,
+                timestamp: Date.now()
+            };
+            
+            messages[conversationId].push(newMessage);
+            localStorage.setItem('messages', JSON.stringify(messages));
+            
+            input.value = '';
+            loadMessages(currentMessageFriend);
+        }
+
+        function handleMessageKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function formatMessageTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) { // Less than 1 minute
+                return 'Just now';
+            } else if (diff < 3600000) { // Less than 1 hour
+                const minutes = Math.floor(diff / 60000);
+                return `${minutes}m ago`;
+            } else if (diff < 86400000) { // Less than 1 day
+                const hours = Math.floor(diff / 3600000);
+                return `${hours}h ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        // Close message window when clicking outside
+        document.addEventListener('click', (e) => {
+            const messageWindow = document.getElementById('messageWindow');
+            
+            if (messageWindow && messageWindow.classList.contains('show')) {
+                if (!messageWindow.contains(e.target) && !e.target.closest('.message-btn')) {
+                    // Don't close if clicking on message button
+                    if (!e.target.classList.contains('message-btn') && !e.target.closest('.message-btn')) {
+                        // Allow closing
+                    }
+                }
+            }
+        });
+
+        // Make messaging functions global
+        window.openMessageWindow = openMessageWindow;
+        window.closeMessageWindow = closeMessageWindow;
+        window.sendMessage = sendMessage;
+        window.handleMessageKeyPress = handleMessageKeyPress;
+
+        // Chatbot functionality
+        function toggleChatbot() {
+            const window = document.getElementById('chatbotWindow');
+            const bubble = document.getElementById('chatbotBubble');
+            
+            if (window.classList.contains('show')) {
+                window.classList.remove('show');
+                bubble.classList.remove('active');
+            } else {
+                window.classList.add('show');
+                bubble.classList.add('active');
+                document.getElementById('chatbotInput').focus();
+            }
+        }
+
+        function handleChatbotKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatbotMessage();
+            }
+        }
+
+        function sendChatbotMessage() {
+            const input = document.getElementById('chatbotInput');
+            const messages = document.getElementById('chatbotMessages');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chatbot-message user';
+            userMessage.innerHTML = `
+                <div class="chatbot-avatar">👤</div>
+                <div class="chatbot-text">${escapeHtml(message)}</div>
+            `;
+            messages.appendChild(userMessage);
+            messages.scrollTop = messages.scrollHeight;
+
+            input.value = '';
+            input.disabled = true;
+
+            // Simulate AI response (you can replace this with actual API call)
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(message);
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'chatbot-message';
+                aiMessage.innerHTML = `
+                    <div class="chatbot-avatar">🤖</div>
+                    <div class="chatbot-text">${aiResponse}</div>
+                `;
+                messages.appendChild(aiMessage);
+                messages.scrollTop = messages.scrollHeight;
+                input.disabled = false;
+                input.focus();
+            }, 500);
+        }
+
+        function generateAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Course-related queries
+            if (lowerMessage.includes('course') || lowerMessage.includes('module') || lowerMessage.includes('learn')) {
+                return `Our Critical Thinking course has 8 comprehensive modules covering everything from foundations to decision-making. Would you like to know more about a specific module?`;
+            }
+            
+            if (lowerMessage.includes('quiz') || lowerMessage.includes('test') || lowerMessage.includes('assessment')) {
+                return `Each module includes interactive quizzes to test your understanding. You can take quizzes anytime and track your progress!`;
+            }
+            
+            if (lowerMessage.includes('certificate') || lowerMessage.includes('certification')) {
+                return `Complete all 8 modules and pass the quizzes to earn your certificate of completion. It's a great way to showcase your critical thinking skills!`;
+            }
+            
+            if (lowerMessage.includes('start') || lowerMessage.includes('begin') || lowerMessage.includes('how')) {
+                return `To get started, simply click on any course card or module. You can explore the content at your own pace. Need help navigating? Just ask!`;
+            }
+            
+            if (lowerMessage.includes('progress') || lowerMessage.includes('track')) {
+                return `Your progress is automatically saved as you complete modules and quizzes. Sign in to track your learning journey!`;
+            }
+            
+            // Default responses
+            const responses = [
+                `That's a great question! I can help you navigate the course, explain modules, or answer questions about the learning platform. What would you like to know?`,
+                `I'm here to help! You can ask me about courses, modules, quizzes, certificates, or anything else related to your learning experience.`,
+                `Feel free to explore the courses above or ask me anything about the platform. I'm here to make your learning journey smooth and enjoyable!`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close chatbot when clicking outside
+        document.addEventListener('click', (e) => {
+            const chatbotWindow = document.getElementById('chatbotWindow');
+            const chatbotBubble = document.getElementById('chatbotBubble');
+            
+            if (chatbotWindow && chatbotWindow.classList.contains('show')) {
+                if (!chatbotWindow.contains(e.target) && !chatbotBubble.contains(e.target)) {
+                    toggleChatbot();
+                }
+            }
+        });
+
+        // Make functions global
+        window.toggleChatbot = toggleChatbot;
+        window.handleChatbotKeyPress = handleChatbotKeyPress;
+        window.sendChatbotMessage = sendChatbotMessage;
+        window.scrollToCourses = scrollToCourses;
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

@@ -2240,6 +2240,13 @@
             } else {
                 showSignInButton();
             }
+
+            // OAuth callback handler: if the user just returned from
+            // Google/Facebook/Apple, the URL fragment carries an access_token.
+            // Supabase JS auto-extracts it when the client is created
+            // (detectSessionInUrl=true), so we just need to ask for the
+            // session and adopt it as the local user record.
+            handleOAuthCallback();
             showCourses();
         }
 
@@ -4134,78 +4141,74 @@
             }
         }
 
-        function isOAuthConfigured() {
-            const supabaseUrl = localStorage.getItem('supabase_url');
-            const supabaseKey = localStorage.getItem('supabase_anon_key');
-            return !!(
-                supabaseUrl &&
-                supabaseKey &&
-                typeof SupabaseManager !== 'undefined' &&
-                typeof SupabaseManager.signInWithOAuth === 'function'
-            );
-        }
-
-        // OAuth Sign In Handlers
-        async function handleGoogleSignIn() {
+        // Pick up a Supabase session created during the OAuth redirect.
+        // Called from init(); also safe to call any time afterwards.
+        async function handleOAuthCallback() {
             try {
-                if (typeof AuthManager === 'undefined') {
-                    alert('Authentication system not loaded. Please refresh the page.');
-                    return;
+                if (typeof SupabaseManager === 'undefined') return;
+                const client = await SupabaseManager.init();
+                if (!client || !client.auth) return;
+
+                const { data: { session } } = await client.auth.getSession();
+                if (!session || !session.user) return;
+
+                // Strip the access_token fragment from the URL so refreshes
+                // don't re-trigger the OAuth flow.
+                if (window.location.hash && window.location.hash.includes('access_token')) {
+                    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
                 }
-                
-                if (!isOAuthConfigured()) {
-                    showComingSoon('OAuth sign-in');
-                    return;
+
+                // If we already have a local user, nothing to do.
+                if (user && user.email === session.user.email) return;
+
+                const supaUser = session.user;
+                const meta = supaUser.user_metadata || {};
+                user = {
+                    id: supaUser.id,
+                    email: supaUser.email,
+                    name: meta.full_name || meta.name || (supaUser.email ? supaUser.email.split('@')[0] : 'User'),
+                    avatar: meta.avatar_url || meta.picture || null,
+                    verified: true,
+                    authMethod: supaUser.app_metadata?.provider || 'oauth',
+                    createdAt: supaUser.created_at || new Date().toISOString()
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+                if (typeof updateUserDisplay === 'function') updateUserDisplay();
+
+                // Pull the latest premium state from the server now that we
+                // know who the user is.
+                if (typeof PaymentManager !== 'undefined' && PaymentManager.refreshPremiumFromServer) {
+                    PaymentManager.refreshPremiumFromServer();
                 }
-                
-                const result = await AuthManager.signInWithGoogle();
-                // OAuth redirects, so this may not execute
-                console.log('Google sign in initiated');
-            } catch (error) {
-                console.error('Google sign in error:', error);
-                alert(error.message || 'Google sign in failed. Please try again.');
+            } catch (err) {
+                console.warn('OAuth callback handler failed:', err);
             }
         }
 
-        async function handleFacebookSignIn() {
-            try {
-                if (typeof AuthManager === 'undefined') {
-                    alert('Authentication system not loaded. Please refresh the page.');
-                    return;
-                }
-                
-                if (!isOAuthConfigured()) {
-                    showComingSoon('OAuth sign-in');
-                    return;
-                }
-                
-                const result = await AuthManager.signInWithFacebook();
-                // OAuth redirects, so this may not execute
-                console.log('Facebook sign in initiated');
-            } catch (error) {
-                console.error('Facebook sign in error:', error);
-                alert(error.message || 'Facebook sign in failed. Please try again.');
-            }
-        }
+        // OAuth Sign In Handlers — AuthManager.signInWith* awaits
+        // SupabaseManager.init() internally (which fetches creds from the
+        // backend), so we no longer need a localStorage pre-check.
+        async function handleGoogleSignIn()   { return _handleOAuth('Google',   () => AuthManager.signInWithGoogle()); }
+        async function handleFacebookSignIn() { return _handleOAuth('Facebook', () => AuthManager.signInWithFacebook()); }
+        async function handleAppleSignIn()    { return _handleOAuth('Apple',    () => AuthManager.signInWithApple()); }
 
-        async function handleAppleSignIn() {
+        async function _handleOAuth(label, fn) {
             try {
                 if (typeof AuthManager === 'undefined') {
                     alert('Authentication system not loaded. Please refresh the page.');
                     return;
                 }
-                
-                if (!isOAuthConfigured()) {
-                    showComingSoon('OAuth sign-in');
+                await fn();
+                console.log(`${label} sign in initiated (redirecting…)`);
+            } catch (error) {
+                console.error(`${label} sign in error:`, error);
+                // "provider is not enabled" from Supabase means the user clicked
+                // a button for a provider that the admin hasn't wired up yet.
+                if (error.message && /provider is not enabled/i.test(error.message)) {
+                    showComingSoon(`${label} sign-in`);
                     return;
                 }
-                
-                const result = await AuthManager.signInWithApple();
-                // OAuth redirects, so this may not execute
-                console.log('Apple sign in initiated');
-            } catch (error) {
-                console.error('Apple sign in error:', error);
-                alert(error.message || 'Apple sign in failed. Please try again.');
+                alert(error.message || `${label} sign in failed. Please try again.`);
             }
         }
 
