@@ -40,3 +40,9 @@ backup-old-version/
 API_KEYS_BACKUP.md
 school-3/sounds/**/*.wav
 sounds/**/*.wav
+
+# Local backup snapshots — never check these in
+School 2/
+School/
+School_backup_*/
+*.bak
