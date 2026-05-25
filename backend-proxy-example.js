@@ -1032,6 +1032,345 @@ function escapeHtml(s) {
         .replace(/'/g, '&#39;');
 }
 
+// ============================================================================
+// PHASE 1–6 ROUTES
+// ============================================================================
+
+// Auth middleware: attach req.userEmail + req.userId if the bearer is valid.
+async function requireAuth(req, res, next) {
+    const auth = req.headers.authorization || '';
+    const m = auth.match(/^Bearer\s+(.+)$/i);
+    if (!m || !supabaseAdmin) {
+        return res.status(401).json({ error: 'Authentication required.' });
+    }
+    try {
+        const { data, error } = await supabaseAdmin.auth.getUser(m[1]);
+        if (error || !data?.user) return res.status(401).json({ error: 'Invalid token.' });
+        req.userId = data.user.id;
+        req.userEmail = data.user.email;
+        req.userToken = m[1];
+        next();
+    } catch (e) {
+        return res.status(401).json({ error: 'Auth failed.' });
+    }
+}
+
+// Helper: a Supabase client scoped to the calling user, so RLS applies.
+function supabaseAs(token) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+    try {
+        const { createClient } = require('@supabase/supabase-js');
+        return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            global: { headers: { Authorization: `Bearer ${token}` } },
+            auth: { autoRefreshToken: false, persistSession: false }
+        });
+    } catch (_) { return null; }
+}
+
+// ---------- P1.1 Lesson comments ----------------------------------------------
+app.get('/api/comments/:slug/:n', async (req, res) => {
+    if (!supabaseAdmin) return res.status(503).json({ error: 'DB not configured' });
+    const { slug, n } = req.params;
+    const { data, error } = await supabaseAdmin
+        .from('lesson_comments')
+        .select('id, body, created_at, parent_id, user_id, profiles!inner(name, avatar_url, handle)')
+        .eq('course_slug', slug)
+        .eq('module_n', Number(n))
+        .order('created_at', { ascending: true })
+        .limit(200);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ comments: data });
+});
+
+app.post('/api/comments/:slug/:n', requireAuth, async (req, res) => {
+    const { slug, n } = req.params;
+    const body = (req.body?.body || '').toString().trim();
+    if (!body || body.length > 5000) return res.status(400).json({ error: 'Comment must be 1–5000 chars.' });
+    const parent_id = req.body?.parent_id || null;
+    const client = supabaseAs(req.userToken) || supabaseAdmin;
+    const { data, error } = await client
+        .from('lesson_comments')
+        .insert({ course_slug: slug, module_n: Number(n), user_id: req.userId, body, parent_id })
+        .select()
+        .single();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ comment: data });
+});
+
+app.delete('/api/comments/:id', requireAuth, async (req, res) => {
+    const client = supabaseAs(req.userToken) || supabaseAdmin;
+    const { error } = await client.from('lesson_comments').delete().eq('id', req.params.id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+});
+
+// ---------- P1.2 Certificates ------------------------------------------------
+app.post('/api/certificates/issue', requireAuth, async (req, res) => {
+    const { courseSlug, courseTitle, studentName } = req.body || {};
+    if (!courseSlug || !courseTitle) return res.status(400).json({ error: 'Missing courseSlug / courseTitle.' });
+    // Verify premium server-side: only PRO users get persisted certs.
+    if (supabaseAdmin) {
+        const { data: sub } = await supabaseAdmin.from('subscriptions')
+            .select('status,end_date').eq('user_email', req.userEmail).maybeSingle();
+        const active = sub && sub.status === 'active' && (!sub.end_date || new Date(sub.end_date) > new Date());
+        if (!active) return res.status(402).json({ error: 'Certificates are a premium feature.' });
+    }
+    const certNumber = 'CT-' + (require('crypto').randomUUID().replace(/-/g, '').slice(0, 12).toUpperCase());
+    const { data, error } = await supabaseAdmin.from('certificates').insert({
+        certificate_number: certNumber,
+        user_id: req.userId,
+        user_email: req.userEmail,
+        student_name: (studentName || '').slice(0, 120) || req.userEmail.split('@')[0],
+        course_slug: courseSlug,
+        course_title: courseTitle.slice(0, 200)
+    }).select().single();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ certificate: data });
+});
+
+app.get('/api/certificates/verify/:certNumber', async (req, res) => {
+    if (!supabaseAdmin) return res.status(503).json({ error: 'DB not configured' });
+    const { data, error } = await supabaseAdmin
+        .from('certificates')
+        .select('certificate_number, student_name, course_slug, course_title, issued_at, revoked')
+        .eq('certificate_number', req.params.certNumber)
+        .maybeSingle();
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data) return res.status(404).json({ error: 'Certificate not found.' });
+    res.json({ certificate: data });
+});
+
+// ---------- P1.3 Notifications -----------------------------------------------
+app.get('/api/notifications', requireAuth, async (req, res) => {
+    const client = supabaseAs(req.userToken) || supabaseAdmin;
+    const { data, error } = await client
+        .from('notifications')
+        .select('*')
+        .eq('user_id', req.userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ notifications: data, unread: data.filter(n => !n.read_at).length });
+});
+
+app.post('/api/notifications/:id/read', requireAuth, async (req, res) => {
+    const client = supabaseAs(req.userToken) || supabaseAdmin;
+    const { error } = await client
+        .from('notifications')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', req.params.id)
+        .eq('user_id', req.userId);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+});
+
+async function createNotification({ userId, kind, title, body, url }) {
+    if (!supabaseAdmin || !userId) return;
+    await supabaseAdmin.from('notifications').insert({ user_id: userId, kind, title, body, url });
+}
+
+// ---------- P1.4 Stripe Customer Portal --------------------------------------
+app.post('/api/payments/portal', requireAuth, paymentLimiter, async (req, res) => {
+    if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
+    // Find or create customer by email.
+    try {
+        let customer;
+        const customers = await stripe.customers.list({ email: req.userEmail, limit: 1 });
+        if (customers.data.length > 0) customer = customers.data[0];
+        else customer = await stripe.customers.create({ email: req.userEmail });
+        const session = await stripe.billingPortal.sessions.create({
+            customer: customer.id,
+            return_url: req.body?.returnUrl || FRONTEND_URL
+        });
+        res.json({ url: session.url });
+    } catch (e) {
+        console.error('portal error:', e);
+        res.status(500).json({ error: e.message || 'Portal failed.' });
+    }
+});
+
+// ---------- P1.8 GDPR export + delete ----------------------------------------
+app.get('/api/user/export', requireAuth, async (req, res) => {
+    if (!supabaseAdmin) return res.status(503).json({ error: 'DB not configured' });
+    try {
+        const tables = ['profiles', 'user_progress', 'quiz_scores', 'user_notes',
+            'lesson_comments', 'certificates', 'subscriptions', 'notifications',
+            'community_posts', 'post_comments', 'post_likes',
+            'flashcards', 'flashcard_reviews', 'user_streaks', 'user_badges'];
+        const dump = { exported_at: new Date().toISOString(), user_id: req.userId, email: req.userEmail };
+        for (const t of tables) {
+            const col = t === 'subscriptions' ? 'user_email' : 'user_id';
+            const val = t === 'subscriptions' ? req.userEmail : req.userId;
+            const { data } = await supabaseAdmin.from(t).select('*').eq(col, val);
+            dump[t] = data || [];
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="school-export-${Date.now()}.json"`);
+        res.send(JSON.stringify(dump, null, 2));
+    } catch (e) {
+        console.error('export error:', e);
+        res.status(500).json({ error: e.message || 'Export failed.' });
+    }
+});
+
+app.delete('/api/user/delete', requireAuth, async (req, res) => {
+    if (!supabaseAdmin) return res.status(503).json({ error: 'DB not configured' });
+    try {
+        // Stripe: cancel any active sub before nuking the row.
+        if (stripe) {
+            try {
+                const customers = await stripe.customers.list({ email: req.userEmail, limit: 1 });
+                if (customers.data[0]) {
+                    const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: 'active' });
+                    for (const s of subs.data) await stripe.subscriptions.cancel(s.id);
+                    await stripe.customers.del(customers.data[0].id);
+                }
+            } catch (e) { console.warn('stripe cleanup:', e.message); }
+        }
+        // Auth deletion cascades via ON DELETE CASCADE on FKs.
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(req.userId);
+        if (error) return res.status(500).json({ error: error.message });
+        res.json({ ok: true });
+    } catch (e) {
+        console.error('delete error:', e);
+        res.status(500).json({ error: e.message || 'Delete failed.' });
+    }
+});
+
+// ---------- P3.3 AI practice quiz --------------------------------------------
+app.post('/api/ai/practice-quiz', aiLimiter, async (req, res) => {
+    if (!GROQ_API_KEY) return res.status(500).json({ error: 'Groq not configured' });
+    const { courseTitle, moduleTitle, missedConcepts = [], count = 5 } = req.body || {};
+    if (!courseTitle) return res.status(400).json({ error: 'Missing courseTitle' });
+
+    const prompt = `Generate exactly ${count} multiple-choice quiz questions about "${moduleTitle || courseTitle}".
+Focus on these missed concepts the student needs to practice: ${missedConcepts.join(', ') || '(general review)'}.
+
+Respond as JSON only — no prose — matching this shape:
+{
+  "questions": [
+    { "id": 1, "question": "<text>", "type": "multiple_choice",
+      "options": ["a","b","c","d"], "correct_answer": <0-3>,
+      "explanation": "<one sentence>" }
+  ]
+}`;
+    try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages: [
+                    { role: 'system', content: 'You are an expert educator who writes precise quizzes. Output JSON only.' },
+                    { role: 'user', content: prompt }
+                ],
+                temperature: 0.5, max_tokens: 1200, stream: false
+            })
+        });
+        const data = await response.json();
+        let text = data.choices?.[0]?.message?.content || '';
+        // Extract JSON from fenced or raw response
+        text = text.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+        const first = text.indexOf('{'); const last = text.lastIndexOf('}');
+        if (first === -1 || last === -1) return res.status(502).json({ error: 'AI returned non-JSON.' });
+        const parsed = JSON.parse(text.slice(first, last + 1));
+        res.json(parsed);
+    } catch (e) {
+        console.error('practice-quiz error:', e);
+        res.status(500).json({ error: e.message || 'AI practice quiz failed.' });
+    }
+});
+
+// ---------- P3.5 Voice tutor (Whisper transcription) -------------------------
+// Accepts raw audio body (audio/webm typical) up to ~15 MB. Returns { text }.
+app.post('/api/ai/whisper', aiLimiter, express.raw({ type: 'audio/*', limit: '15mb' }), async (req, res) => {
+    if (!GROQ_API_KEY) return res.status(500).json({ error: 'Groq not configured' });
+    if (!req.body || !req.body.length) return res.status(400).json({ error: 'Missing audio body.' });
+    try {
+        const form = new FormData();
+        const contentType = req.headers['content-type'] || 'audio/webm';
+        const ext = contentType.includes('mp3') ? 'mp3' : contentType.includes('mp4') ? 'm4a' : 'webm';
+        const blob = new Blob([req.body], { type: contentType });
+        form.append('file', blob, `audio.${ext}`);
+        form.append('model', 'whisper-large-v3-turbo');
+        form.append('response_format', 'json');
+        const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}` },
+            body: form
+        });
+        if (!response.ok) {
+            const err = await response.text();
+            return res.status(response.status).json({ error: err });
+        }
+        const data = await response.json();
+        res.json({ text: data.text || '' });
+    } catch (e) {
+        console.error('whisper error:', e);
+        res.status(500).json({ error: e.message || 'Transcription failed.' });
+    }
+});
+
+// ---------- P5.3 Push subscriptions ------------------------------------------
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:noreply@school.6x7.gr';
+let webpush = null;
+try {
+    if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+        webpush = require('web-push');
+        webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    }
+} catch (_) { /* web-push optional */ }
+
+app.get('/api/push/vapid-public-key', (_req, res) => {
+    if (!VAPID_PUBLIC_KEY) return res.status(503).json({ error: 'Push not configured.' });
+    res.json({ key: VAPID_PUBLIC_KEY });
+});
+
+app.post('/api/push/subscribe', requireAuth, async (req, res) => {
+    const sub = req.body?.subscription;
+    if (!sub || !sub.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) {
+        return res.status(400).json({ error: 'Invalid subscription payload.' });
+    }
+    if (!supabaseAdmin) return res.status(503).json({ error: 'DB not configured.' });
+    const { error } = await supabaseAdmin.from('push_subscriptions').upsert({
+        endpoint: sub.endpoint,
+        user_id: req.userId,
+        p256dh: sub.keys.p256dh,
+        auth_key: sub.keys.auth
+    }, { onConflict: 'endpoint' });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+});
+
+app.post('/api/push/unsubscribe', requireAuth, async (req, res) => {
+    const endpoint = req.body?.endpoint;
+    if (!endpoint || !supabaseAdmin) return res.status(400).json({ error: 'Bad request.' });
+    await supabaseAdmin.from('push_subscriptions').delete().eq('endpoint', endpoint).eq('user_id', req.userId);
+    res.json({ ok: true });
+});
+
+async function sendPushToUser(userId, payload) {
+    if (!webpush || !supabaseAdmin) return;
+    const { data } = await supabaseAdmin.from('push_subscriptions').select('*').eq('user_id', userId);
+    if (!data) return;
+    for (const sub of data) {
+        try {
+            await webpush.sendNotification({
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.p256dh, auth: sub.auth_key }
+            }, JSON.stringify(payload));
+        } catch (e) {
+            if (e.statusCode === 410 || e.statusCode === 404) {
+                await supabaseAdmin.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+            } else {
+                console.warn('push send failed:', e.statusCode, e.body);
+            }
+        }
+    }
+}
+
 // ----------------------------------------------------------------------------
 // Start
 // ----------------------------------------------------------------------------

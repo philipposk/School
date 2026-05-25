@@ -8,6 +8,8 @@
   <title>School — careful courses on hard subjects</title>
 
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23B8543A'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-style='italic' font-weight='400' font-size='20' text-anchor='middle' fill='%23F7F4EE'%3ES%3C/text%3E%3C/svg%3E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='28' fill='%23B8543A'/%3E%3Ctext x='96' y='132' font-family='Georgia,serif' font-style='italic' font-weight='400' font-size='120' text-anchor='middle' fill='%23F7F4EE'%3ES%3C/text%3E%3C/svg%3E">
 
   <!-- Fonts: Newsreader (serif display + body), Geist (UI + mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,5 +85,19 @@
   <script src="js/certificates.js"></script>
 
   <script src="assets/app.js"></script>
+
+  <!-- Service worker registration (offline shell + push) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.warn('SW reg failed:', err));
+      });
+      navigator.serviceWorker.addEventListener('message', (e) => {
+        if (e.data && e.data.type === 'navigate' && e.data.url) {
+          location.hash = e.data.url.replace(/^\//, '');
+        }
+      });
+    }
+  </script>
 </body>
 </html>
