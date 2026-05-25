@@ -165,9 +165,27 @@ function loadSupabaseLibrary() {
     return supabaseLibPromise;
 }
 
+let _initSupabasePromise = null;
 async function initSupabase() {
     if (supabaseClient) return supabaseClient;
-    
+    // Dedupe concurrent callers — without this, both the auto-init at the
+    // bottom of this file AND SupabaseManager.init() from app.js race to
+    // create the client, which triggers GoTrue's "multiple instances"
+    // warning and risks divergent auth state.
+    if (_initSupabasePromise) return _initSupabasePromise;
+    _initSupabasePromise = (async () => {
+        try {
+            return await _doInitSupabase();
+        } finally {
+            _initSupabasePromise = null;
+        }
+    })();
+    return _initSupabasePromise;
+}
+
+async function _doInitSupabase() {
+    if (supabaseClient) return supabaseClient;
+
     // Get credentials dynamically each time
     let credentials = getSupabaseCredentials();
     
