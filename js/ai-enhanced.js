@@ -230,7 +230,15 @@ Provide a structured summary with:
     _moduleContentCache: {},
 
     _getCourseDir(courseId) {
-        const map = {
+        // Prefer the live mapping declared in assets/data.js (the new
+        // editorial frontend) — the legacy hard-coded map below used
+        // pre-redesign slugs (`personal-finance`, `ios-app-development`,
+        // `teaching-physics-*`) that no longer match anything, so every AI
+        // call was silently falling back to `'course'`.
+        if (window.COURSE_CONTENT_DIR && window.COURSE_CONTENT_DIR[courseId]) {
+            return window.COURSE_CONTENT_DIR[courseId];
+        }
+        const legacy = {
             'personal-finance': 'course-finance',
             'ios-app-development': 'course-ios',
             'vibecoding': 'course-vibecoding',
@@ -240,7 +248,7 @@ Provide a structured summary with:
             'teaching-physics-high-school': 'course-physics-highschool',
             'teaching-physics-advanced': 'course-physics-advanced'
         };
-        return map[courseId] || 'course';
+        return legacy[courseId] || 'course';
     },
 
     async getModuleContent(courseId, moduleId) {

@@ -299,11 +299,12 @@ const SupabaseManager = {
     
     async signInWithOAuth(provider) {
         const client = await this.init();
+        // Preserve the route the user was on so deep links survive the
+        // round-trip through the provider (Supabase keeps the fragment).
+        const redirectTo = window.location.origin + window.location.pathname + (window.location.hash || '');
         const { data, error } = await client.auth.signInWithOAuth({
             provider,
-            options: {
-                redirectTo: window.location.origin
-            }
+            options: { redirectTo }
         });
         if (error) throw error;
         return data;

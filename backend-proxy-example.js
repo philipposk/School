@@ -370,6 +370,34 @@ function subscriptionPeriodStart(sub) {
     return ts ? new Date(ts * 1000).toISOString() : null;
 }
 
+// Null-safe price-id reader. A subscription event with no items (rare but
+// valid for some Stripe flows) would otherwise throw and 500 the webhook.
+function subscriptionPriceId(sub) {
+    return sub?.items?.data?.[0]?.price?.id || null;
+}
+
+// RFC-5322-lite email validation (server-side sanity check, not a guarantee).
+function isLikelyEmail(s) {
+    return typeof s === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
+}
+
+// Verify a Supabase access-token JWT and return the user's email.
+// Returns null on any failure (no token, invalid, expired, supabase down).
+async function emailFromBearer(req) {
+    const auth = req.headers.authorization || '';
+    const m = auth.match(/^Bearer\s+(.+)$/i);
+    if (!m) return null;
+    if (!supabaseAdmin) return null;
+    try {
+        const { data, error } = await supabaseAdmin.auth.getUser(m[1]);
+        if (error || !data?.user?.email) return null;
+        return data.user.email;
+    } catch (err) {
+        console.warn('emailFromBearer error:', err.message);
+        return null;
+    }
+}
+
 // ----------------------------------------------------------------------------
 // Root / health
 // ----------------------------------------------------------------------------
@@ -633,6 +661,15 @@ app.post('/api/payments/create-checkout', paymentLimiter, async (req, res) => {
         const { planId, userId, successUrl, cancelUrl } = req.body;
         if (!planId) return res.status(400).json({ error: 'Missing planId' });
 
+        // Anonymous checkout produces orphan subscriptions (webhook can't
+        // link them to a user). Require a valid-looking email up front.
+        // Prefer the auth bearer if present; fall back to the body field.
+        const verifiedEmail = await emailFromBearer(req);
+        const email = verifiedEmail || (typeof userId === 'string' ? userId.trim() : '');
+        if (!isLikelyEmail(email)) {
+            return res.status(400).json({ error: 'Missing or invalid userId (must be a valid email).' });
+        }
+
         let priceId = '';
         if (planId === 'monthly') priceId = STRIPE_MONTHLY_PRICE_ID || req.body.priceId;
         else if (planId === 'yearly') priceId = STRIPE_YEARLY_PRICE_ID || req.body.priceId;
@@ -648,8 +685,8 @@ app.post('/api/payments/create-checkout', paymentLimiter, async (req, res) => {
             mode: 'subscription',
             success_url: successUrl || `${FRONTEND_URL}?payment=success`,
             cancel_url: cancelUrl || `${FRONTEND_URL}?payment=cancel`,
-            customer_email: userId, // frontend passes email as userId
-            metadata: { userId: userId || '', planId }
+            customer_email: email,
+            metadata: { userId: email, planId }
         });
 
         res.json({ sessionId: session.id, url: session.url });
@@ -662,8 +699,13 @@ app.post('/api/payments/create-checkout', paymentLimiter, async (req, res) => {
 app.post('/api/payments/verify-payment', paymentLimiter, async (req, res) => {
     try {
         if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ error: 'Missing userId (email)' });
+        const verifiedEmail = await emailFromBearer(req);
+        const bodyEmail = (req.body?.userId || '').toString().trim();
+        if (verifiedEmail && bodyEmail && verifiedEmail.toLowerCase() !== bodyEmail.toLowerCase()) {
+            return res.status(403).json({ error: 'Token does not match userId.' });
+        }
+        const userId = verifiedEmail || bodyEmail;
+        if (!isLikelyEmail(userId)) return res.status(400).json({ error: 'Missing or invalid userId (email)' });
 
         const customers = await stripe.customers.list({ email: userId, limit: 1 });
         if (customers.data.length === 0) {
@@ -677,7 +719,7 @@ app.post('/api/payments/verify-payment', paymentLimiter, async (req, res) => {
             return res.json({ subscription: null, message: 'No active subscription found' });
         }
         const subscription = subscriptions.data[0];
-        const priceId = subscription.items.data[0].price.id;
+        const priceId = subscriptionPriceId(subscription);
         const plan = planFromPriceId(priceId) || 'monthly';
 
         res.json({
@@ -696,11 +738,22 @@ app.post('/api/payments/verify-payment', paymentLimiter, async (req, res) => {
     }
 });
 
-// Server-side premium gate: trust this over localStorage
+// Server-side premium gate: trust this over localStorage.
+// Prefer a verified Supabase JWT (Authorization: Bearer …); the email query
+// param is allowed only as a fallback for callers that haven't been migrated
+// yet, and never lets one user inspect another user's plan.
 app.get('/api/payments/subscription', paymentLimiter, async (req, res) => {
     try {
-        const userId = String(req.query.userId || '').trim();
-        if (!userId) return res.status(400).json({ error: 'Missing userId' });
+        const verifiedEmail = await emailFromBearer(req);
+        const queryEmail = String(req.query.userId || '').trim();
+        // If the caller sent a JWT and a query email, they must match.
+        if (verifiedEmail && queryEmail && verifiedEmail.toLowerCase() !== queryEmail.toLowerCase()) {
+            return res.status(403).json({ error: 'Token does not match userId.' });
+        }
+        const userId = verifiedEmail || queryEmail;
+        if (!isLikelyEmail(userId)) {
+            return res.status(400).json({ error: 'Missing or invalid userId (must be a valid email).' });
+        }
 
         // Prefer DB record (cheap), fall back to live Stripe check
         if (supabaseAdmin) {
@@ -738,7 +791,7 @@ app.get('/api/payments/subscription', paymentLimiter, async (req, res) => {
             return res.json({ plan: 'free', status: 'inactive', active: false, source: 'stripe' });
         }
         const sub = subs.data[0];
-        const plan = planFromPriceId(sub.items.data[0].price.id) || 'monthly';
+        const plan = planFromPriceId(subscriptionPriceId(sub)) || 'monthly';
         res.json({
             plan,
             status: sub.status,
@@ -798,10 +851,14 @@ async function handleStripeWebhook(req, res) {
                 const session = event.data.object;
                 const userEmail = session.customer_email || session.metadata?.userId;
                 const planFromMeta = session.metadata?.planId || null;
-                if (userEmail && session.subscription) {
+                if (!userEmail) {
+                    console.warn('Webhook: checkout.session.completed with no email; cannot link to a user.');
+                    break;
+                }
+                if (session.subscription) {
                     // Fetch subscription to get accurate price + period
                     const sub = await stripe.subscriptions.retrieve(session.subscription);
-                    const priceId = sub.items.data[0].price.id;
+                    const priceId = subscriptionPriceId(sub);
                     const plan = planFromPriceId(priceId) || planFromMeta || 'monthly';
                     await upsertSubscription({
                         userEmail,
@@ -818,21 +875,39 @@ async function handleStripeWebhook(req, res) {
             case 'customer.subscription.created':
             case 'customer.subscription.updated': {
                 const sub = event.data.object;
-                const customer = await stripe.customers.retrieve(sub.customer);
-                const userEmail = customer?.email;
-                if (userEmail) {
-                    const priceId = sub.items.data[0].price.id;
-                    const plan = planFromPriceId(priceId) || 'monthly';
-                    await upsertSubscription({
-                        userEmail,
-                        plan,
-                        status: sub.status,
-                        stripeSubscriptionId: sub.id,
-                        stripeCustomerId: sub.customer,
-                        startDate: new Date(sub.created * 1000).toISOString(),
-                        endDate: subscriptionPeriodEnd(sub)
-                    });
+                // Resolve the user email: prefer live customer record, fall
+                // back to the row we already wrote by stripe_subscription_id.
+                // Stripe returns a stub `{deleted:true}` for deleted customers.
+                let userEmail = null;
+                try {
+                    const customer = await stripe.customers.retrieve(sub.customer);
+                    if (customer && !customer.deleted) userEmail = customer.email || null;
+                } catch (e) {
+                    console.warn('Webhook: customer retrieve failed:', e.message);
                 }
+                if (!userEmail && supabaseAdmin) {
+                    const { data } = await supabaseAdmin
+                        .from('subscriptions')
+                        .select('user_email')
+                        .eq('stripe_subscription_id', sub.id)
+                        .maybeSingle();
+                    if (data?.user_email) userEmail = data.user_email;
+                }
+                if (!userEmail) {
+                    console.warn(`Webhook: no email for subscription ${sub.id}; skipping upsert.`);
+                    break;
+                }
+                const priceId = subscriptionPriceId(sub);
+                const plan = planFromPriceId(priceId) || 'monthly';
+                await upsertSubscription({
+                    userEmail,
+                    plan,
+                    status: sub.status,
+                    stripeSubscriptionId: sub.id,
+                    stripeCustomerId: sub.customer,
+                    startDate: new Date(sub.created * 1000).toISOString(),
+                    endDate: subscriptionPeriodEnd(sub)
+                });
                 break;
             }
             case 'customer.subscription.deleted': {

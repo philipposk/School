@@ -16,7 +16,9 @@ const PaymentManager = {
             name: 'Monthly Premium',
             price: 9.99,
             interval: 'month',
-            stripePriceId: (typeof process !== 'undefined' && process.env && process.env.STRIPE_MONTHLY_PRICE_ID) || 'price_1TaQr7CGeGVZZj1Rz1los9rz',
+            // Backend env (STRIPE_MONTHLY_PRICE_ID on Fly) is authoritative; this
+            // is only a fallback the browser sends along for legacy callers.
+            stripePriceId: 'price_1Tan4cCGeGVZZj1RqIdKEvWT', // EUR monthly
             stripeProductId: 'prod_UZa1LFPUV6T1wj',
             features: ['All courses', 'AI tutor', 'Certificates', 'Priority support']
         },
@@ -25,7 +27,7 @@ const PaymentManager = {
             name: 'Yearly Premium',
             price: 99.99,
             interval: 'year',
-            stripePriceId: (typeof process !== 'undefined' && process.env && process.env.STRIPE_YEARLY_PRICE_ID) || 'price_1TaQrbCGeGVZZj1RaDpAzf73',
+            stripePriceId: 'price_1Tan4dCGeGVZZj1RthBXKyQ9', // EUR yearly
             stripeProductId: 'prod_UZa1VaNb4oQAe3',
             features: ['All courses', 'AI tutor', 'Certificates', 'Priority support', 'Save 17%']
         }
@@ -81,15 +83,34 @@ const PaymentManager = {
     // Pull authoritative subscription state from backend (Supabase / Stripe).
     // Mutates the local cache so subsequent hasPremiumAccess() calls reflect it.
     async refreshPremiumFromServer() {
-        if (!user || !user.email) return null;
+        // Always read the latest user from window — never the stale `user`
+        // captured at script-load time (the bootstrap re-binds it later).
+        const u = (typeof window !== 'undefined' && window.user) || null;
+        if (!u || !u.email) return null;
         const backendUrl = localStorage.getItem('backend_url') || 'https://school-backend.fly.dev';
         try {
-            const url = `${backendUrl}/api/payments/subscription?userId=${encodeURIComponent(user.email)}`;
-            const response = await fetch(url);
+            const headers = { 'Content-Type': 'application/json' };
+            // If Supabase is initialised, attach the access token so the
+            // backend can verify the request — this is what locks the
+            // endpoint down: anyone can still hit it, but they only get
+            // back data for the user that owns the token.
+            try {
+                if (typeof SupabaseManager !== 'undefined' && SupabaseManager.init) {
+                    const client = await SupabaseManager.init();
+                    if (client && client.auth) {
+                        const { data } = await client.auth.getSession();
+                        const token = data?.session?.access_token;
+                        if (token) headers['Authorization'] = `Bearer ${token}`;
+                    }
+                }
+            } catch (_) { /* token attach is best-effort */ }
+
+            const url = `${backendUrl}/api/payments/subscription?userId=${encodeURIComponent(u.email)}`;
+            const response = await fetch(url, { headers });
             if (!response.ok) return null;
             const data = await response.json();
 
-            const userId = user.email;
+            const userId = u.email;
             this.subscriptions[userId] = {
                 plan: data.plan || 'free',
                 status: data.active ? 'active' : (data.status || 'inactive'),
@@ -299,16 +320,9 @@ const PaymentManager = {
     }
 };
 
-// Check payment status on page load
-if (typeof window !== 'undefined') {
-    window.addEventListener('load', () => {
-        PaymentManager.checkPaymentStatus();
-        // Sync premium state from server (don't trust localStorage alone)
-        if (typeof user !== 'undefined' && user && user.email) {
-            PaymentManager.refreshPremiumFromServer();
-        }
-    });
-}
+// Auto load-handler removed: app.js owns these two calls so we don't
+// double-fire (which produced two "Payment successful" alerts + two POSTs
+// to /verify-payment).
 
 window.PaymentManager = PaymentManager;
 

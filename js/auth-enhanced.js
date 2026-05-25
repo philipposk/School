@@ -63,9 +63,14 @@ const AuthManager = {
     // Note: OAuth providers (Google, Facebook, Apple) skip this - they're already verified
     async signUpWithEmail(email, password, name) {
         // Validate inputs
-        if (!SecurityUtils.validateEmail(email)) {
-            throw new Error('Invalid email address');
+        // validateEmail returns { valid, error?, email? } — the bare object
+        // is always truthy, so the previous `if (!validateEmail(...))` check
+        // never tripped. Read .valid explicitly.
+        const emailCheck = SecurityUtils.validateEmail(email);
+        if (!emailCheck.valid) {
+            throw new Error(emailCheck.error || 'Invalid email address');
         }
+        email = emailCheck.email;
         
         if (!password || password.length < 6) {
             throw new Error('Password must be at least 6 characters');
@@ -123,39 +128,34 @@ const AuthManager = {
             throw new Error('Invalid confirmation code. Please try again.');
         }
         
-        // Code is valid - create account
-        // Only email/password signups go through this verification flow
+        // Code is valid - create account.
+        // Don't gate on localStorage (it's empty on first visit and the
+        // synchronous check races SupabaseManager's backend fetch). Just
+        // initialise the client; if no backend is reachable, init returns
+        // null and we throw a clear error.
         try {
-            // Try Supabase first if configured
-            const supabaseUrl = localStorage.getItem('supabase_url');
-            const supabaseKey = localStorage.getItem('supabase_anon_key');
-            
-            if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
-                const { data, error } = await SupabaseManager.signUp(
-                    email,
-                    stored.password,
-                    stored.name
-                );
-                
-                if (error) throw error;
-                
-                // Clean up confirmation code
-                delete this.confirmationCodes[email];
-                localStorage.setItem('confirmationCodes', JSON.stringify(this.confirmationCodes));
-                
-                return {
-                    success: true,
-                    user: data.user,
-                    verified: true,
-                    authMethod: 'email', // Track auth method
-                    message: 'Email verified! Account created successfully.'
-                };
-            } else {
-                // No Supabase configured — refuse to create a phantom account
-                // (we can't securely store the password client-side, and a
-                // localStorage-only user lets anyone sign in as that email).
-                throw new Error('Account creation requires the authentication backend. Please contact the administrator.');
+            if (typeof SupabaseManager === 'undefined') {
+                throw new Error('Authentication system not loaded. Please refresh the page.');
             }
+            const client = await SupabaseManager.init();
+            if (!client) {
+                throw new Error('Authentication backend is not available. Please contact the administrator.');
+            }
+
+            const { data, error } = await SupabaseManager.signUp(email, stored.password, stored.name);
+            if (error) throw error;
+
+            // Clean up confirmation code
+            delete this.confirmationCodes[email];
+            localStorage.setItem('confirmationCodes', JSON.stringify(this.confirmationCodes));
+
+            return {
+                success: true,
+                user: data.user,
+                verified: true,
+                authMethod: 'email',
+                message: 'Email verified! Account created successfully.'
+            };
         } catch (error) {
             throw new Error(`Account creation failed: ${error.message}`);
         }
@@ -219,41 +219,39 @@ const AuthManager = {
     async signInWithFacebook() { return this._signInWithProvider('facebook'); },
     async signInWithApple()    { return this._signInWithProvider('apple'); },
     
-    // Sign in with email and password
+    // Sign in with email and password.
+    // Don't gate on localStorage — that races SupabaseManager's initial
+    // backend fetch on first visit. Init explicitly, then sign in.
     async signInWithEmail(email, password) {
-        const supabaseUrl = localStorage.getItem('supabase_url');
-        const supabaseKey = localStorage.getItem('supabase_anon_key');
-        
-        if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
-            try {
-                const { data, error } = await SupabaseManager.signIn(email, password);
-                if (error) throw error;
-                return data;
-            } catch (error) {
-                throw new Error(`Sign in failed: ${error.message}`);
-            }
+        if (typeof SupabaseManager === 'undefined') {
+            throw new Error('Authentication system not loaded. Please refresh the page.');
         }
-
-        // No Supabase configured: refuse sign-in. The localStorage path can't
-        // verify passwords (we never store them), so accepting a known email
-        // with any password is a critical bypass. Force real auth instead.
-        throw new Error(
-            'Sign-in is unavailable: authentication backend is not configured. ' +
-            'Please contact the administrator.'
-        );
+        const client = await SupabaseManager.init();
+        if (!client) {
+            // No Supabase configured: refuse. The localStorage fallback
+            // can't verify passwords (we never store them), so accepting
+            // any password for a known email is a critical bypass.
+            throw new Error('Sign-in is unavailable: authentication backend is not configured.');
+        }
+        try {
+            const { data, error } = await SupabaseManager.signIn(email, password);
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            throw new Error(`Sign in failed: ${error.message}`);
+        }
     },
     
-    // Sign out
+    // Sign out. Does NOT reload — callers (app.js) re-render in place.
     async signOut() {
-        const supabaseUrl = localStorage.getItem('supabase_url');
-        const supabaseKey = localStorage.getItem('supabase_anon_key');
-        
-        if (supabaseUrl && supabaseKey && typeof SupabaseManager !== 'undefined') {
-            await SupabaseManager.signOut();
-        }
-        
+        try {
+            if (typeof SupabaseManager !== 'undefined' && SupabaseManager.init) {
+                const client = await SupabaseManager.init();
+                if (client && client.auth) await client.auth.signOut();
+            }
+        } catch (e) { console.warn('SupabaseManager.signOut:', e); }
         localStorage.removeItem('user');
-        window.location.reload();
+        if (typeof window !== 'undefined') window.user = null;
     }
 };
 

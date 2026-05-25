@@ -82,6 +82,26 @@
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  // Render untrusted markdown (e.g. AI-generated text). Marked alone passes
+  // raw HTML through, so a prompt-injection could echo a <script>. Use
+  // marked → then strip dangerous elements via a temp DOM scrub.
+  function renderSafeMarkdown(md) {
+    if (!window.marked) return escapeHtml(md || '');
+    const raw = window.marked.parse(String(md || ''));
+    const tmp = document.createElement('div');
+    tmp.innerHTML = raw;
+    // Remove script/style/iframe/object/embed and any on* attributes.
+    tmp.querySelectorAll('script, style, iframe, object, embed, link').forEach(n => n.remove());
+    tmp.querySelectorAll('*').forEach(n => {
+      [...n.attributes].forEach(a => {
+        const name = a.name.toLowerCase();
+        if (name.startsWith('on')) n.removeAttribute(a.name);
+        if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(a.value)) n.removeAttribute(a.name);
+      });
+    });
+    return tmp.innerHTML;
+  }
+
   // Map a course slug to its on-disk content directory. The legacy folders
   // are kept (course-finance, course-ios, etc) so we don't have to migrate
   // hundreds of .md files — data.js declares the mapping.
@@ -248,13 +268,12 @@
   }
 
   async function signOut() {
+    // AuthManager.signOut() now revokes the Supabase session and clears
+    // localStorage without reloading. We re-render in place after.
     try {
       if (typeof AuthManager !== 'undefined' && AuthManager.signOut) {
-        // AuthManager.signOut does its own reload via window.location.reload();
-        // strip it first so we re-render in place.
-        setCurrentUser(null);
-      }
-      if (typeof SupabaseManager !== 'undefined') {
+        await AuthManager.signOut();
+      } else if (typeof SupabaseManager !== 'undefined') {
         const c = await SupabaseManager.init();
         if (c && c.auth) await c.auth.signOut();
       }
@@ -398,10 +417,11 @@
   }
 
   /* --------------------- modal primitives --------------------- */
+  let _modalEscHandler = null;
   function showModal({ title, body }) {
     closeModal();
     const overlay = el('div', { class: 'modal-overlay', id: 'modalOverlay', onclick: (e) => { if (e.target === overlay) closeModal(); } },
-      el('div', { class: 'modal' },
+      el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true' },
         el('div', { class: 'modal-head' },
           el('h3', null, title || ''),
           el('button', { class: 'icon-btn', onclick: closeModal, 'aria-label': 'Close' }, '×')
@@ -411,11 +431,18 @@
     );
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
+    // Escape to close — a11y + UX
+    _modalEscHandler = (e) => { if (e.key === 'Escape') closeModal(); };
+    document.addEventListener('keydown', _modalEscHandler);
   }
   function closeModal() {
     const o = document.getElementById('modalOverlay');
     if (o) o.remove();
     document.body.style.overflow = '';
+    if (_modalEscHandler) {
+      document.removeEventListener('keydown', _modalEscHandler);
+      _modalEscHandler = null;
+    }
   }
   window.closeSchoolModal = closeModal;
 
@@ -582,7 +609,7 @@
           el('div', { class: 'module-title' }, m.title),
           el('div', { class: 'module-sub' }, m.sub)
         ),
-        el('div', { class: 'module-meta' }, `Week ${m.n} · ~${Math.round(c.hours / c.modules.length)}h`),
+        el('div', { class: 'module-meta' }, `Module ${m.n} · ~${Math.round(c.hours / c.modules.length)}h`),
         el('div', { class: 'module-status' + (done ? ' done' : inProgress ? ' progress' : '') },
            done ? 'Completed' : inProgress ? 'In progress' : 'Not started'),
         el('div', { class: 'arr', html: ICONS.arrow })
@@ -876,7 +903,15 @@
           });
         } else {
           const a = (ans || '').toLowerCase();
-          correct = (q.acceptable_answers || []).some(x => a && (a === x.toLowerCase() || a.includes(x.toLowerCase())));
+          // Match acceptable answers by whole-word token, not substring,
+          // so "no" doesn't get a pass for "normal" / "north".
+          correct = (q.acceptable_answers || []).some(x => {
+            if (!a) return false;
+            const target = String(x).toLowerCase().trim();
+            if (a === target) return true;
+            const re = new RegExp('\\b' + target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+            return re.test(a);
+          });
           item.querySelector('.q-input').disabled = true;
         }
         if (correct) score++;
@@ -1013,13 +1048,9 @@
       tt.innerHTML = cur === 'dark' ? ICONS.sun : ICONS.moon;
     }
 
-    // search behavior
+    // search behavior — Enter navigates to the first match
     const search = document.getElementById('globalSearch');
     if (search) {
-      search.addEventListener('input', (e) => {
-        const q = e.target.value.toLowerCase();
-        // simple in-page: only meaningful on home; navigate if course matches
-      });
       search.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && search.value.trim()) {
           const q = search.value.toLowerCase();
@@ -1031,15 +1062,16 @@
         }
       });
     }
-    // ⌘K
-    document.onkeydown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        const s = document.getElementById('globalSearch');
-        if (s) s.focus();
-      }
-    };
   }
+  // ⌘K registered once at module load (not per-render — assigning
+  // document.onkeydown clobbered any other key handler).
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      const s = document.getElementById('globalSearch');
+      if (s) s.focus();
+    }
+  });
 
   /* --------------------- AI features --------------------- */
   function openAITutor(course, mod) {
@@ -1115,7 +1147,7 @@
           body.appendChild(el('p', { class: 'muted' }, 'Could not generate a summary right now.'));
           return;
         }
-        body.appendChild(el('article', { class: 'prose', html: window.marked ? window.marked.parse(result.summary) : escapeHtml(result.summary) }));
+        body.appendChild(el('article', { class: 'prose', html: renderSafeMarkdown(result.summary) }));
       } catch (e) {
         clear(body);
         body.appendChild(el('p', { class: 'muted' }, e.message || 'Summary unavailable.'));
@@ -1158,9 +1190,39 @@
   function maybeIssueCertificate(course) {
     try {
       if (typeof CertificateManager === 'undefined') return;
+      const u = currentUser();
+      // Anonymous users get a "sign in to claim" nudge instead of a
+      // certificate with `studentName: 'Student'` and a blank email.
+      if (!u || !u.email) {
+        showModal({
+          title: '🎓 Course completed',
+          body: el('div', { class: 'cert-modal' },
+            el('p', null, "You finished ", el('b', null, course.title), '. Sign in to claim your certificate.'),
+            el('div', { class: 'modal-actions' },
+              el('button', { class: 'btn btn-primary', onclick: () => { closeModal(); openSignInModal(); } }, 'Sign in'),
+              el('button', { class: 'btn btn-ghost', onclick: closeModal }, 'Close')
+            )
+          )
+        });
+        return;
+      }
+      // Certificates are a premium feature (see /api/payments/plans).
+      if (!hasPremium()) {
+        showModal({
+          title: '🎓 Course completed',
+          body: el('div', { class: 'cert-modal' },
+            el('p', null, "Great work finishing ", el('b', null, course.title), '. Certificates are a premium feature.'),
+            el('div', { class: 'modal-actions' },
+              el('button', { class: 'btn btn-accent', onclick: () => { closeModal(); subscribePrompt('monthly'); } }, 'Unlock premium'),
+              el('button', { class: 'btn btn-ghost', onclick: closeModal }, 'Maybe later')
+            )
+          )
+        });
+        return;
+      }
       // Don't double-issue.
       const existing = CertificateManager.getCertificatesForUser
-        ? CertificateManager.getCertificatesForUser((currentUser() && currentUser().email) || '')
+        ? CertificateManager.getCertificatesForUser(u.email)
         : [];
       if (existing.some(c => c.courseId === course.slug)) return;
       const cert = CertificateManager.generateCertificate(course.slug, course.title);
@@ -1181,26 +1243,32 @@
   /* --------------------- init --------------------- */
   initTheme();
   window.addEventListener('hashchange', render);
-  // Pick up Supabase session if the user just came back from an OAuth redirect.
-  handleOAuthCallback();
-  // Refresh premium status from the backend on load (don't trust localStorage).
-  if (window.PaymentManager?.refreshPremiumFromServer) {
-    PaymentManager.refreshPremiumFromServer();
-  }
-  // Handle ?payment=success|cancel coming back from Stripe Checkout.
-  if (window.PaymentManager?.checkPaymentStatus) {
-    PaymentManager.checkPaymentStatus();
-  }
-  // Configure marked
+  // Configure marked once.
   if (window.marked) {
-    window.marked.setOptions({
-      gfm: true,
-      breaks: false,
-      headerIds: false,
-      mangle: false
+    window.marked.setOptions({ gfm: true, breaks: false, headerIds: false, mangle: false });
+  }
+
+  // Render first, then post-DOM bootstrap (OAuth callback + premium
+  // refresh + Stripe return). Doing post-DOM work in this order avoids
+  // a stale auth badge flashing on the first paint.
+  function bootstrapPostRender() {
+    // Pick up Supabase session if the user just came back from an OAuth redirect.
+    handleOAuthCallback();
+    if (window.PaymentManager?.refreshPremiumFromServer) {
+      PaymentManager.refreshPremiumFromServer();
+    }
+    if (window.PaymentManager?.checkPaymentStatus) {
+      PaymentManager.checkPaymentStatus();
+    }
+  }
+
+  if (document.readyState !== 'loading') {
+    render();
+    bootstrapPostRender();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+      bootstrapPostRender();
     });
   }
-  document.addEventListener('DOMContentLoaded', render);
-  // Fallback if already loaded:
-  if (document.readyState !== 'loading') render();
 })();
