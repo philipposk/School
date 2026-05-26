@@ -404,15 +404,17 @@ async function emailFromBearer(req) {
 app.get('/', (_req, res) => {
     res.json({
         name: 'School Platform Backend API',
-        version: '1.1.0',
+        version: '2.0.0',
         status: 'running',
         endpoints: {
             health: '/health',
-            ai: { groq: '/api/ai/groq', openai: '/api/ai/openai' },
+            ai: { groq: '/api/ai/groq', openai: '/api/ai/openai', practiceQuiz: '/api/ai/practice-quiz', whisper: '/api/ai/whisper' },
             notifications: {
                 email: '/api/notifications/email',
                 sms: '/api/notifications/sms',
-                send: '/api/notifications/send'
+                send: '/api/notifications/send',
+                list: '/api/notifications',
+                markRead: '/api/notifications/:id/read'
             },
             payments: {
                 createCheckout: '/api/payments/create-checkout',
@@ -420,8 +422,13 @@ app.get('/', (_req, res) => {
                 cancelSubscription: '/api/payments/cancel-subscription',
                 subscription: '/api/payments/subscription',
                 webhook: '/api/payments/webhook',
-                plans: '/api/payments/plans'
+                plans: '/api/payments/plans',
+                portal: '/api/payments/portal'
             },
+            comments: { list: '/api/comments/:slug/:n', post: '/api/comments/:slug/:n', delete: '/api/comments/:id' },
+            certificates: { issue: '/api/certificates/issue', verify: '/api/certificates/verify/:certNumber' },
+            push: { vapidKey: '/api/push/vapid-public-key', subscribe: '/api/push/subscribe', unsubscribe: '/api/push/unsubscribe' },
+            user: { export: '/api/user/export', delete: '/api/user/delete' },
             config: { supabase: '/api/config/supabase' }
         },
         timestamp: new Date().toISOString()

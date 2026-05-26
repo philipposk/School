@@ -1590,7 +1590,7 @@
       try {
         const client = await supaClient();
         if (!client) throw new Error('Supabase not ready');
-        const { data: prof, error } = await client.from('profiles').select('*').eq('handle', handle).maybeSingle();
+        const { data: prof, error } = await client.from('profiles').select('id, name, bio, avatar_url, handle, is_instructor, total_points, created_at').eq('handle', handle).maybeSingle();
         const slot = wrap.querySelector('#profileBody');
         clear(slot);
         if (error || !prof) { slot.appendChild(el('p', { class: 'muted' }, 'Profile not found.')); return; }
