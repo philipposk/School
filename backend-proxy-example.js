@@ -1071,15 +1071,28 @@ function supabaseAs(token) {
 app.get('/api/comments/:slug/:n', async (req, res) => {
     if (!supabaseAdmin) return res.status(503).json({ error: 'DB not configured' });
     const { slug, n } = req.params;
-    const { data, error } = await supabaseAdmin
+    // Two-step fetch: comments then profiles. We can't ask Supabase REST to
+    // auto-resolve `profiles!inner(...)` because lesson_comments.user_id has
+    // its FK on auth.users (not public.profiles), so the implicit join fails.
+    const { data: comments, error } = await supabaseAdmin
         .from('lesson_comments')
-        .select('id, body, created_at, parent_id, user_id, profiles!inner(name, avatar_url, handle)')
+        .select('id, body, created_at, parent_id, user_id')
         .eq('course_slug', slug)
         .eq('module_n', Number(n))
         .order('created_at', { ascending: true })
         .limit(200);
     if (error) return res.status(500).json({ error: error.message });
-    res.json({ comments: data });
+    const userIds = [...new Set((comments || []).map(c => c.user_id).filter(Boolean))];
+    let profileMap = {};
+    if (userIds.length) {
+        const { data: profs } = await supabaseAdmin
+            .from('profiles')
+            .select('id, name, avatar_url, handle')
+            .in('id', userIds);
+        profileMap = Object.fromEntries((profs || []).map(p => [p.id, p]));
+    }
+    const enriched = (comments || []).map(c => ({ ...c, profiles: profileMap[c.user_id] || null }));
+    res.json({ comments: enriched });
 });
 
 app.post('/api/comments/:slug/:n', requireAuth, async (req, res) => {

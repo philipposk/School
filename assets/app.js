@@ -1487,14 +1487,25 @@
     try {
       const client = await supaClient();
       if (!client) throw new Error('Supabase not ready');
+      // Two-step: community_posts.user_id FK is on auth.users, so Supabase
+      // REST can't auto-resolve `profiles!inner(...)`. Fetch profiles separately.
       const { data: posts, error } = await client
         .from('community_posts')
-        .select('id, user_id, body, created_at, like_count, comment_count, profiles!inner(name, avatar_url, handle)')
+        .select('id, user_id, body, created_at, like_count, comment_count')
         .order('created_at', { ascending: false }).limit(40);
       clear(slot);
       if (error) { slot.appendChild(el('p', { class: 'muted' }, error.message)); return; }
-      if (posts.length === 0) { slot.appendChild(el('p', { class: 'muted' }, 'No posts yet.')); return; }
-      posts.forEach(p => slot.appendChild(renderPostCard(p, client)));
+      if (!posts || posts.length === 0) { slot.appendChild(el('p', { class: 'muted' }, 'No posts yet.')); return; }
+      const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))];
+      let profileMap = {};
+      if (userIds.length) {
+        const { data: profs } = await client.from('profiles').select('id, name, avatar_url, handle').in('id', userIds);
+        profileMap = Object.fromEntries((profs || []).map(pr => [pr.id, pr]));
+      }
+      posts.forEach(p => {
+        p.profiles = profileMap[p.user_id] || null;
+        slot.appendChild(renderPostCard(p, client));
+      });
     } catch (e) {
       clear(slot);
       slot.appendChild(el('p', { class: 'muted' }, e.message || 'Feed unavailable.'));
