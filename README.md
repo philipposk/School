@@ -1,98 +1,28 @@
-# 🧠 Critical Thinking School
+# Critical Thinking School
 
-**Professional Course Platform - Production Ready**
+An online course that teaches you how to think more clearly and reason better. You open it in your web browser and work through eight lessons at your own pace — covering things like spotting bad arguments, avoiding common thinking traps, weighing evidence, and making better decisions. It keeps track of how far you've got so you can pick up where you left off.
 
-A complete, Coursera-quality web application for delivering your Critical Thinking course.
+It's for anyone who wants to sharpen their reasoning skills, whether you're studying, teaching, or just curious.
 
-## 🚀 Quick Start
+## What it does
+- Walks you through eight lessons on clear thinking and good reasoning
+- Shows a sidebar menu and buttons to move between lessons
+- Tracks your progress and saves it automatically on your device
+- Includes quizzes and worksheets along the way
+- Looks clean and works well on phones, tablets, and computers
 
-### Option 1: Simple Python Server (Recommended)
-```bash
-./start.sh
-```
-Then open: **http://localhost:8000**
+The eight lessons cover: the foundations of critical thinking, logic and arguments, evidence and induction, probability and Bayesian thinking, cognitive biases, fallacies and rhetoric, building strong arguments, and decision-making with a final project.
 
-### Option 2: Manual Start
-```bash
-python3 -m http.server 8000
-```
-Then open: **http://localhost:8000**
-
-## ✨ Features
-
-✅ **Professional UI/UX** - Coursera-level design and user experience
-✅ **Smooth Navigation** - Sidebar navigation with progress tracking
-✅ **Beautiful Content Rendering** - Markdown rendered with syntax highlighting
-✅ **Progress Tracking** - Visual progress bar and completion status
-✅ **Responsive Design** - Works perfectly on desktop, tablet, and mobile
-✅ **Local Storage** - Saves your progress automatically
-✅ **8 Complete Modules** - Full critical thinking curriculum
-✅ **No Backend Required** - Works with simple HTTP server
-
-## 📚 Course Structure
-
-1. **Module 1:** Foundations of Critical Thinking
-2. **Module 2:** Deduction: Propositional Logic & Syllogisms
-3. **Module 3:** Induction, Evidence & Strength
-4. **Module 4:** Probabilistic Thinking & Bayes
-5. **Module 5:** Cognitive Biases & Debiasing
-6. **Module 6:** Fallacies & Rhetoric
-7. **Module 7:** Constructing Strong Arguments
-8. **Module 8:** Decision-Making & Final Project
-
-## 🎯 How to Use
-
-1. **Start the server** using `./start.sh` or `python3 -m http.server 8000`
-2. **Open your browser** to `http://localhost:8000`
-3. **Click any module** in the sidebar to start learning
-4. **Use navigation buttons** to move between modules
-5. **Your progress is saved** automatically in browser storage
-
-## 🛠️ Technical Details
-
-- **Frontend:** Pure HTML/CSS/JavaScript (no build step required)
-- **Markdown Rendering:** Marked.js with Highlight.js for code
-- **Storage:** LocalStorage for progress tracking
-- **Server:** Simple Python HTTP server (or any static file server)
-- **Dependencies:** All loaded via CDN (no npm install needed)
-
-## 📦 File Structure
-
-```
-School/
-├── index.html          # Main application (Coursera-quality UI)
-├── start.sh           # Quick start script
-├── course/
-│   ├── modules/       # All 8 course modules (.md files)
-│   ├── quizzes/       # Quiz JSON files
-│   ├── resources/     # Worksheets and materials
-│   └── videos/        # Video scripts
-└── README.md          # This file
-```
-
-## 🌐 Deployment
-
-This can be deployed to any static hosting:
-- **Netlify** - Drag and drop the folder
-- **Vercel** - Connect your GitHub repo
-- **GitHub Pages** - Push to gh-pages branch
-- **Any web server** - Just upload the files
-
-## ✨ Quality Features
-
-- **Professional Design** - Clean, modern, accessible
-- **Fast Loading** - Optimized for performance
-- **Mobile Responsive** - Perfect on all devices
-- **Progress Tracking** - Visual feedback on completion
-- **Smooth Animations** - Polished user experience
-- **Code Highlighting** - Beautiful syntax highlighting
-- **Accessibility** - WCAG compliant
-
-## 🎓 Ready to Use
-
-This is a **complete, production-ready course platform**. Just start the server and begin teaching!
+## Status
+Working website / course platform. Several backup and experimental copies of the project also live in this folder.
 
 ---
+### For developers
+Frontend is pure HTML/CSS/JavaScript with no build step; dependencies load via CDN (Marked.js for Markdown, Highlight.js for code). Progress is stored in `localStorage`. Course content lives as Markdown modules, quiz JSON, resources, and video scripts under `course/`. Serve as static files:
 
-**Built with ❤️ for Critical Thinking Education**
+```bash
+./start.sh                 # or: python3 -m http.server 8000
+open http://localhost:8000
+```
 
+Deploys to any static host (Netlify, Vercel, GitHub Pages). A Dockerfile and Fly.io deployment scripts are also present. See `TECH_STACK.md`, `FEATURES.md`, and `DEPLOYMENT.md`. License: MIT.
