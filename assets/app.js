@@ -422,7 +422,7 @@
           ? el('p', null, 'Subscription: ', el('b', null, 'Premium'), '  ',
               el('button', { class: 'btn btn-ghost btn-sm', onclick: openStripePortal }, 'Manage billing'))
           : el('p', null, 'Subscription: ', el('b', null, 'Free'), '  ',
-              el('button', { class: 'btn btn-accent btn-sm', onclick: () => { closeModal(); subscribePrompt('monthly'); } }, 'Upgrade')),
+              upgradeButton('btn btn-accent btn-sm', 'Upgrade', () => { closeModal(); subscribePrompt('monthly'); })),
         el('hr'),
         el('div', { class: 'account-links' },
           el('a', { href: '#/dashboard', onclick: closeModal }, 'Instructor dashboard'),
@@ -654,7 +654,21 @@
   window.closeSchoolModal = closeModal;
 
   /* --------------------- subscription glue --------------------- */
+  // Paid plans stay switched off until Stripe is live. To turn them on, set
+  // `window.SCHOOL_BILLING_ENABLED = true` in a <script> before assets/app.js.
+  const BILLING_ENABLED = window.SCHOOL_BILLING_ENABLED === true;
+
+  // An upgrade CTA, or a disabled "Coming soon" button while billing is off.
+  function upgradeButton(cls, label, onclick) {
+    if (!BILLING_ENABLED) {
+      return el('button', { class: cls + ' btn-soon', disabled: true, 'aria-disabled': 'true',
+        title: 'Premium is coming soon' }, 'Premium — coming soon');
+    }
+    return el('button', { class: cls, onclick }, label);
+  }
+
   async function subscribePrompt(planId) {
+    if (!BILLING_ENABLED) return;
     const u = currentUser();
     if (!u) { openSignInModal(); return; }
     if (typeof PaymentManager === 'undefined') {
@@ -838,8 +852,7 @@
         : null,
       premium
         ? null
-        : el('button', { class: 'btn btn-accent', onclick: () => subscribePrompt('monthly') },
-            'Unlock all courses — €9.99/mo')
+        : upgradeButton('btn btn-accent', 'Unlock all courses — €9.99/mo', () => subscribePrompt('monthly'))
     );
 
     return el('main', { class: 'page' },
@@ -2272,7 +2285,7 @@
           body: el('div', { class: 'cert-modal' },
             el('p', null, "Great work finishing ", el('b', null, course.title), '. Certificates are a premium feature.'),
             el('div', { class: 'modal-actions' },
-              el('button', { class: 'btn btn-accent', onclick: () => { closeModal(); subscribePrompt('monthly'); } }, 'Unlock premium'),
+              upgradeButton('btn btn-accent', 'Unlock premium', () => { closeModal(); subscribePrompt('monthly'); }),
               el('button', { class: 'btn btn-ghost', onclick: closeModal }, 'Maybe later')
             )
           )
