@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /archive/
+Disallow: /school-3/
+Disallow: /deploy-to-server/
+Disallow: /web-app/
+
+Sitemap: https://school.6x7.gr/sitemap.xml
