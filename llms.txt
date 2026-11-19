@@ -1,0 +1,21 @@
+# School
+
+> A small library of careful, short self-paced courses on hard subjects, by 6x7.
+
+## Courses
+- Critical Thinking: Clear Reasoning & Practical Logic. Master arguments, biases, and decisions — in eight weeks.
+- Personal Finance: & Investing Fundamentals. Take control of your money with a clear, practical plan.
+- iOS with SwiftUI: Build beautiful Apple apps. Ship App Store-ready iOS apps in eight weeks.
+- Understanding Human Minds: Theology, Narcissism & Optimistic Living. A compassionate, clear-eyed look at human nature.
+- Teaching Physics: Elementary: Ages 8–12. Help young minds see the laws of nature for themselves.
+- Teaching Physics: High School: Ages 13–18. Rigor with intuition. Math meets meaning.
+- Teaching Physics: Advanced: AP & University Intro. Calculus-based physics, taught with clarity.
+- American Sign Language: Complete Communication Course. Connect through your hands. Eight weeks to conversation.
+- Vibecoding with Cursor: AI-Powered Development. Ship production apps ten times faster with AI as a copilot.
+- Web Development: From Zero to Deploy. Build real websites. Launch them. Start your career.
+
+## Links
+- [School](https://school.6x7.gr/)
+- [About](https://school.6x7.gr/about.html)
+- [How we teach](https://school.6x7.gr/pedagogy.html)
+- [6x7](https://6x7.gr/)

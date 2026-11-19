@@ -2,7 +2,7 @@
 // plus push notification + click handling. Versioned cache name lets old
 // clients prune their shell on deploy.
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL = [
   '/',
   '/index.html',
